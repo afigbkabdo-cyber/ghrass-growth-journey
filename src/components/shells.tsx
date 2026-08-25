@@ -150,7 +150,7 @@ export function AdminShell({
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="قائمة الإدارة">
           {sidebarItems.map((item) => {
-            const active = item.exact ? pathname === item.to : pathname.startsWith(item.to) && item.to !== "/admin" ? pathname.startsWith(item.to) : pathname === item.to;
+            const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (
               <Link
                 key={item.to}
