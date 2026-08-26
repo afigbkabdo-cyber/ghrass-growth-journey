@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivitiesRouteImport } from './routes/activities'
+import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChildRouteImport } from './routes/child'
 import { Route as JourneyRouteImport } from './routes/journey'
+import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MoreRouteImport } from './routes/more'
 import { Route as ValueRouteImport } from './routes/value'
 
 const IndexRoute = IndexRouteImport.update({
@@ -25,6 +29,16 @@ const ActivitiesRoute = ActivitiesRouteImport.update({
   path: '/activities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnnouncementsRoute = AnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChildRoute = ChildRouteImport.update({
   id: '/child',
   path: '/child',
@@ -33,6 +47,16 @@ const ChildRoute = ChildRouteImport.update({
 const JourneyRoute = JourneyRouteImport.update({
   id: '/journey',
   path: '/journey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoreRoute = MoreRouteImport.update({
+  id: '/more',
+  path: '/more',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ValueRoute = ValueRouteImport.update({
@@ -44,38 +68,82 @@ const ValueRoute = ValueRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
+  '/announcements': typeof AnnouncementsRoute
+  '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/messages': typeof MessagesRoute
+  '/more': typeof MoreRoute
   '/value': typeof ValueRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
+  '/announcements': typeof AnnouncementsRoute
+  '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/messages': typeof MessagesRoute
+  '/more': typeof MoreRoute
   '/value': typeof ValueRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
+  '/announcements': typeof AnnouncementsRoute
+  '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/messages': typeof MessagesRoute
+  '/more': typeof MoreRoute
   '/value': typeof ValueRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/activities' | '/child' | '/journey' | '/value'
+  fullPaths:
+    | '/'
+    | '/activities'
+    | '/announcements'
+    | '/chat'
+    | '/child'
+    | '/journey'
+    | '/messages'
+    | '/more'
+    | '/value'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/activities' | '/child' | '/journey' | '/value'
-  id: '__root__' | '/' | '/activities' | '/child' | '/journey' | '/value'
+  to:
+    | '/'
+    | '/activities'
+    | '/announcements'
+    | '/chat'
+    | '/child'
+    | '/journey'
+    | '/messages'
+    | '/more'
+    | '/value'
+  id:
+    | '__root__'
+    | '/'
+    | '/activities'
+    | '/announcements'
+    | '/chat'
+    | '/child'
+    | '/journey'
+    | '/messages'
+    | '/more'
+    | '/value'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivitiesRoute: typeof ActivitiesRoute
+  AnnouncementsRoute: typeof AnnouncementsRoute
+  ChatRoute: typeof ChatRoute
   ChildRoute: typeof ChildRoute
   JourneyRoute: typeof JourneyRoute
+  MessagesRoute: typeof MessagesRoute
+  MoreRoute: typeof MoreRoute
   ValueRoute: typeof ValueRoute
 }
 
@@ -95,6 +163,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActivitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/announcements': {
+      id: '/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AnnouncementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/child': {
       id: '/child'
       path: '/child'
@@ -107,6 +189,20 @@ declare module '@tanstack/react-router' {
       path: '/journey'
       fullPath: '/journey'
       preLoaderRoute: typeof JourneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/more': {
+      id: '/more'
+      path: '/more'
+      fullPath: '/more'
+      preLoaderRoute: typeof MoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/value': {
@@ -122,8 +218,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivitiesRoute: ActivitiesRoute,
+  AnnouncementsRoute: AnnouncementsRoute,
+  ChatRoute: ChatRoute,
   ChildRoute: ChildRoute,
   JourneyRoute: JourneyRoute,
+  MessagesRoute: MessagesRoute,
+  MoreRoute: MoreRoute,
   ValueRoute: ValueRoute,
 }
 export const routeTree = rootRouteImport
