@@ -15,6 +15,7 @@ import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChildRouteImport } from './routes/child'
 import { Route as JourneyRouteImport } from './routes/journey'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as TeacherRouteImport } from './routes/teacher'
@@ -59,6 +60,11 @@ const ChildRoute = ChildRouteImport.update({
 const JourneyRoute = JourneyRouteImport.update({
   id: '/journey',
   path: '/journey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
   '/teacher': typeof TeacherRouteWithChildren
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
   '/value': typeof ValueRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
   '/teacher': typeof TeacherRouteWithChildren
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/child'
     | '/journey'
+    | '/login'
     | '/messages'
     | '/more'
     | '/teacher'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/child'
     | '/journey'
+    | '/login'
     | '/messages'
     | '/more'
     | '/value'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/child'
     | '/journey'
+    | '/login'
     | '/messages'
     | '/more'
     | '/teacher'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   ChildRoute: typeof ChildRoute
   JourneyRoute: typeof JourneyRoute
+  LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
   MoreRoute: typeof MoreRoute
   TeacherRoute: typeof TeacherRouteWithChildren
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/journey'
       fullPath: '/journey'
       preLoaderRoute: typeof JourneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -490,6 +510,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   ChildRoute: ChildRoute,
   JourneyRoute: JourneyRoute,
+  LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
   MoreRoute: MoreRoute,
   TeacherRoute: TeacherRouteWithChildren,
