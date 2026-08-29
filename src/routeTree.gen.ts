@@ -23,6 +23,7 @@ import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as TeacherActivitiesRouteImport } from './routes/teacher.activities'
 import { Route as TeacherAttendanceRouteImport } from './routes/teacher.attendance'
 import { Route as TeacherChildrenRouteImport } from './routes/teacher.children'
+import { Route as TeacherValueGuideRouteImport } from './routes/teacher.value-guide'
 import { Route as TeacherChildIdRouteImport } from './routes/teacher.child.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -95,6 +96,11 @@ const TeacherChildrenRoute = TeacherChildrenRouteImport.update({
   path: '/children',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherValueGuideRoute = TeacherValueGuideRouteImport.update({
+  id: '/value-guide',
+  path: '/value-guide',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherChildIdRoute = TeacherChildIdRouteImport.update({
   id: '/child/$id',
   path: '/child/$id',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/teacher/activities': typeof TeacherActivitiesRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
+  '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
 }
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/teacher/activities': typeof TeacherActivitiesRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
+  '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
 }
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/teacher/activities': typeof TeacherActivitiesRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
+  '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
 }
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/teacher/activities'
     | '/teacher/attendance'
     | '/teacher/children'
+    | '/teacher/value-guide'
     | '/teacher/'
     | '/teacher/child/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/teacher/activities'
     | '/teacher/attendance'
     | '/teacher/children'
+    | '/teacher/value-guide'
     | '/teacher'
     | '/teacher/child/$id'
   id:
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/teacher/activities'
     | '/teacher/attendance'
     | '/teacher/children'
+    | '/teacher/value-guide'
     | '/teacher/'
     | '/teacher/child/$id'
   fileRoutesById: FileRoutesById
@@ -318,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherChildrenRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/value-guide': {
+      id: '/teacher/value-guide'
+      path: '/value-guide'
+      fullPath: '/teacher/value-guide'
+      preLoaderRoute: typeof TeacherValueGuideRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/child/$id': {
       id: '/teacher/child/$id'
       path: '/child/$id'
@@ -332,6 +351,7 @@ interface TeacherRouteChildren {
   TeacherActivitiesRoute: typeof TeacherActivitiesRoute
   TeacherAttendanceRoute: typeof TeacherAttendanceRoute
   TeacherChildrenRoute: typeof TeacherChildrenRoute
+  TeacherValueGuideRoute: typeof TeacherValueGuideRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
   TeacherChildIdRoute: typeof TeacherChildIdRoute
 }
@@ -340,6 +360,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherActivitiesRoute: TeacherActivitiesRoute,
   TeacherAttendanceRoute: TeacherAttendanceRoute,
   TeacherChildrenRoute: TeacherChildrenRoute,
+  TeacherValueGuideRoute: TeacherValueGuideRoute,
   TeacherIndexRoute: TeacherIndexRoute,
   TeacherChildIdRoute: TeacherChildIdRoute,
 }
