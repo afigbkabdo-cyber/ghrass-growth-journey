@@ -26,6 +26,7 @@ import { Route as TeacherChildrenRouteImport } from './routes/teacher.children'
 import { Route as TeacherMessagesRouteImport } from './routes/teacher.messages'
 import { Route as TeacherValueGuideRouteImport } from './routes/teacher.value-guide'
 import { Route as TeacherChildIdRouteImport } from './routes/teacher.child.$id'
+import { Route as TeacherMessagesIdRouteImport } from './routes/teacher.messages.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +113,11 @@ const TeacherChildIdRoute = TeacherChildIdRouteImport.update({
   path: '/child/$id',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherMessagesIdRoute = TeacherMessagesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => TeacherMessagesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -127,10 +133,11 @@ export interface FileRoutesByFullPath {
   '/teacher/activities': typeof TeacherActivitiesRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
-  '/teacher/messages': typeof TeacherMessagesRoute
+  '/teacher/messages': typeof TeacherMessagesRouteWithChildren
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
+  '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -145,10 +152,11 @@ export interface FileRoutesByTo {
   '/teacher/activities': typeof TeacherActivitiesRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
-  '/teacher/messages': typeof TeacherMessagesRoute
+  '/teacher/messages': typeof TeacherMessagesRouteWithChildren
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
+  '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -165,10 +173,11 @@ export interface FileRoutesById {
   '/teacher/activities': typeof TeacherActivitiesRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
-  '/teacher/messages': typeof TeacherMessagesRoute
+  '/teacher/messages': typeof TeacherMessagesRouteWithChildren
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
+  '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/teacher/value-guide'
     | '/teacher/'
     | '/teacher/child/$id'
+    | '/teacher/messages/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/teacher/value-guide'
     | '/teacher'
     | '/teacher/child/$id'
+    | '/teacher/messages/$id'
   id:
     | '__root__'
     | '/'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/teacher/value-guide'
     | '/teacher/'
     | '/teacher/child/$id'
+    | '/teacher/messages/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -363,14 +375,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherChildIdRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/messages/$id': {
+      id: '/teacher/messages/$id'
+      path: '/$id'
+      fullPath: '/teacher/messages/$id'
+      preLoaderRoute: typeof TeacherMessagesIdRouteImport
+      parentRoute: typeof TeacherMessagesRoute
+    }
   }
 }
+
+interface TeacherMessagesRouteChildren {
+  TeacherMessagesIdRoute: typeof TeacherMessagesIdRoute
+}
+
+const TeacherMessagesRouteChildren: TeacherMessagesRouteChildren = {
+  TeacherMessagesIdRoute: TeacherMessagesIdRoute,
+}
+
+const TeacherMessagesRouteWithChildren = TeacherMessagesRoute._addFileChildren(
+  TeacherMessagesRouteChildren,
+)
 
 interface TeacherRouteChildren {
   TeacherActivitiesRoute: typeof TeacherActivitiesRoute
   TeacherAttendanceRoute: typeof TeacherAttendanceRoute
   TeacherChildrenRoute: typeof TeacherChildrenRoute
-  TeacherMessagesRoute: typeof TeacherMessagesRoute
+  TeacherMessagesRoute: typeof TeacherMessagesRouteWithChildren
   TeacherValueGuideRoute: typeof TeacherValueGuideRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
   TeacherChildIdRoute: typeof TeacherChildIdRoute
@@ -380,7 +411,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherActivitiesRoute: TeacherActivitiesRoute,
   TeacherAttendanceRoute: TeacherAttendanceRoute,
   TeacherChildrenRoute: TeacherChildrenRoute,
-  TeacherMessagesRoute: TeacherMessagesRoute,
+  TeacherMessagesRoute: TeacherMessagesRouteWithChildren,
   TeacherValueGuideRoute: TeacherValueGuideRoute,
   TeacherIndexRoute: TeacherIndexRoute,
   TeacherChildIdRoute: TeacherChildIdRoute,
