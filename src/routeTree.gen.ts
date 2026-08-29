@@ -15,15 +15,22 @@ import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChildRouteImport } from './routes/child'
 import { Route as JourneyRouteImport } from './routes/journey'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as ValueRouteImport } from './routes/value'
 import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as TeacherActivitiesRouteImport } from './routes/teacher.activities'
+import { Route as TeacherAnnouncementsRouteImport } from './routes/teacher.announcements'
 import { Route as TeacherAttendanceRouteImport } from './routes/teacher.attendance'
 import { Route as TeacherChildrenRouteImport } from './routes/teacher.children'
+import { Route as TeacherMessagesRouteImport } from './routes/teacher.messages'
+import { Route as TeacherMoreRouteImport } from './routes/teacher.more'
+import { Route as TeacherNotificationsRouteImport } from './routes/teacher.notifications'
+import { Route as TeacherValueGuideRouteImport } from './routes/teacher.value-guide'
 import { Route as TeacherChildIdRouteImport } from './routes/teacher.child.$id'
+import { Route as TeacherMessagesIdRouteImport } from './routes/teacher.messages.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -53,6 +60,11 @@ const ChildRoute = ChildRouteImport.update({
 const JourneyRoute = JourneyRouteImport.update({
   id: '/journey',
   path: '/journey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -85,6 +97,11 @@ const TeacherActivitiesRoute = TeacherActivitiesRouteImport.update({
   path: '/activities',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherAnnouncementsRoute = TeacherAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherAttendanceRoute = TeacherAttendanceRouteImport.update({
   id: '/attendance',
   path: '/attendance',
@@ -95,10 +112,35 @@ const TeacherChildrenRoute = TeacherChildrenRouteImport.update({
   path: '/children',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherMessagesRoute = TeacherMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => TeacherRoute,
+} as any)
+const TeacherMoreRoute = TeacherMoreRouteImport.update({
+  id: '/more',
+  path: '/more',
+  getParentRoute: () => TeacherRoute,
+} as any)
+const TeacherNotificationsRoute = TeacherNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => TeacherRoute,
+} as any)
+const TeacherValueGuideRoute = TeacherValueGuideRouteImport.update({
+  id: '/value-guide',
+  path: '/value-guide',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherChildIdRoute = TeacherChildIdRouteImport.update({
   id: '/child/$id',
   path: '/child/$id',
   getParentRoute: () => TeacherRoute,
+} as any)
+const TeacherMessagesIdRoute = TeacherMessagesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => TeacherMessagesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -108,15 +150,22 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
   '/teacher': typeof TeacherRouteWithChildren
   '/value': typeof ValueRoute
   '/teacher/activities': typeof TeacherActivitiesRoute
+  '/teacher/announcements': typeof TeacherAnnouncementsRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
+  '/teacher/messages': typeof TeacherMessagesRouteWithChildren
+  '/teacher/more': typeof TeacherMoreRoute
+  '/teacher/notifications': typeof TeacherNotificationsRoute
+  '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
+  '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,14 +174,21 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
   '/value': typeof ValueRoute
   '/teacher/activities': typeof TeacherActivitiesRoute
+  '/teacher/announcements': typeof TeacherAnnouncementsRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
+  '/teacher/messages': typeof TeacherMessagesRouteWithChildren
+  '/teacher/more': typeof TeacherMoreRoute
+  '/teacher/notifications': typeof TeacherNotificationsRoute
+  '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
+  '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,15 +198,22 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
   '/journey': typeof JourneyRoute
+  '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
   '/teacher': typeof TeacherRouteWithChildren
   '/value': typeof ValueRoute
   '/teacher/activities': typeof TeacherActivitiesRoute
+  '/teacher/announcements': typeof TeacherAnnouncementsRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
   '/teacher/children': typeof TeacherChildrenRoute
+  '/teacher/messages': typeof TeacherMessagesRouteWithChildren
+  '/teacher/more': typeof TeacherMoreRoute
+  '/teacher/notifications': typeof TeacherNotificationsRoute
+  '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
+  '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,15 +224,22 @@ export interface FileRouteTypes {
     | '/chat'
     | '/child'
     | '/journey'
+    | '/login'
     | '/messages'
     | '/more'
     | '/teacher'
     | '/value'
     | '/teacher/activities'
+    | '/teacher/announcements'
     | '/teacher/attendance'
     | '/teacher/children'
+    | '/teacher/messages'
+    | '/teacher/more'
+    | '/teacher/notifications'
+    | '/teacher/value-guide'
     | '/teacher/'
     | '/teacher/child/$id'
+    | '/teacher/messages/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -178,14 +248,21 @@ export interface FileRouteTypes {
     | '/chat'
     | '/child'
     | '/journey'
+    | '/login'
     | '/messages'
     | '/more'
     | '/value'
     | '/teacher/activities'
+    | '/teacher/announcements'
     | '/teacher/attendance'
     | '/teacher/children'
+    | '/teacher/messages'
+    | '/teacher/more'
+    | '/teacher/notifications'
+    | '/teacher/value-guide'
     | '/teacher'
     | '/teacher/child/$id'
+    | '/teacher/messages/$id'
   id:
     | '__root__'
     | '/'
@@ -194,15 +271,22 @@ export interface FileRouteTypes {
     | '/chat'
     | '/child'
     | '/journey'
+    | '/login'
     | '/messages'
     | '/more'
     | '/teacher'
     | '/value'
     | '/teacher/activities'
+    | '/teacher/announcements'
     | '/teacher/attendance'
     | '/teacher/children'
+    | '/teacher/messages'
+    | '/teacher/more'
+    | '/teacher/notifications'
+    | '/teacher/value-guide'
     | '/teacher/'
     | '/teacher/child/$id'
+    | '/teacher/messages/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -212,6 +296,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   ChildRoute: typeof ChildRoute
   JourneyRoute: typeof JourneyRoute
+  LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
   MoreRoute: typeof MoreRoute
   TeacherRoute: typeof TeacherRouteWithChildren
@@ -262,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JourneyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages': {
       id: '/messages'
       path: '/messages'
@@ -304,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherActivitiesRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/announcements': {
+      id: '/teacher/announcements'
+      path: '/announcements'
+      fullPath: '/teacher/announcements'
+      preLoaderRoute: typeof TeacherAnnouncementsRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/attendance': {
       id: '/teacher/attendance'
       path: '/attendance'
@@ -318,6 +417,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherChildrenRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/messages': {
+      id: '/teacher/messages'
+      path: '/messages'
+      fullPath: '/teacher/messages'
+      preLoaderRoute: typeof TeacherMessagesRouteImport
+      parentRoute: typeof TeacherRoute
+    }
+    '/teacher/more': {
+      id: '/teacher/more'
+      path: '/more'
+      fullPath: '/teacher/more'
+      preLoaderRoute: typeof TeacherMoreRouteImport
+      parentRoute: typeof TeacherRoute
+    }
+    '/teacher/notifications': {
+      id: '/teacher/notifications'
+      path: '/notifications'
+      fullPath: '/teacher/notifications'
+      preLoaderRoute: typeof TeacherNotificationsRouteImport
+      parentRoute: typeof TeacherRoute
+    }
+    '/teacher/value-guide': {
+      id: '/teacher/value-guide'
+      path: '/value-guide'
+      fullPath: '/teacher/value-guide'
+      preLoaderRoute: typeof TeacherValueGuideRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/child/$id': {
       id: '/teacher/child/$id'
       path: '/child/$id'
@@ -325,21 +452,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherChildIdRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/messages/$id': {
+      id: '/teacher/messages/$id'
+      path: '/$id'
+      fullPath: '/teacher/messages/$id'
+      preLoaderRoute: typeof TeacherMessagesIdRouteImport
+      parentRoute: typeof TeacherMessagesRoute
+    }
   }
 }
 
+interface TeacherMessagesRouteChildren {
+  TeacherMessagesIdRoute: typeof TeacherMessagesIdRoute
+}
+
+const TeacherMessagesRouteChildren: TeacherMessagesRouteChildren = {
+  TeacherMessagesIdRoute: TeacherMessagesIdRoute,
+}
+
+const TeacherMessagesRouteWithChildren = TeacherMessagesRoute._addFileChildren(
+  TeacherMessagesRouteChildren,
+)
+
 interface TeacherRouteChildren {
   TeacherActivitiesRoute: typeof TeacherActivitiesRoute
+  TeacherAnnouncementsRoute: typeof TeacherAnnouncementsRoute
   TeacherAttendanceRoute: typeof TeacherAttendanceRoute
   TeacherChildrenRoute: typeof TeacherChildrenRoute
+  TeacherMessagesRoute: typeof TeacherMessagesRouteWithChildren
+  TeacherMoreRoute: typeof TeacherMoreRoute
+  TeacherNotificationsRoute: typeof TeacherNotificationsRoute
+  TeacherValueGuideRoute: typeof TeacherValueGuideRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
   TeacherChildIdRoute: typeof TeacherChildIdRoute
 }
 
 const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherActivitiesRoute: TeacherActivitiesRoute,
+  TeacherAnnouncementsRoute: TeacherAnnouncementsRoute,
   TeacherAttendanceRoute: TeacherAttendanceRoute,
   TeacherChildrenRoute: TeacherChildrenRoute,
+  TeacherMessagesRoute: TeacherMessagesRouteWithChildren,
+  TeacherMoreRoute: TeacherMoreRoute,
+  TeacherNotificationsRoute: TeacherNotificationsRoute,
+  TeacherValueGuideRoute: TeacherValueGuideRoute,
   TeacherIndexRoute: TeacherIndexRoute,
   TeacherChildIdRoute: TeacherChildIdRoute,
 }
@@ -354,6 +510,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   ChildRoute: ChildRoute,
   JourneyRoute: JourneyRoute,
+  LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
   MoreRoute: MoreRoute,
   TeacherRoute: TeacherRouteWithChildren,
