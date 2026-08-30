@@ -21,6 +21,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as ValueRouteImport } from './routes/value'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as TeacherActivitiesRouteImport } from './routes/teacher.activities'
 import { Route as TeacherAnnouncementsRouteImport } from './routes/teacher.announcements'
@@ -93,6 +94,11 @@ const ValueRoute = ValueRouteImport.update({
   path: '/value',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const TeacherIndexRoute = TeacherIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -152,7 +158,7 @@ const TeacherMessagesIdRoute = TeacherMessagesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/teacher/more': typeof TeacherMoreRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
+  '/admin/': typeof AdminIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
   '/teacher/messages/$id': typeof TeacherMessagesIdRoute
@@ -177,7 +184,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
-  '/admin': typeof AdminRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
@@ -194,6 +200,7 @@ export interface FileRoutesByTo {
   '/teacher/more': typeof TeacherMoreRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
+  '/admin': typeof AdminIndexRoute
   '/teacher': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
   '/teacher/messages/$id': typeof TeacherMessagesIdRoute
@@ -202,7 +209,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activities': typeof ActivitiesRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
   '/child': typeof ChildRoute
@@ -220,6 +227,7 @@ export interface FileRoutesById {
   '/teacher/more': typeof TeacherMoreRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
+  '/admin/': typeof AdminIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
   '/teacher/messages/$id': typeof TeacherMessagesIdRoute
@@ -247,6 +255,7 @@ export interface FileRouteTypes {
     | '/teacher/more'
     | '/teacher/notifications'
     | '/teacher/value-guide'
+    | '/admin/'
     | '/teacher/'
     | '/teacher/child/$id'
     | '/teacher/messages/$id'
@@ -254,7 +263,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activities'
-    | '/admin'
     | '/announcements'
     | '/chat'
     | '/child'
@@ -271,6 +279,7 @@ export interface FileRouteTypes {
     | '/teacher/more'
     | '/teacher/notifications'
     | '/teacher/value-guide'
+    | '/admin'
     | '/teacher'
     | '/teacher/child/$id'
     | '/teacher/messages/$id'
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/teacher/more'
     | '/teacher/notifications'
     | '/teacher/value-guide'
+    | '/admin/'
     | '/teacher/'
     | '/teacher/child/$id'
     | '/teacher/messages/$id'
@@ -304,7 +314,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivitiesRoute: typeof ActivitiesRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRoute
   ChatRoute: typeof ChatRoute
   ChildRoute: typeof ChildRoute
@@ -402,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ValueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/teacher/': {
       id: '/teacher/'
       path: '/'
@@ -482,6 +499,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface TeacherMessagesRouteChildren {
   TeacherMessagesIdRoute: typeof TeacherMessagesIdRoute
 }
@@ -526,7 +553,7 @@ const TeacherRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivitiesRoute: ActivitiesRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRoute,
   ChatRoute: ChatRoute,
   ChildRoute: ChildRoute,
