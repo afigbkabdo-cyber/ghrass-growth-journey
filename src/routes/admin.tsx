@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminShell, adminSidebarNav, adminBottomNav } from "@/components/shells";
+import { RoleGuard } from "@/components/role-guard";
+import { sectionRoles } from "@/lib/session";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -17,5 +19,9 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  return <AdminShell sidebarItems={adminSidebarNav} bottomItems={adminBottomNav} />;
+  return (
+    <RoleGuard allow={sectionRoles.admin}>
+      <AdminShell sidebarItems={adminSidebarNav} bottomItems={adminBottomNav} />
+    </RoleGuard>
+  );
 }
