@@ -50,7 +50,7 @@ function TeacherChildrenPage() {
       {list.length === 0 ? (
         <EmptyState
           title="لا توجد نتائج"
-          description="جرّب البحث باسم آخر من أسماء أطفال فصلك."
+          message="جرّب البحث باسم آخر من أسماء أطفال فصلك."
         />
       ) : (
         <div className="space-y-2">

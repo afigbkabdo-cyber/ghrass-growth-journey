@@ -33,7 +33,7 @@ export const Route = createFileRoute("/teacher/messages/$id")({
 function ThreadNotFound() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pt-10 pb-28">
-      <EmptyState title="المحادثة غير موجودة" description="ربما حُذفت المحادثة أو الرابط غير صحيح." />
+      <EmptyState title="المحادثة غير موجودة" message="ربما حُذفت المحادثة أو الرابط غير صحيح." />
       <div className="mt-4 text-center">
         <Link to="/teacher/messages" className="text-sm font-bold text-primary">
           الرجوع إلى الرسائل

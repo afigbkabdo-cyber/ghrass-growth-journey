@@ -38,7 +38,7 @@ export const Route = createFileRoute("/teacher/child/$id")({
 function ChildNotFound() {
   return (
     <PageContainer>
-      <EmptyState title="لم نجد هذا الطفل" description="قد يكون الطفل من فصل آخر لا تملكين صلاحية عرضه." />
+      <EmptyState title="لم نجد هذا الطفل" message="قد يكون الطفل من فصل آخر لا تملكين صلاحية عرضه." />
       <Link
         to="/teacher/children"
         className="mt-4 block rounded-2xl bg-primary py-3 text-center text-sm font-extrabold text-primary-foreground"
@@ -185,7 +185,7 @@ function TeacherChildPage() {
       {/* سجل الملاحظات */}
       <SectionHeader title="سجل الملاحظات" subtitle={`${notes.length} ملاحظة`} icon={NotebookPen} tone="blue" />
       {notes.length === 0 ? (
-        <EmptyState title="لا توجد ملاحظات بعد" description="أضيفي أول ملاحظة عن هذا الطفل من الأعلى." />
+        <EmptyState title="لا توجد ملاحظات بعد" message="أضيفي أول ملاحظة عن هذا الطفل من الأعلى." />
       ) : (
         <div className="space-y-2">
           {notes.map((n) => (

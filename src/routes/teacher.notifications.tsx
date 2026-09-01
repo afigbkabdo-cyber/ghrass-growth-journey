@@ -39,7 +39,7 @@ function TeacherNotificationsPage() {
       </header>
 
       {teacherNotifications.length === 0 ? (
-        <EmptyState title="لا توجد إشعارات" description="سنخبرك هنا بكل جديد يخص فصلك." />
+        <EmptyState title="لا توجد إشعارات" message="سنخبرك هنا بكل جديد يخص فصلك." />
       ) : (
         <div className="space-y-2">
           {teacherNotifications.map((n) => {
