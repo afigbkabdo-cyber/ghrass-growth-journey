@@ -62,14 +62,14 @@ function ChildPage() {
               className="flex items-center justify-between rounded-2xl border border-border bg-card p-3.5 shadow-soft"
             >
               <div className="flex items-center gap-3">
-                <span className={`grid h-9 w-9 place-items-center rounded-xl ${toneClasses[statusTone[d.status]].soft}`}>
-                  <CalendarCheck className={`h-4.5 w-4.5 ${toneClasses[statusTone[d.status]].deep}`} strokeWidth={2.2} />
+                <span className={`grid h-9 w-9 place-items-center rounded-xl ${toneClasses[statusTone[d.status] ?? "green"].soft}`}>
+                  <CalendarCheck className={`h-4.5 w-4.5 ${toneClasses[statusTone[d.status] ?? "green"].deep}`} strokeWidth={2.2} />
                 </span>
                 <p className="text-sm font-bold text-foreground">{d.date}</p>
               </div>
               <div className="flex items-center gap-2">
                 {d.time && <span className="text-[11px] text-muted-foreground">{d.time}</span>}
-                <ToneBadge tone={statusTone[d.status]}>{attendanceLabels[d.status]}</ToneBadge>
+                <ToneBadge tone={statusTone[d.status] ?? "green"}>{attendanceLabels[d.status]}</ToneBadge>
               </div>
             </div>
           ))}

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/chat")({
 });
 
 function ChatPage() {
-  const conv = conversations[0];
+  const conv = conversations[0]!;
   const [messages, setMessages] = useState(chatThread);
   const [draft, setDraft] = useState("");
   const [sent, setSent] = useState(false);

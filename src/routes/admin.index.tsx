@@ -168,10 +168,7 @@ function AdminHome() {
         </div>
       </section>
 
-      <Link
-        to="/admin/messages"
-        className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft"
-      >
+      <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft">
         <span className="flex items-center gap-3">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-pink-soft">
             <MessagesSquare className="h-4.5 w-4.5 text-brand-pink-deep" strokeWidth={2.2} />
@@ -181,7 +178,7 @@ function AdminHome() {
           </span>
         </span>
         <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-      </Link>
+      </div>
     </div>
   );
 }

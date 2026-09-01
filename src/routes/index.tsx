@@ -27,6 +27,8 @@ import {
   currentValue,
   todayActivities,
 } from "@/lib/data";
+import { RoleGuard } from "@/components/role-guard";
+import { sectionRoles } from "@/lib/session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -48,6 +50,14 @@ export const Route = createFileRoute("/")({
 });
 
 function ParentHome() {
+  return (
+    <RoleGuard allow={sectionRoles.parent}>
+      <ParentHomeContent />
+    </RoleGuard>
+  );
+}
+
+function ParentHomeContent() {
   const today = childAttendance[0];
   const t = toneClasses[currentValue.tone];
 
@@ -65,7 +75,7 @@ function ParentHome() {
           </div>
           <ToneBadge tone="green">
             <CalendarCheck className="h-3.5 w-3.5" />
-            حاضرة {today.time}
+            حاضرة {today?.time}
           </ToneBadge>
         </section>
 

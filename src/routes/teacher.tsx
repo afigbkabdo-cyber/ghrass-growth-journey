@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, teacherNav } from "@/components/shells";
+import { RoleGuard } from "@/components/role-guard";
+import { sectionRoles } from "@/lib/session";
 
 export const Route = createFileRoute("/teacher")({
   head: () => ({
@@ -14,5 +16,9 @@ export const Route = createFileRoute("/teacher")({
 });
 
 function TeacherLayout() {
-  return <AppShell navItems={teacherNav} roleLabel="معلمة" tone="blue" />;
+  return (
+    <RoleGuard allow={sectionRoles.teacher}>
+      <AppShell navItems={teacherNav} roleLabel="معلمة" tone="blue" />
+    </RoleGuard>
+  );
 }

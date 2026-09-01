@@ -43,5 +43,16 @@ export function clearSession() {
 export const roleHome: Record<Role, string> = {
   parent: "/",
   teacher: "/teacher",
-  admin: "/teacher",
+  admin: "/admin",
 };
+
+/** الأدوار المسموح لها بفتح كل قسم من التطبيق. */
+export const sectionRoles = {
+  parent: ["parent"] as Role[],
+  teacher: ["teacher"] as Role[],
+  admin: ["admin"] as Role[],
+};
+
+export function canAccess(role: Role, allowed: Role[]) {
+  return allowed.includes(role);
+}

@@ -34,7 +34,7 @@ function TeacherAnnouncementsPage() {
       </header>
 
       {teacherAnnouncements.length === 0 ? (
-        <EmptyState title="لا توجد إعلانات" description="ستظهر إعلانات الإدارة هنا عند نشرها." />
+        <EmptyState title="لا توجد إعلانات" message="ستظهر إعلانات الإدارة هنا عند نشرها." />
       ) : (
         <div className="space-y-3">
           {teacherAnnouncements.map((a) => (

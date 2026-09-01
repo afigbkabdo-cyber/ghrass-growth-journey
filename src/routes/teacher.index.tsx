@@ -110,7 +110,7 @@ function TeacherHome() {
           <h3 className="font-display text-2xl font-extrabold text-brand-orange-deep">
             {teacherValueGuide.name}
           </h3>
-          <ToneBadge tone="orange">{teacherValueGuide.week.split("—")[0].trim()}</ToneBadge>
+          <ToneBadge tone="orange">{teacherValueGuide.week.split("—")[0]?.trim() ?? teacherValueGuide.week}</ToneBadge>
         </div>
         <p className="mt-2 text-sm leading-relaxed text-foreground/80">{teacherValueGuide.tagline}</p>
         <p className="mt-3 rounded-2xl bg-card p-3 text-xs leading-relaxed text-muted-foreground">
