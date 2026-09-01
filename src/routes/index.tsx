@@ -75,7 +75,7 @@ function ParentHomeContent() {
           </div>
           <ToneBadge tone="green">
             <CalendarCheck className="h-3.5 w-3.5" />
-            حاضرة {today.time}
+            حاضرة {today?.time}
           </ToneBadge>
         </section>
 

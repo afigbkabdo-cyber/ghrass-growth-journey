@@ -195,7 +195,7 @@ export function AdminShell({
         <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-28 md:px-8 md:pb-10">
           <div className="mb-5 hidden items-center justify-between md:flex">
             <div>
-              <h1 className="font-display text-2xl font-extrabold text-foreground">{current.label}</h1>
+              <h1 className="font-display text-2xl font-extrabold text-foreground">{current?.label ?? "لوحة الإدارة"}</h1>
               <p className="text-sm text-muted-foreground">لوحة تحكم روضة غراس — العام الأول ١٤٤٨هـ</p>
             </div>
             <button
