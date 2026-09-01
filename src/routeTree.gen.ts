@@ -19,6 +19,7 @@ import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MoreRouteImport } from './routes/more'
+import { Route as ParentRouteImport } from './routes/parent'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as ValueRouteImport } from './routes/value'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -87,6 +88,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const MoreRoute = MoreRouteImport.update({
   id: '/more',
   path: '/more',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentRoute = ParentRouteImport.update({
+  id: '/parent',
+  path: '/parent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherRoute = TeacherRouteImport.update({
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
+  '/parent': typeof ParentRoute
   '/teacher': typeof TeacherRouteWithChildren
   '/value': typeof ValueRoute
   '/admin/attendance': typeof AdminAttendanceRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
+  '/parent': typeof ParentRoute
   '/value': typeof ValueRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/children': typeof AdminChildrenRoute
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
+  '/parent': typeof ParentRoute
   '/teacher': typeof TeacherRouteWithChildren
   '/value': typeof ValueRoute
   '/admin/attendance': typeof AdminAttendanceRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/messages'
     | '/more'
+    | '/parent'
     | '/teacher'
     | '/value'
     | '/admin/attendance'
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/messages'
     | '/more'
+    | '/parent'
     | '/value'
     | '/admin/attendance'
     | '/admin/children'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/messages'
     | '/more'
+    | '/parent'
     | '/teacher'
     | '/value'
     | '/admin/attendance'
@@ -382,6 +394,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
   MoreRoute: typeof MoreRoute
+  ParentRoute: typeof ParentRoute
   TeacherRoute: typeof TeacherRouteWithChildren
   ValueRoute: typeof ValueRoute
 }
@@ -456,6 +469,13 @@ declare module '@tanstack/react-router' {
       path: '/more'
       fullPath: '/more'
       preLoaderRoute: typeof MoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent': {
+      id: '/parent'
+      path: '/parent'
+      fullPath: '/parent'
+      preLoaderRoute: typeof ParentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher': {
@@ -666,6 +686,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
   MoreRoute: MoreRoute,
+  ParentRoute: ParentRoute,
   TeacherRoute: TeacherRouteWithChildren,
   ValueRoute: ValueRoute,
 }
