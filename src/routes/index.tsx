@@ -50,6 +50,14 @@ export const Route = createFileRoute("/")({
 });
 
 function ParentHome() {
+  return (
+    <RoleGuard allow={sectionRoles.parent}>
+      <ParentHomeContent />
+    </RoleGuard>
+  );
+}
+
+function ParentHomeContent() {
   const today = childAttendance[0];
   const t = toneClasses[currentValue.tone];
 
