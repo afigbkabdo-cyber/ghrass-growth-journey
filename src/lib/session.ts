@@ -81,7 +81,7 @@ export function clearSession() {
 
 /** المسار الرئيسي لكل دور — نقطة الربط المستقبلية مع نظام الصلاحيات الحقيقي. */
 export const roleHome: Record<Role, string> = {
-  parent: "/parent",
+  parent: "/",
   teacher: "/teacher",
   admin: "/admin",
   owner: "/owner",
