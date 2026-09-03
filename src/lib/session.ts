@@ -3,13 +3,12 @@
  * حيث تُحدَّد الواجهة حسب الدور: parent | teacher | admin | owner.
  */
 
-export type Role = "parent" | "teacher" | "admin" | "owner";
+export type Role = "parent" | "teacher" | "admin";
 
 export const roleLabels: Record<Role, string> = {
   parent: "ولي أمر",
   teacher: "معلمة",
   admin: "الإدارة",
-  owner: "المالك",
 };
 
 export interface DemoSession {
@@ -34,8 +33,6 @@ export const demoAccounts: DemoAccount[] = [
   { id: "parent_1", role: "parent", name: "أم ليان", email: "parent@ghiras.sa", password: "ghiras123", title: "ولي أمر — ليان" },
   { id: "teacher_1", role: "teacher", name: "أ. نورة العتيبي", email: "noura@ghiras.sa", password: "ghiras123", title: "معلمة اللغة العربية" },
   { id: "admin_1", role: "admin", name: "أ. الجوهرة السبيعي", email: "admin@ghiras.sa", password: "ghiras123", title: "مديرة الروضة" },
-  { id: "owner_1", role: "owner", name: "المالك الأول — أ. عبدالله", email: "owner1@ghiras.sa", password: "ghiras123", title: "مالك الروضة (١)" },
-  { id: "owner_2", role: "owner", name: "المالك الثاني — أ. لمياء", email: "owner2@ghiras.sa", password: "ghiras123", title: "مالك الروضة (٢)" },
 ];
 
 export function findAccount(email: string) {
@@ -84,7 +81,6 @@ export const roleHome: Record<Role, string> = {
   parent: "/",
   teacher: "/teacher",
   admin: "/admin",
-  owner: "/owner",
 };
 
 /** الأدوار المسموح لها بفتح كل قسم من التطبيق. */
@@ -92,7 +88,6 @@ export const sectionRoles = {
   parent: ["parent"] as Role[],
   teacher: ["teacher"] as Role[],
   admin: ["admin"] as Role[],
-  owner: ["owner"] as Role[],
 };
 
 export function canAccess(role: Role, allowed: Role[]) {

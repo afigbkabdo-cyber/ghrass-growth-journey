@@ -42,7 +42,7 @@ function TeacherMorePage() {
 
   const logout = () => {
     clearSession();
-    navigate({ to: "/login" });
+    navigate({ to: "/login", replace: true });
   };
 
   return (

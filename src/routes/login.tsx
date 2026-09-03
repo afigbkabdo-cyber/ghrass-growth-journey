@@ -2,7 +2,14 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LogIn, Mail, Lock } from "lucide-react";
 import { GhirasLogo, ToneBadge } from "@/components/ghiras";
-import { roleLabels, roleHome, writeSession, type Role } from "@/lib/session";
+import {
+  demoAccounts,
+  findAccount,
+  roleLabels,
+  roleHome,
+  writeSession,
+  type Role,
+} from "@/lib/session";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -23,24 +30,34 @@ export const Route = createFileRoute("/login")({
 
 const roles: Role[] = ["parent", "teacher", "admin"];
 
-const demoNames: Record<Role, string> = {
-  parent: "أم ليان",
-  teacher: "أ. نورة العتيبي",
-  admin: "أ. الجوهرة السبيعي",
-};
+function accountFor(role: Role) {
+  return demoAccounts.find((a) => a.role === role)!;
+}
 
 function LoginPage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<Role>("teacher");
-  const [email, setEmail] = useState("noura@ghiras.sa");
-  const [password, setPassword] = useState("••••••••");
+  const [email, setEmail] = useState(accountFor("teacher").email);
+  const [password, setPassword] = useState("ghiras123");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    const account = findAccount(email);
+    if (!account || account.password !== password) {
+      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+      return;
+    }
+    setError(null);
     setLoading(true);
-    writeSession({ role, name: demoNames[role], email });
-    setTimeout(() => navigate({ to: roleHome[role] }), 400);
+    writeSession({
+      role: account.role,
+      name: account.name,
+      email: account.email,
+      accountId: account.id,
+    });
+    setTimeout(() => navigate({ to: roleHome[account.role], replace: true }), 350);
   };
 
   return (
@@ -65,9 +82,9 @@ function LoginPage() {
                   type="button"
                   onClick={() => {
                     setRole(r);
-                    setEmail(
-                      r === "parent" ? "parent@ghiras.sa" : r === "teacher" ? "noura@ghiras.sa" : "admin@ghiras.sa",
-                    );
+                    setEmail(accountFor(r).email);
+                    setPassword("ghiras123");
+                    setError(null);
                   }}
                   className={`rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
                     role === r
@@ -79,6 +96,7 @@ function LoginPage() {
                 </button>
               ))}
             </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">{accountFor(role).title}</p>
           </div>
 
           <label className="block">
@@ -105,10 +123,17 @@ function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                dir="ltr"
                 className="w-full rounded-2xl border border-border bg-background py-3 ps-10 pe-4 text-sm outline-none transition-shadow focus:shadow-soft"
               />
             </span>
           </label>
+
+          {error && (
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
@@ -120,7 +145,7 @@ function LoginPage() {
           </button>
 
           <p className="text-center text-[11px] text-muted-foreground">
-            نموذج عرض تجريبي — الدخول الحقيقي سيُربط لاحقًا.
+            نموذج عرض تجريبي — كلمة المرور لجميع الحسابات: ghiras123
           </p>
         </form>
 
