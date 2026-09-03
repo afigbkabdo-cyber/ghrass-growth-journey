@@ -35,6 +35,7 @@ import { Route as TeacherAttendanceRouteImport } from './routes/teacher.attendan
 import { Route as TeacherChildrenRouteImport } from './routes/teacher.children'
 import { Route as TeacherMessagesRouteImport } from './routes/teacher.messages'
 import { Route as TeacherMoreRouteImport } from './routes/teacher.more'
+import { Route as TeacherMyAttendanceRouteImport } from './routes/teacher.my-attendance'
 import { Route as TeacherNotificationsRouteImport } from './routes/teacher.notifications'
 import { Route as TeacherValueGuideRouteImport } from './routes/teacher.value-guide'
 import { Route as TeacherChildIdRouteImport } from './routes/teacher.child.$id'
@@ -170,6 +171,11 @@ const TeacherMoreRoute = TeacherMoreRouteImport.update({
   path: '/more',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherMyAttendanceRoute = TeacherMyAttendanceRouteImport.update({
+  id: '/my-attendance',
+  path: '/my-attendance',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherNotificationsRoute = TeacherNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/teacher/children': typeof TeacherChildrenRoute
   '/teacher/messages': typeof TeacherMessagesRouteWithChildren
   '/teacher/more': typeof TeacherMoreRoute
+  '/teacher/my-attendance': typeof TeacherMyAttendanceRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin/': typeof AdminIndexRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/teacher/children': typeof TeacherChildrenRoute
   '/teacher/messages': typeof TeacherMessagesRouteWithChildren
   '/teacher/more': typeof TeacherMoreRoute
+  '/teacher/my-attendance': typeof TeacherMyAttendanceRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin': typeof AdminIndexRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/teacher/children': typeof TeacherChildrenRoute
   '/teacher/messages': typeof TeacherMessagesRouteWithChildren
   '/teacher/more': typeof TeacherMoreRoute
+  '/teacher/my-attendance': typeof TeacherMyAttendanceRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin/': typeof AdminIndexRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/teacher/children'
     | '/teacher/messages'
     | '/teacher/more'
+    | '/teacher/my-attendance'
     | '/teacher/notifications'
     | '/teacher/value-guide'
     | '/admin/'
@@ -343,6 +353,7 @@ export interface FileRouteTypes {
     | '/teacher/children'
     | '/teacher/messages'
     | '/teacher/more'
+    | '/teacher/my-attendance'
     | '/teacher/notifications'
     | '/teacher/value-guide'
     | '/admin'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '/teacher/children'
     | '/teacher/messages'
     | '/teacher/more'
+    | '/teacher/my-attendance'
     | '/teacher/notifications'
     | '/teacher/value-guide'
     | '/admin/'
@@ -583,6 +595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherMoreRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/my-attendance': {
+      id: '/teacher/my-attendance'
+      path: '/my-attendance'
+      fullPath: '/teacher/my-attendance'
+      preLoaderRoute: typeof TeacherMyAttendanceRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/notifications': {
       id: '/teacher/notifications'
       path: '/notifications'
@@ -653,6 +672,7 @@ interface TeacherRouteChildren {
   TeacherChildrenRoute: typeof TeacherChildrenRoute
   TeacherMessagesRoute: typeof TeacherMessagesRouteWithChildren
   TeacherMoreRoute: typeof TeacherMoreRoute
+  TeacherMyAttendanceRoute: typeof TeacherMyAttendanceRoute
   TeacherNotificationsRoute: typeof TeacherNotificationsRoute
   TeacherValueGuideRoute: typeof TeacherValueGuideRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
@@ -666,6 +686,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherChildrenRoute: TeacherChildrenRoute,
   TeacherMessagesRoute: TeacherMessagesRouteWithChildren,
   TeacherMoreRoute: TeacherMoreRoute,
+  TeacherMyAttendanceRoute: TeacherMyAttendanceRoute,
   TeacherNotificationsRoute: TeacherNotificationsRoute,
   TeacherValueGuideRoute: TeacherValueGuideRoute,
   TeacherIndexRoute: TeacherIndexRoute,
