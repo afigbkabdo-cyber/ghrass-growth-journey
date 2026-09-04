@@ -29,6 +29,7 @@ import {
   subjectLabels,
   activityStateLabels,
 } from "@/lib/teacher-data";
+import { TeacherShiftCard } from "@/components/teacher-shift-card";
 
 export const Route = createFileRoute("/teacher/")({
   head: () => ({
@@ -67,6 +68,11 @@ function TeacherHome() {
           </div>
         </div>
       </section>
+
+      {/* دوام المعلمة اليوم */}
+      <TeacherShiftCard />
+
+
 
       {/* إحصاءات اليوم */}
       <SectionHeader title="ملخص اليوم" subtitle="حالة فصلي الآن" icon={CalendarCheck} tone="green" />
