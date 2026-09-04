@@ -169,7 +169,7 @@ export function AdminShell({
             );
           })}
         </nav>
-        <div className="border-t border-border p-4">
+        <div className="space-y-3 border-t border-border p-4">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-orange-soft font-display text-sm font-extrabold text-brand-orange-deep">
               ج
@@ -179,7 +179,9 @@ export function AdminShell({
               <p className="text-[11px] text-muted-foreground">مديرة الروضة</p>
             </div>
           </div>
+          <AdminLogoutButton />
         </div>
+
       </aside>
 
       {/* المحتوى */}
