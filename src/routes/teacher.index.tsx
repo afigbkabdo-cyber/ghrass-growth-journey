@@ -68,6 +68,11 @@ function TeacherHome() {
         </div>
       </section>
 
+      {/* دوام المعلمة اليوم */}
+      <TeacherShiftCard />
+
+
+
       {/* إحصاءات اليوم */}
       <SectionHeader title="ملخص اليوم" subtitle="حالة فصلي الآن" icon={CalendarCheck} tone="green" />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
