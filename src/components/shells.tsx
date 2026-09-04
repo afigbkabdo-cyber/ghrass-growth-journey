@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Home,
   Baby,
