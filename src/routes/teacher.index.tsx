@@ -29,6 +29,7 @@ import {
   subjectLabels,
   activityStateLabels,
 } from "@/lib/teacher-data";
+import { TeacherShiftCard } from "@/components/teacher-shift-card";
 
 export const Route = createFileRoute("/teacher/")({
   head: () => ({
