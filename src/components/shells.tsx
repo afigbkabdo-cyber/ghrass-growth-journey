@@ -16,11 +16,31 @@ import {
   Settings,
   Bell,
   School,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GhirasLogo, toneClasses } from "@/components/ghiras";
+import { clearSession } from "@/lib/session";
 import type { Tone } from "@/lib/data";
+
+/** تسجيل خروج آمن للإدارة — مسح الجلسة والعودة لصفحة الدخول بدون رجوع للخلف. */
+function AdminLogoutButton() {
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={() => {
+        clearSession();
+        navigate({ to: "/login", replace: true });
+      }}
+      className="flex w-full items-center gap-2.5 rounded-xl border border-brand-pink/40 bg-brand-pink-soft/50 px-3.5 py-2.5 text-xs font-bold text-brand-pink-deep transition-colors hover:bg-brand-pink-soft"
+    >
+      <LogOut className="h-4 w-4" />
+      تسجيل الخروج
+    </button>
+  );
+}
+
 
 export interface NavItem {
   to: string;
