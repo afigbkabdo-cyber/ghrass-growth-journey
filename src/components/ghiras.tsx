@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tone } from "@/lib/data";
+import ghirasLogoFull from "@/assets/ghiras-logo-full.png.asset.json";
+import ghirasLogoMark from "@/assets/ghiras-logo-mark.png.asset.json";
 
 /* ---------- خريطة درجات الألوان ---------- */
 
