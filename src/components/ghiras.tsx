@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tone } from "@/lib/data";
+import ghirasLogoFull from "@/assets/ghiras-logo-full.png.asset.json";
+import ghirasLogoMark from "@/assets/ghiras-logo-mark.png.asset.json";
 
 /* ---------- خريطة درجات الألوان ---------- */
 
@@ -52,15 +54,26 @@ export const toneClasses: Record<
 
 /* ---------- الشعار ---------- */
 
+/** الشعار الرسمي الكامل (الرمز + الاسم) — لشاشة الدخول والشاشات التعريفية. */
+export function GhirasLogoFull({ className }: { className?: string }) {
+  return (
+    <img
+      src={ghirasLogoFull.url}
+      alt="شعار روضة غراس — نمو معًا"
+      className={cn("h-auto w-40 select-none object-contain", className)}
+    />
+  );
+}
+
 export function GhirasLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const box =
-    size === "lg" ? "h-14 w-14 rounded-2xl" : size === "sm" ? "h-8 w-8 rounded-lg" : "h-10 w-10 rounded-xl";
-  const icon = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const box = size === "lg" ? "h-14 w-14" : size === "sm" ? "h-8 w-8" : "h-10 w-10";
   return (
     <div className="flex items-center gap-2.5">
-      <div className={cn("bg-gradient-growth grid shrink-0 place-items-center shadow-soft", box)}>
-        <Sprout className={cn("text-primary-foreground", icon)} strokeWidth={2.4} />
-      </div>
+      <img
+        src={ghirasLogoMark.url}
+        alt="شعار غراس"
+        className={cn("shrink-0 select-none object-contain", box)}
+      />
       <div className="leading-tight">
         <p className={cn("font-display font-extrabold text-foreground", size === "lg" ? "text-2xl" : "text-lg")}>
           غراس
@@ -70,6 +83,7 @@ export function GhirasLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
         )}
       </div>
     </div>
+
   );
 }
 

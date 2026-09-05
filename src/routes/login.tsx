@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LogIn, Mail, Lock } from "lucide-react";
-import { GhirasLogo, ToneBadge } from "@/components/ghiras";
+import { LogIn, Mail, Lock, Phone, Info } from "lucide-react";
+import { GhirasLogoFull, ToneBadge } from "@/components/ghiras";
 import {
   demoAccounts,
   findAccount,
@@ -39,6 +39,8 @@ function LoginPage() {
   const [role, setRole] = useState<Role>("teacher");
   const [email, setEmail] = useState(accountFor("teacher").email);
   const [password, setPassword] = useState("ghiras123");
+  const [method, setMethod] = useState<"email" | "phone">("email");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -64,7 +66,7 @@ function LoginPage() {
     <main className="grid min-h-screen place-items-center bg-background px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <GhirasLogo size="lg" />
+          <GhirasLogoFull className="w-44" />
           <h1 className="font-display text-xl font-extrabold text-foreground">أهلًا بك في غراس</h1>
           <p className="text-xs text-muted-foreground">نمو معًا — روضة غراس، المملكة العربية السعودية</p>
         </div>
@@ -99,6 +101,67 @@ function LoginPage() {
             <p className="mt-2 text-[11px] text-muted-foreground">{accountFor(role).title}</p>
           </div>
 
+          <div>
+            <p className="mb-2 text-xs font-bold text-foreground">طريقة تسجيل الدخول</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod("email");
+                  setError(null);
+                }}
+                className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
+                  method === "email"
+                    ? "border-primary bg-brand-orange-soft text-brand-orange-deep"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Mail className="h-4 w-4" />
+                البريد الإلكتروني
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod("phone");
+                  setError(null);
+                }}
+                className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
+                  method === "phone"
+                    ? "border-primary bg-brand-orange-soft text-brand-orange-deep"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Phone className="h-4 w-4" />
+                رقم الهاتف
+              </button>
+            </div>
+          </div>
+
+          {method === "phone" && (
+            <div className="space-y-3">
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-bold text-foreground">رقم الهاتف</span>
+                <span className="relative block">
+                  <Phone className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+9665XXXXXXXX"
+                    dir="ltr"
+                    className="w-full rounded-2xl border border-border bg-background py-3 ps-10 pe-4 text-sm outline-none transition-shadow focus:shadow-soft"
+                  />
+                </span>
+              </label>
+              <p className="flex items-start gap-2 rounded-xl bg-brand-blue-soft px-3 py-2.5 text-[11px] font-bold leading-relaxed text-brand-blue-deep">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                الدخول برقم الهاتف يتطلب تفعيل خدمة إرسال رسائل التحقق (SMS) من إعدادات المشروع. بعد التفعيل سيعمل هذا الخيار مباشرة. حاليًا استخدم الدخول بالبريد الإلكتروني.
+              </p>
+            </div>
+          )}
+
+          {method === "email" && (
           <label className="block">
             <span className="mb-1.5 block text-xs font-bold text-foreground">البريد الإلكتروني</span>
             <span className="relative block">
@@ -113,7 +176,11 @@ function LoginPage() {
               />
             </span>
           </label>
+          )}
 
+
+
+          {method === "email" && (
           <label className="block">
             <span className="mb-1.5 block text-xs font-bold text-foreground">كلمة المرور</span>
             <span className="relative block">
@@ -128,6 +195,7 @@ function LoginPage() {
               />
             </span>
           </label>
+          )}
 
           {error && (
             <p className="rounded-xl bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive">
@@ -137,11 +205,11 @@ function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || method === "phone"}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground transition-opacity disabled:opacity-60"
           >
             <LogIn className="h-4.5 w-4.5" />
-            {loading ? "جارٍ الدخول…" : "دخول"}
+            {method === "phone" ? "الدخول برقم الهاتف غير مفعّل بعد" : loading ? "جارٍ الدخول…" : "دخول"}
           </button>
 
           <p className="text-center text-[11px] text-muted-foreground">
