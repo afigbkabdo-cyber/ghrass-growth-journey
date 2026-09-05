@@ -176,6 +176,9 @@ function LoginPage() {
               />
             </span>
           </label>
+          )}
+
+
 
           {method === "email" && (
           <label className="block">
