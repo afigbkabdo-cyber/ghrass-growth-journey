@@ -1,95 +1,160 @@
 /*
- * جلسة تجريبية بسيطة (بدون خادم) — تُهيّئ البنية لربط Authentication موحّد لاحقًا
- * حيث تُحدَّد الواجهة حسب الدور: parent | teacher | admin | owner.
+ * جلسة المستخدم الحقيقية (Lovable Cloud) — الدور يُقرأ من قاعدة البيانات.
  */
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-export type Role = "parent" | "teacher" | "admin";
+export type Role = "parent" | "teacher" | "admin" | "super_admin";
 
 export const roleLabels: Record<Role, string> = {
   parent: "ولي أمر",
   teacher: "معلمة",
   admin: "الإدارة",
+  super_admin: "مسؤول النظام",
 };
 
-export interface DemoSession {
+export interface AppSession {
+  userId: string;
   role: Role;
   name: string;
-  email: string;
-  /** معرّف الحساب — يفصل بين المالك الأول والثاني */
-  accountId: string;
+  phone: string | null;
+  title: string | null;
+  mustChangePassword: boolean;
 }
 
-/** حسابات تجريبية — كل مالك حساب مستقل بجلسة مستقلة */
-export interface DemoAccount {
-  id: string;
-  role: Role;
-  name: string;
-  email: string;
-  password: string;
-  title: string;
+/** المسار الرئيسي لكل دور. */
+export const roleHome: Record<Role, string> = {
+  parent: "/",
+  teacher: "/teacher",
+  admin: "/admin",
+  super_admin: "/admin",
+};
+
+/** الأدوار المسموح لها بفتح كل قسم — مسؤول النظام يملك صلاحيات كاملة. */
+export const sectionRoles = {
+  parent: ["parent", "super_admin"] as Role[],
+  teacher: ["teacher", "super_admin"] as Role[],
+  admin: ["admin", "super_admin"] as Role[],
+};
+
+export function canAccess(role: Role, allowed: Role[]) {
+  return allowed.includes(role);
 }
 
-export const demoAccounts: DemoAccount[] = [
-  { id: "parent_1", role: "parent", name: "أم ليان", email: "parent@ghiras.sa", password: "ghiras123", title: "ولي أمر — ليان" },
-  { id: "teacher_1", role: "teacher", name: "أ. نورة العتيبي", email: "noura@ghiras.sa", password: "ghiras123", title: "معلمة اللغة العربية" },
-  { id: "admin_1", role: "admin", name: "أ. الجوهرة السبيعي", email: "admin@ghiras.sa", password: "ghiras123", title: "مديرة الروضة" },
+const rolePriority: Role[] = ["super_admin", "admin", "teacher", "parent"];
+
+/** مفاتيح محلية قديمة/تجريبية تُمسح عند الخروج. */
+const LOCAL_KEYS = [
+  "ghiras.demo-session",
+  "ghiras.role",
+  "ghiras.auth",
+  "ghiras.demo-role",
+  "ghiras.teacher.shift",
 ];
 
-export function findAccount(email: string) {
-  return demoAccounts.find((a) => a.email.trim().toLowerCase() === email.trim().toLowerCase());
-}
-
-const STORAGE_KEY = "ghiras.demo-session";
-
-/** كل مفاتيح المصادقة التجريبية — تُمسح كلها عند تسجيل الخروج */
-const AUTH_KEYS = [STORAGE_KEY, "ghiras.role", "ghiras.auth", "ghiras.demo-role", "ghiras.teacher.shift"];
-
-export function readSession(): DemoSession | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<DemoSession>;
-    if (!parsed?.role || !roleLabels[parsed.role as Role]) return null;
-    return {
-      role: parsed.role as Role,
-      name: parsed.name ?? "",
-      email: parsed.email ?? "",
-      accountId: parsed.accountId ?? "",
-    };
-  } catch {
-    return null;
-  }
-}
-
-export function writeSession(session: DemoSession) {
+export function clearLocalState() {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-}
-
-/** مسح الجلسة والدور وأي بيانات مصادقة تجريبية محفوظة. */
-export function clearSession() {
-  if (typeof window === "undefined") return;
-  for (const key of AUTH_KEYS) {
+  for (const key of LOCAL_KEYS) {
     window.localStorage.removeItem(key);
     window.sessionStorage.removeItem(key);
   }
 }
 
-/** المسار الرئيسي لكل دور — نقطة الربط المستقبلية مع نظام الصلاحيات الحقيقي. */
-export const roleHome: Record<Role, string> = {
-  parent: "/",
-  teacher: "/teacher",
-  admin: "/admin",
-};
+/** إنهاء الجلسة فعليًا. */
+export async function signOutCompletely() {
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    /* تجاهل — سنمسح الحالة المحلية على أي حال */
+  }
+  clearLocalState();
+}
 
-/** الأدوار المسموح لها بفتح كل قسم من التطبيق. */
-export const sectionRoles = {
-  parent: ["parent"] as Role[],
-  teacher: ["teacher"] as Role[],
-  admin: ["admin"] as Role[],
-};
+/** توافقًا مع الاستدعاءات الحالية. */
+export const clearSession = signOutCompletely;
 
-export function canAccess(role: Role, allowed: Role[]) {
-  return allowed.includes(role);
+/** قراءة الجلسة والدور من قاعدة البيانات. */
+export async function loadSession(): Promise<AppSession | null> {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) return null;
+  const user = userData.user;
+
+  const [{ data: profile, error: profileError }, { data: roles, error: rolesError }] =
+    await Promise.all([
+      supabase.from("profiles").select("full_name, phone, title, must_change_password").eq("id", user.id).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", user.id),
+    ]);
+
+  if (profileError) throw profileError;
+  if (rolesError) throw rolesError;
+
+  const owned = (roles ?? []).map((r) => r.role as Role);
+  const role = rolePriority.find((r) => owned.includes(r)) ?? "parent";
+
+  return {
+    userId: user.id,
+    role,
+    name: profile?.full_name ?? "",
+    phone: profile?.phone ?? null,
+    title: profile?.title ?? null,
+    mustChangePassword: profile?.must_change_password ?? false,
+  };
+}
+
+export interface SessionState {
+  session: AppSession | null;
+  loading: boolean;
+  error: string | null;
+  reload: () => void;
+}
+
+/** هوك الجلسة — لا يبقى عالقًا في التحميل: أي خطأ يظهر مع إمكانية إعادة المحاولة. */
+export function useAppSession(): SessionState {
+  const [session, setSession] = useState<AppSession | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+
+  const reload = useCallback(() => setTick((t) => t + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        setLoading(false);
+        setError("تعذر التحقق من الصلاحيات — تحقق من الاتصال بالإنترنت.");
+      }
+    }, 12000);
+
+    loadSession()
+      .then((result) => {
+        if (cancelled) return;
+        setSession(result);
+        setError(null);
+      })
+      .catch(() => {
+        if (!cancelled) setError("تعذر التحقق من الصلاحيات. حاول مرة أخرى.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+        clearTimeout(timeout);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [tick]);
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") reload();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [reload]);
+
+  return { session, loading, error, reload };
 }
