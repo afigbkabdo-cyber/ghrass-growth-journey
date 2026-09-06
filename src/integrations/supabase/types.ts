@@ -14,16 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      child_guardians: {
+        Row: {
+          child_id: string
+          guardian_id: string
+          relation: string | null
+        }
+        Insert: {
+          child_id: string
+          guardian_id: string
+          relation?: string | null
+        }
+        Update: {
+          child_id?: string
+          guardian_id?: string
+          relation?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_guardians_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_guardians_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          birth_date: string | null
+          class_id: string | null
+          created_at: string
+          gender: string | null
+          id: string
+          name: string
+          notes: string | null
+          stage: string
+        }
+        Insert: {
+          birth_date?: string | null
+          class_id?: string | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          stage?: string
+        }
+        Update: {
+          birth_date?: string | null
+          class_id?: string | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          stage: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          stage: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          stage?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          must_change_password: boolean
+          phone: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+          must_change_password?: boolean
+          phone?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          must_change_password?: boolean
+          phone?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      teacher_classes: {
+        Row: {
+          class_id: string
+          teacher_id: string
+        }
+        Insert: {
+          class_id: string
+          teacher_id: string
+        }
+        Update: {
+          class_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_classes_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_guardian_of: {
+        Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
+      teaches_child: {
+        Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "parent" | "teacher" | "admin" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +334,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["parent", "teacher", "admin", "super_admin"],
+    },
   },
 } as const
