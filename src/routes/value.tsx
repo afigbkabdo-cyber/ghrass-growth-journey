@@ -15,6 +15,8 @@ import { AppShell, parentNav } from "@/components/shells";
 import { PageContainer, SectionHeader, ToneBadge, toneClasses } from "@/components/ghiras";
 import { currentValue } from "@/lib/data";
 import { getCurrentValue } from "@/lib/kg.functions";
+import { RoleGuard } from "@/components/role-guard";
+import { sectionRoles } from "@/lib/session";
 
 export const Route = createFileRoute("/value")({
   head: () => ({
@@ -25,7 +27,11 @@ export const Route = createFileRoute("/value")({
       { property: "og:description", content: "قيمة الأسبوع المعتمدة من إدارة روضة غراس." },
     ],
   }),
-  component: ValuePage,
+  component: () => (
+    <RoleGuard allow={sectionRoles.parent}>
+      <ValuePage />
+    </RoleGuard>
+  ),
 });
 
 function ValuePage() {
