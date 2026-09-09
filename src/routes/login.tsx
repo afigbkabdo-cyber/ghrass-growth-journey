@@ -9,12 +9,12 @@ import { loadSession, roleHome } from "@/lib/session";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "الدخول إلى غراس — نمو معًا" },
+      { title: "الدخول إلى غراس — ننمو معًا" },
       {
         name: "description",
         content: "دخول أولياء الأمور والمعلمات وإدارة روضة غراس إلى واجهتهم الخاصة.",
       },
-      { property: "og:title", content: "الدخول إلى غراس — نمو معًا" },
+      { property: "og:title", content: "الدخول إلى غراس — ننمو معًا" },
       { property: "og:description", content: "واجهة دخول موحّدة تُحدَّد حسب دور المستخدم." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -81,7 +81,7 @@ function LoginPage() {
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <GhirasLogoFull className="w-44" />
           <h1 className="font-display text-xl font-extrabold text-foreground">أهلًا بك في غراس</h1>
-          <p className="text-xs text-muted-foreground">نمو معًا — روضة غراس، المملكة العربية السعودية</p>
+          <p className="text-xs text-muted-foreground">ننمو معًا — روضة غراس، المملكة العربية السعودية</p>
         </div>
 
         <form
