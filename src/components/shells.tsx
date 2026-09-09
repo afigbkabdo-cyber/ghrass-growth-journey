@@ -253,7 +253,7 @@ export const teacherNav: NavItem[] = [
   { to: "/teacher/children", label: "الأطفال", icon: Baby },
   { to: "/teacher/attendance", label: "الحضور", icon: CalendarCheck },
   { to: "/teacher/activities", label: "الأنشطة", icon: Blocks },
-  { to: "/teacher/messages", label: "الرسائل", icon: MessagesSquare },
+  { to: "/teacher/schedule", label: "الجدول", icon: ListChecks },
   { to: "/teacher/more", label: "المزيد", icon: Menu },
 ];
 
@@ -265,6 +265,7 @@ export const adminSidebarNav: NavItem[] = [
   { to: "/admin/attendance", label: "الحضور", icon: CalendarCheck },
   { to: "/admin/values", label: "القيم", icon: HeartHandshake },
   { to: "/admin/activities", label: "الأنشطة", icon: Blocks },
+  { to: "/admin/schedule", label: "الجدول اليومي", icon: ListChecks },
   { to: "/admin/announcements", label: "الإعلانات", icon: Megaphone },
   { to: "/admin/messages", label: "الرسائل", icon: MessagesSquare },
   { to: "/admin/reports", label: "التقارير", icon: BarChart3 },
