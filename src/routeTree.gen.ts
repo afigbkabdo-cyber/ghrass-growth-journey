@@ -30,6 +30,7 @@ import { Route as AdminClassesRouteImport } from './routes/admin.classes'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminScheduleRouteImport } from './routes/admin.schedule'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminValuesRouteImport } from './routes/admin.values'
@@ -42,6 +43,7 @@ import { Route as TeacherChildrenRouteImport } from './routes/teacher.children'
 import { Route as TeacherMoreRouteImport } from './routes/teacher.more'
 import { Route as TeacherMyAttendanceRouteImport } from './routes/teacher.my-attendance'
 import { Route as TeacherNotificationsRouteImport } from './routes/teacher.notifications'
+import { Route as TeacherScheduleRouteImport } from './routes/teacher.schedule'
 import { Route as TeacherValueGuideRouteImport } from './routes/teacher.value-guide'
 import { Route as AdminMessagesIdRouteImport } from './routes/admin.messages.$id'
 import { Route as TeacherChildIdRouteImport } from './routes/teacher.child.$id'
@@ -151,6 +153,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminScheduleRoute = AdminScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -211,6 +218,11 @@ const TeacherNotificationsRoute = TeacherNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherScheduleRoute = TeacherScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherValueGuideRoute = TeacherValueGuideRouteImport.update({
   id: '/value-guide',
   path: '/value-guide',
@@ -248,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/admin/messages': typeof AdminMessagesRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/schedule': typeof AdminScheduleRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/values': typeof AdminValuesRoute
@@ -259,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/teacher/more': typeof TeacherMoreRoute
   '/teacher/my-attendance': typeof TeacherMyAttendanceRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
+  '/teacher/schedule': typeof TeacherScheduleRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin/': typeof AdminIndexRoute
   '/teacher/': typeof TeacherIndexRoute
@@ -284,6 +298,7 @@ export interface FileRoutesByTo {
   '/admin/messages': typeof AdminMessagesRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/schedule': typeof AdminScheduleRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/values': typeof AdminValuesRoute
@@ -295,6 +310,7 @@ export interface FileRoutesByTo {
   '/teacher/more': typeof TeacherMoreRoute
   '/teacher/my-attendance': typeof TeacherMyAttendanceRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
+  '/teacher/schedule': typeof TeacherScheduleRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin': typeof AdminIndexRoute
   '/teacher': typeof TeacherIndexRoute
@@ -323,6 +339,7 @@ export interface FileRoutesById {
   '/admin/messages': typeof AdminMessagesRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/schedule': typeof AdminScheduleRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/values': typeof AdminValuesRoute
@@ -334,6 +351,7 @@ export interface FileRoutesById {
   '/teacher/more': typeof TeacherMoreRoute
   '/teacher/my-attendance': typeof TeacherMyAttendanceRoute
   '/teacher/notifications': typeof TeacherNotificationsRoute
+  '/teacher/schedule': typeof TeacherScheduleRoute
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin/': typeof AdminIndexRoute
   '/teacher/': typeof TeacherIndexRoute
@@ -363,6 +381,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/more'
     | '/admin/reports'
+    | '/admin/schedule'
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/values'
@@ -374,6 +393,7 @@ export interface FileRouteTypes {
     | '/teacher/more'
     | '/teacher/my-attendance'
     | '/teacher/notifications'
+    | '/teacher/schedule'
     | '/teacher/value-guide'
     | '/admin/'
     | '/teacher/'
@@ -399,6 +419,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/more'
     | '/admin/reports'
+    | '/admin/schedule'
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/values'
@@ -410,6 +431,7 @@ export interface FileRouteTypes {
     | '/teacher/more'
     | '/teacher/my-attendance'
     | '/teacher/notifications'
+    | '/teacher/schedule'
     | '/teacher/value-guide'
     | '/admin'
     | '/teacher'
@@ -437,6 +459,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/more'
     | '/admin/reports'
+    | '/admin/schedule'
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/values'
@@ -448,6 +471,7 @@ export interface FileRouteTypes {
     | '/teacher/more'
     | '/teacher/my-attendance'
     | '/teacher/notifications'
+    | '/teacher/schedule'
     | '/teacher/value-guide'
     | '/admin/'
     | '/teacher/'
@@ -619,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/schedule': {
+      id: '/admin/schedule'
+      path: '/schedule'
+      fullPath: '/admin/schedule'
+      preLoaderRoute: typeof AdminScheduleRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -703,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherNotificationsRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/schedule': {
+      id: '/teacher/schedule'
+      path: '/schedule'
+      fullPath: '/teacher/schedule'
+      preLoaderRoute: typeof TeacherScheduleRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/value-guide': {
       id: '/teacher/value-guide'
       path: '/value-guide'
@@ -748,6 +786,7 @@ interface AdminRouteChildren {
   AdminMessagesRoute: typeof AdminMessagesRouteWithChildren
   AdminMoreRoute: typeof AdminMoreRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminScheduleRoute: typeof AdminScheduleRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminValuesRoute: typeof AdminValuesRoute
@@ -763,6 +802,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMessagesRoute: AdminMessagesRouteWithChildren,
   AdminMoreRoute: AdminMoreRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AdminScheduleRoute: AdminScheduleRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminValuesRoute: AdminValuesRoute,
@@ -791,6 +831,7 @@ interface TeacherRouteChildren {
   TeacherMoreRoute: typeof TeacherMoreRoute
   TeacherMyAttendanceRoute: typeof TeacherMyAttendanceRoute
   TeacherNotificationsRoute: typeof TeacherNotificationsRoute
+  TeacherScheduleRoute: typeof TeacherScheduleRoute
   TeacherValueGuideRoute: typeof TeacherValueGuideRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
   TeacherChildIdRoute: typeof TeacherChildIdRoute
@@ -804,6 +845,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherMoreRoute: TeacherMoreRoute,
   TeacherMyAttendanceRoute: TeacherMyAttendanceRoute,
   TeacherNotificationsRoute: TeacherNotificationsRoute,
+  TeacherScheduleRoute: TeacherScheduleRoute,
   TeacherValueGuideRoute: TeacherValueGuideRoute,
   TeacherIndexRoute: TeacherIndexRoute,
   TeacherChildIdRoute: TeacherChildIdRoute,

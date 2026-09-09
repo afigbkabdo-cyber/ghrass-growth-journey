@@ -770,7 +770,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       .object({
         threadId: z.string().uuid(),
         body: z.string().trim().min(1),
-        asAdmin: z.boolean().optional(),
+        
       })
       .parse(d),
   )

@@ -1,4 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getCurrentValue, myClassChildren } from "@/lib/kg.functions";
 import {
   Baby,
   CalendarCheck,
@@ -52,6 +55,12 @@ const quickActions = [
 
 function TeacherHome() {
   const published = teacherActivities.filter((a) => a.state === "published");
+  const fetchValue = useServerFn(getCurrentValue);
+  const fetchChildren = useServerFn(myClassChildren);
+  const valueQuery = useQuery({ queryKey: ["current-value"], queryFn: () => fetchValue({}) });
+  const childrenQuery = useQuery({ queryKey: ["teacher-children"], queryFn: () => fetchChildren({}) });
+  const value = valueQuery.data;
+  const childCount = childrenQuery.data?.length ?? teacherTodaySummary.children;
 
   return (
     <PageContainer>
@@ -77,7 +86,7 @@ function TeacherHome() {
       {/* إحصاءات اليوم */}
       <SectionHeader title="ملخص اليوم" subtitle="حالة فصلي الآن" icon={CalendarCheck} tone="green" />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard icon={Baby} value={teacherTodaySummary.children} label="أطفال الفصل" tone="blue" />
+        <StatCard icon={Baby} value={childCount} label="أطفال الفصل" tone="blue" />
         <StatCard icon={UserCheck} value={teacherTodaySummary.present} label="حاضر" tone="green" />
         <StatCard icon={UserX} value={teacherTodaySummary.absent} label="غائب" tone="pink" />
         <StatCard icon={Blocks} value={teacherTodaySummary.activities} label="أنشطة اليوم" tone="orange" />
@@ -114,15 +123,17 @@ function TeacherHome() {
       <section className="mb-6 rounded-3xl border border-brand-orange-soft bg-brand-orange-soft/50 p-5">
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-display text-2xl font-extrabold text-brand-orange-deep">
-            {teacherValueGuide.name}
+            {value?.name ?? teacherValueGuide.name}
           </h3>
-          <ToneBadge tone="orange">{teacherValueGuide.week.split("—")[0]?.trim() ?? teacherValueGuide.week}</ToneBadge>
+          {value?.weekStart && <ToneBadge tone="orange">{value.weekStart}</ToneBadge>}
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/80">{teacherValueGuide.tagline}</p>
+        <p className="mt-2 text-sm leading-relaxed text-foreground/80">
+          {value?.tagline ?? teacherValueGuide.tagline}
+        </p>
         <p className="mt-3 rounded-2xl bg-card p-3 text-xs leading-relaxed text-muted-foreground">
-          {teacherValueGuide.hadith}
+          {value?.hadith ?? teacherValueGuide.hadith}
           <span className="mt-1 block text-[11px] font-bold text-brand-orange-deep">
-            {teacherValueGuide.source}
+            {value?.source ?? teacherValueGuide.source}
           </span>
         </p>
       </section>

@@ -39,7 +39,7 @@ function AdminThreadPage() {
   const thread = (threads.data ?? []).find((t) => t.id === id);
 
   const reply = useMutation({
-    mutationFn: () => send({ data: { threadId: id, body: draft.trim(), asAdmin: true } }),
+    mutationFn: () => send({ data: { threadId: id, body: draft.trim() } }),
     onSuccess: () => {
       setDraft("");
       qc.invalidateQueries({ queryKey: ["thread-messages", id] });

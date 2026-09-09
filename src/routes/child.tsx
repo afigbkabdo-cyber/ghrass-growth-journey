@@ -168,14 +168,14 @@ function ChildPage() {
                       }`
                     : "لم تُسجّل بعد"
                 }
-                note={log.data?.mealNotes}
+                note={log.data?.mealNotes ?? null}
               />
               <InfoRow
                 icon={Droplets}
                 tone="blue"
                 title="دورة المياه / الحفاض"
                 value={`دورة المياه: ${log.data?.bathroomCount ?? 0} • تغيير الحفاض: ${log.data?.diaperCount ?? 0}`}
-                note={log.data?.bathroomNotes}
+                note={log.data?.bathroomNotes ?? null}
               />
               <InfoRow
                 icon={Moon}

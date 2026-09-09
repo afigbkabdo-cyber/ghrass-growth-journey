@@ -1,22 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Blocks, Plus } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Blocks, Eye, EyeOff, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
-import {
-  adminActivities,
-  adminActivityStateLabels,
-  adminActivityStateTone,
-} from "@/lib/admin-data";
+import { deleteActivity, listActivities, setActivityPublished } from "@/lib/kg.functions";
 
 export const Route = createFileRoute("/admin/activities")({
   head: () => ({
     meta: [
       { title: "الأنشطة — لوحة إدارة غراس" },
-      {
-        name: "description",
-        content: "متابعة أنشطة المعلمات في روضة غراس: المنشورة والمسودات والمؤرشفة وربطها بقيمة الأسبوع.",
-      },
+      { name: "description", content: "متابعة أنشطة الفصول وصورها والتحكم في نشرها لأولياء الأمور." },
       { property: "og:title", content: "الأنشطة — لوحة إدارة غراس" },
-      { property: "og:description", content: "إدارة أنشطة الفصول وربطها بخطة القيم." },
+      { property: "og:description", content: "متابعة أنشطة فصول روضة غراس والتحكم في نشرها." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -24,57 +20,99 @@ export const Route = createFileRoute("/admin/activities")({
   component: AdminActivitiesPage,
 });
 
-const groups = [
-  { state: "published" as const, title: "منشورة", tone: "green" as const },
-  { state: "draft" as const, title: "مسودات", tone: "yellow" as const },
-  { state: "archived" as const, title: "مؤرشفة", tone: "blue" as const },
-];
-
 function AdminActivitiesPage() {
+  const qc = useQueryClient();
+  const fetchActivities = useServerFn(listActivities);
+  const publish = useServerFn(setActivityPublished);
+  const remove = useServerFn(deleteActivity);
+
+  const activities = useQuery({ queryKey: ["activities"], queryFn: () => fetchActivities({}) });
+
+  const togglePublish = useMutation({
+    mutationFn: (v: { id: string; published: boolean }) => publish({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["activities"] }),
+    onError: (e: Error) => toast.error(e.message || "تعذر التحديث"),
+  });
+
+  const del = useMutation({
+    mutationFn: (id: string) => remove({ data: { id } }),
+    onSuccess: () => {
+      toast.success("تم حذف النشاط");
+      qc.invalidateQueries({ queryKey: ["activities"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "تعذر الحذف"),
+  });
+
+  const list = activities.data ?? [];
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card p-4 shadow-soft">
-        <div>
-          <h2 className="font-display text-lg font-extrabold text-foreground">أنشطة الفصول</h2>
-          <p className="text-xs text-muted-foreground">{adminActivities.length} نشاطًا مسجلًا هذا الفصل</p>
-        </div>
-        <button className="flex items-center gap-1.5 rounded-2xl bg-primary px-3.5 py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-95">
-          <Plus className="h-4 w-4" /> نشاط جديد
-        </button>
+    <div className="space-y-5">
+      <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
+        <h2 className="font-display text-lg font-extrabold text-foreground">أنشطة الفصول</h2>
+        <p className="text-xs text-muted-foreground">
+          {list.filter((a) => a.published).length} منشور من {list.length} نشاط
+        </p>
       </div>
 
-      {groups.map((g) => {
-        const items = adminActivities.filter((a) => a.state === g.state);
-        return (
-          <section key={g.state}>
-            <SectionHeader title={g.title} icon={Blocks} tone={g.tone} />
-            {items.length === 0 ? (
-              <EmptyState title="لا توجد أنشطة" message="ستظهر الأنشطة هنا عند إضافتها من المعلمات." />
-            ) : (
-              <div className="grid gap-3 md:grid-cols-2">
-                {items.map((a) => (
-                  <article key={a.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-sm font-extrabold text-foreground">{a.title}</h3>
-                      <ToneBadge tone={adminActivityStateTone[a.state]} className="shrink-0">
-                        {adminActivityStateLabels[a.state]}
-                      </ToneBadge>
-                    </div>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {a.subject} — {a.teacher}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                      <ToneBadge tone={a.tone}>{a.className}</ToneBadge>
-                      <ToneBadge tone="orange">قيمة {a.value}</ToneBadge>
-                      <span className="text-[11px] font-bold text-muted-foreground">{a.date}</span>
-                    </div>
-                  </article>
-                ))}
+      <SectionHeader title="كل الأنشطة" icon={Blocks} tone="blue" />
+      {activities.isLoading ? (
+        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+      ) : list.length === 0 ? (
+        <EmptyState title="لا توجد أنشطة" message="ستظهر أنشطة المعلمات هنا." />
+      ) : (
+        <div className="space-y-3">
+          {list.map((a) => (
+            <article key={a.id} className="overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
+              {a.photos.length > 0 && (
+                <div className={a.photos.length === 1 ? "" : "grid grid-cols-2 gap-0.5"}>
+                  {a.photos.slice(0, 4).map((src) => (
+                    <img key={src} src={src} alt={`صورة من نشاط ${a.title}`} loading="lazy" className="h-32 w-full object-cover" />
+                  ))}
+                </div>
+              )}
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
+                  <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? "منشور" : "مسودة"}</ToneBadge>
+                </div>
+                {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>}
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {a.className && <ToneBadge tone="blue">{a.className}</ToneBadge>}
+                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">مرتبط بقيمة {a.valueName}</ToneBadge>}
+                  <span className="text-[11px] font-bold text-muted-foreground">
+                    {new Date(a.activityDate).toLocaleDateString("ar-SA")}
+                  </span>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => togglePublish.mutate({ id: a.id, published: !a.published })}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted"
+                  >
+                    {a.published ? (
+                      <>
+                        <Eye className="h-3.5 w-3.5 text-brand-green-deep" /> إيقاف النشر
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="h-3.5 w-3.5" /> نشر لأولياء الأمور
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => del.mutate(a.id)}
+                    aria-label="حذف النشاط"
+                    className="grid h-9 w-9 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            )}
-          </section>
-        );
-      })}
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
