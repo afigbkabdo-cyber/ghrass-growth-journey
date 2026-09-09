@@ -580,7 +580,18 @@ export const listActivities = createServerFn({ method: "GET" })
       .order("activity_date", { ascending: false })
       .order("activity_time", { ascending: true, nullsFirst: true });
     if (error) throw new Error(error.message);
-    return ((data ?? []) as unknown as ActivityQueryRow[]).map(mapActivity);
+    const rows = ((data ?? []) as unknown as ActivityQueryRow[]).map(mapActivity);
+    // روابط موقّتة آمنة لصور الأنشطة (المستودع خاص).
+    const paths = rows.flatMap((r) => r.photos);
+    if (paths.length > 0) {
+      const { data: signed } = await context.supabase.storage
+        .from("activity-photos")
+        .createSignedUrls(paths, 60 * 60);
+      const map = new Map<string, string>();
+      for (const s of signed ?? []) if (s.path && s.signedUrl) map.set(s.path, s.signedUrl);
+      for (const r of rows) r.photos = r.photos.map((p) => map.get(p) ?? p);
+    }
+    return rows;
   });
 
 export const saveActivity = createServerFn({ method: "POST" })
@@ -764,10 +775,12 @@ export const sendMessage = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    // الدور يُستنتج من الخادم ولا يُقبل من العميل.
+    const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
     const { error } = await context.supabase.from("messages").insert({
       thread_id: data.threadId,
       sender_id: context.userId,
-      sender_role: data.asAdmin ? "admin" : "parent",
+      sender_role: isAdmin ? "admin" : "parent",
       body: data.body,
     });
     if (error) throw new Error(error.message);
