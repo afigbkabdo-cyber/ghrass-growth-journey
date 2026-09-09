@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "غراس | نمو معًا — روضة تغرس القيم" },
+      { title: "غراس | ننمو معًا — روضة تغرس القيم" },
       {
         name: "description",
         content:
           "تطبيق روضة غراس: رحلة تربوية أسبوعية تربط القيمة بالحديث النبوي والتعلم والنشاط المنزلي، وتصل ولي الأمر بالمعلمة والإدارة.",
       },
-      { property: "og:title", content: "غراس | نمو معًا" },
+      { property: "og:title", content: "غراس | ننمو معًا" },
       {
         property: "og:description",
         content: "تجربة تربوية رقمية: القيمة ← الحديث ← التعلم ← النشاط ← البيت ← نمو الطفل.",
