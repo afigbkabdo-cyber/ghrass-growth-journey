@@ -16,6 +16,7 @@ import {
   Settings,
   Bell,
   School,
+  ListChecks,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
