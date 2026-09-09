@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin/settings")({
 
 const nurseryInfo = [
   { label: "اسم الروضة", value: "روضة غراس" },
-  { label: "الشعار", value: "نمو معًا" },
+  { label: "الشعار", value: "ننمو معًا" },
   { label: "المدينة", value: "الرياض — المملكة العربية السعودية" },
   { label: "رقم التواصل", value: "0500000000" },
   { label: "البريد الإلكتروني", value: "info@ghiras.sa" },

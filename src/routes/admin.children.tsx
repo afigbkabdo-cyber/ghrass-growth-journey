@@ -38,7 +38,14 @@ function AdminChildren() {
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<Stage | "all">("all");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", stage: "kg1" as Stage, classId: "", guardianId: "" });
+  const [form, setForm] = useState({
+    name: "",
+    stage: "kg1" as Stage,
+    classId: "",
+    guardianId: "",
+    birthDate: "",
+    allergies: "",
+  });
   const [message, setMessage] = useState<string | null>(null);
 
   const childrenQuery = useQuery({ queryKey: ["admin-children"], queryFn: () => fetchChildren({}) });
@@ -53,10 +60,12 @@ function AdminChildren() {
           stage: form.stage,
           classId: form.classId || null,
           guardianId: form.guardianId || null,
+          birthDate: form.birthDate || null,
+          allergies: form.allergies || null,
         },
       }),
     onSuccess: () => {
-      setForm({ name: "", stage: "kg1", classId: "", guardianId: "" });
+      setForm({ name: "", stage: "kg1", classId: "", guardianId: "", birthDate: "", allergies: "" });
       setOpen(false);
       setMessage("تم تسجيل الطفل وحفظه.");
       qc.invalidateQueries({ queryKey: ["admin-children"] });
@@ -150,6 +159,11 @@ function AdminChildren() {
                   {c.className ?? "بدون فصل"} · ولي الأمر:{" "}
                   {c.guardians.length ? c.guardians.join("، ") : "غير مرتبط"}
                 </p>
+                {c.allergies && (
+                  <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-extrabold text-destructive">
+                    حساسية: {c.allergies}
+                  </p>
+                )}
               </div>
               <ToneBadge tone="orange">{stageLabels[c.stage as Stage] ?? c.stage}</ToneBadge>
               <button
@@ -214,6 +228,22 @@ function AdminChildren() {
               </option>
             ))}
           </select>
+          <label className="block text-[11px] font-bold text-muted-foreground">
+            تاريخ الميلاد (لحساب العمر)
+            <input
+              type="date"
+              value={form.birthDate}
+              onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+              className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            />
+          </label>
+          <input
+            value={form.allergies}
+            onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+            placeholder="الحساسية (اتركه فارغًا إن لا يوجد)"
+            aria-label="الحساسية"
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+          />
           <div className="flex gap-2">
             <button
               type="submit"

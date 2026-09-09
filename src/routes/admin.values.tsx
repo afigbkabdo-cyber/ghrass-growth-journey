@@ -1,124 +1,201 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { HeartHandshake, Plus, CheckCircle2, BookOpenCheck } from "lucide-react";
-import { SectionHeader, SuccessNote, ToneBadge, toneClasses } from "@/components/ghiras";
-import { allValues, statusLabels, type WeekValue } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { HeartHandshake, Plus, X, Trash2, CheckCircle2, Star } from "lucide-react";
+import { toast } from "sonner";
+import { SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
+import { approveValue, deleteValue, listValues, saveValue } from "@/lib/kg.functions";
 
 export const Route = createFileRoute("/admin/values")({
   head: () => ({
     meta: [
       { title: "خطة القيم — لوحة إدارة غراس" },
-      { name: "description", content: "بناء واعتماد خطة القيم الأسبوعية في روضة غراس مع الحديث الموثق والأنشطة." },
+      { name: "description", content: "إضافة قيم الأسبوع واعتمادها وتحديد القيمة الحالية للروضة." },
       { property: "og:title", content: "خطة القيم — لوحة إدارة غراس" },
-      { property: "og:description", content: "اعتماد قيم الأسابيع والتحقق من التوثيق الشرعي." },
+      { property: "og:description", content: "إدارة خطة القيم الأسبوعية واعتمادها." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: AdminValues,
+  component: AdminValuesPage,
 });
 
-const statusTone: Record<WeekValue["status"], "green" | "yellow" | "blue" | "pink"> = {
-  published: "green",
-  approved: "blue",
-  pending: "yellow",
-  draft: "pink",
-};
+const field =
+  "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
-function AdminValues() {
-  const [approved, setApproved] = useState<string[]>([]);
-  const [note, setNote] = useState<string | null>(null);
+function AdminValuesPage() {
+  const qc = useQueryClient();
+  const fetchValues = useServerFn(listValues);
+  const save = useServerFn(saveValue);
+  const approve = useServerFn(approveValue);
+  const remove = useServerFn(deleteValue);
 
-  const approve = (v: WeekValue) => {
-    setApproved((p) => [...p, v.id]);
-    setNote(`تم اعتماد قيمة «${v.name}» ونشرها لأولياء الأمور.`);
+  const values = useQuery({ queryKey: ["admin-values"], queryFn: () => fetchValues({}) });
+
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [hadith, setHadith] = useState("");
+  const [source, setSource] = useState("");
+  const [description, setDescription] = useState("");
+  const [weekStart, setWeekStart] = useState("");
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["admin-values"] });
+    qc.invalidateQueries({ queryKey: ["current-value"] });
   };
+
+  const create = useMutation({
+    mutationFn: () =>
+      save({
+        data: {
+          name: name.trim(),
+          tagline: tagline.trim() || null,
+          hadith: hadith.trim() || null,
+          source: source.trim() || null,
+          description: description.trim() || null,
+          weekStart: weekStart || null,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("تمت إضافة القيمة — تحتاج اعتمادًا لتظهر للمعلمات وأولياء الأمور");
+      setName("");
+      setTagline("");
+      setHadith("");
+      setSource("");
+      setDescription("");
+      setWeekStart("");
+      setOpen(false);
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message || "تعذر الحفظ"),
+  });
+
+  const setApproval = useMutation({
+    mutationFn: (v: { id: string; approved: boolean; makeCurrent?: boolean }) => approve({ data: v }),
+    onSuccess: () => {
+      toast.success("تم تحديث حالة القيمة");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message || "تعذر التحديث"),
+  });
+
+  const del = useMutation({
+    mutationFn: (id: string) => remove({ data: { id } }),
+    onSuccess: () => {
+      toast.success("تم حذف القيمة");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message || "تعذر الحذف"),
+  });
 
   return (
     <div className="space-y-5">
-      <SectionHeader
-        title="خطة القيم الأسبوعية"
-        subtitle="كل قيمة مرتبطة بدليل شرعي موثق قبل الاعتماد"
-        icon={HeartHandshake}
-        tone="orange"
-      />
-
-      {note && <SuccessNote>{note}</SuccessNote>}
-
-      <div className="space-y-3">
-        {allValues.map((v) => {
-          const t = toneClasses[v.tone];
-          const isApproved = approved.includes(v.id) || v.status === "published" || v.status === "approved";
-          return (
-            <article key={v.id} className="rounded-3xl border border-border bg-card p-4 shadow-soft">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className={cn("grid h-11 w-11 place-items-center rounded-2xl", t.soft)}>
-                    <HeartHandshake className={cn("h-5 w-5", t.deep)} strokeWidth={2.2} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-display text-base font-extrabold text-foreground">{v.name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {v.weekStart} — {v.weekEnd}
-                    </p>
-                  </div>
-                </div>
-                <ToneBadge tone={isApproved ? statusTone[v.status] : "pink"}>
-                  {approved.includes(v.id) ? "منشورة" : statusLabels[v.status]}
-                </ToneBadge>
-              </div>
-
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{v.tagline}</p>
-
-              <div className={cn("mt-3 rounded-2xl p-3.5", t.soft)}>
-                <p className={cn("text-xs font-bold leading-relaxed", t.deep)}>{v.hadith}</p>
-                <p className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
-                  <BookOpenCheck className="h-3.5 w-3.5" />
-                  {v.source} · {v.authentication}
-                </p>
-              </div>
-
-              <div className="mt-3 grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
-                <div>
-                  <p className="mb-1 font-bold text-foreground">في الروضة</p>
-                  <ul className="space-y-1">
-                    {v.atSchool.map((s) => (
-                      <li key={s}>• {s}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="mb-1 font-bold text-foreground">في المنزل</p>
-                  <ul className="space-y-1">
-                    {v.atHome.map((s) => (
-                      <li key={s}>• {s}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {v.status === "pending" || v.status === "draft" ? (
-                approved.includes(v.id) ? (
-                  <p className="mt-4 flex items-center gap-1.5 text-xs font-bold text-brand-green-deep">
-                    <CheckCircle2 className="h-4 w-4" /> معتمدة ومنشورة
-                  </p>
-                ) : (
-                  <button
-                    onClick={() => approve(v)}
-                    className="mt-4 w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground transition-transform active:scale-95"
-                  >
-                    اعتماد ونشر
-                  </button>
-                )
-              ) : null}
-            </article>
-          );
-        })}
+      <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card p-4 shadow-soft">
+        <div>
+          <h2 className="font-display text-lg font-extrabold text-foreground">خطة القيم</h2>
+          <p className="text-xs text-muted-foreground">القيم والأحاديث تُدار من الإدارة فقط</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"
+          aria-label="إضافة قيمة"
+        >
+          {open ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+        </button>
       </div>
 
-      <button className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card py-3.5 text-sm font-bold text-foreground transition-transform active:scale-95">
-        <Plus className="h-4.5 w-4.5" />
-        إضافة قيمة لأسبوع جديد
-      </button>
+      {open && (
+        <section className="space-y-2.5 rounded-3xl border border-brand-green-soft bg-card p-4 shadow-soft">
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="اسم القيمة (مثال: الرحمة)" aria-label="اسم القيمة" className={field} />
+          <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="عبارة تعريفية قصيرة" aria-label="عبارة تعريفية" className={field} />
+          <textarea
+            value={hadith}
+            onChange={(e) => setHadith(e.target.value)}
+            rows={3}
+            placeholder="نص الحديث"
+            aria-label="نص الحديث"
+            className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none"
+          />
+          <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="مصدر الحديث" aria-label="مصدر الحديث" className={field} />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            placeholder="كيف نغرس هذه القيمة"
+            aria-label="وصف القيمة"
+            className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none"
+          />
+          <label className="block text-[11px] font-bold text-muted-foreground">
+            بداية الأسبوع
+            <input type="date" value={weekStart} onChange={(e) => setWeekStart(e.target.value)} className={field} />
+          </label>
+          <button
+            type="button"
+            disabled={create.isPending || name.trim().length < 2}
+            onClick={() => create.mutate()}
+            className="w-full rounded-2xl bg-primary py-3 text-sm font-extrabold text-primary-foreground disabled:opacity-50"
+          >
+            {create.isPending ? "جارٍ الحفظ…" : "حفظ القيمة"}
+          </button>
+        </section>
+      )}
+
+      <SectionHeader title="القيم" icon={HeartHandshake} tone="green" />
+      {values.isLoading ? (
+        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+      ) : (values.data ?? []).length === 0 ? (
+        <EmptyState title="لا توجد قيم" message="أضف أول قيمة أسبوعية." />
+      ) : (
+        <div className="space-y-3">
+          {(values.data ?? []).map((v) => (
+            <article key={v.id} className="rounded-3xl border border-border bg-card p-4 shadow-soft">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-extrabold text-foreground">{v.name}</h3>
+                  {v.tagline && <p className="mt-0.5 text-xs text-muted-foreground">{v.tagline}</p>}
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <ToneBadge tone={v.approved ? "green" : "yellow"}>{v.approved ? "معتمدة" : "مسودة"}</ToneBadge>
+                  {v.isCurrent && <ToneBadge tone="orange">قيمة الأسبوع</ToneBadge>}
+                </div>
+              </div>
+              {v.hadith && (
+                <p className="mt-2 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-foreground/80">{v.hadith}</p>
+              )}
+              {v.source && <p className="mt-1.5 text-[11px] font-bold text-muted-foreground">المصدر: {v.source}</p>}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setApproval.mutate({ id: v.id, approved: !v.approved })}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 text-brand-green-deep" />
+                  {v.approved ? "إلغاء الاعتماد" : "اعتماد"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApproval.mutate({ id: v.id, approved: true, makeCurrent: true })}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted"
+                >
+                  <Star className="h-3.5 w-3.5 text-brand-yellow-deep" />
+                  اعتماد ونشر كقيمة الأسبوع
+                </button>
+                <button
+                  type="button"
+                  onClick={() => del.mutate(v.id)}
+                  aria-label="حذف القيمة"
+                  className="grid h-8 w-8 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

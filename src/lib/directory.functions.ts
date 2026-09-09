@@ -14,6 +14,8 @@ export interface ChildRow {
   stage: string;
   className: string | null;
   classId: string | null;
+  birthDate: string | null;
+  allergies: string | null;
   guardians: string[];
 }
 
@@ -44,7 +46,9 @@ export const listChildren = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<ChildRow[]> => {
     const { data, error } = await context.supabase
       .from("children")
-      .select("id, name, stage, class_id, classes(name), child_guardians(profiles(full_name))")
+      .select(
+        "id, name, stage, class_id, birth_date, allergies, classes(name), child_guardians(profiles(full_name))",
+      )
       .order("name");
     if (error) throw new Error(error.message);
     return (data ?? []).map((row) => {
@@ -53,6 +57,8 @@ export const listChildren = createServerFn({ method: "GET" })
         name: string;
         stage: string;
         class_id: string | null;
+        birth_date: string | null;
+        allergies: string | null;
         classes: { name: string } | null;
         child_guardians: { profiles: { full_name: string } | null }[] | null;
       };
@@ -62,6 +68,8 @@ export const listChildren = createServerFn({ method: "GET" })
         stage: r.stage,
         classId: r.class_id,
         className: r.classes?.name ?? null,
+        birthDate: r.birth_date,
+        allergies: r.allergies,
         guardians: (r.child_guardians ?? [])
           .map((g) => g.profiles?.full_name)
           .filter((n): n is string => Boolean(n)),
@@ -128,6 +136,8 @@ const childSchema = z.object({
   stage: z.enum(["nursery", "kg1", "kg2"]),
   classId: z.string().uuid().nullable().optional(),
   guardianId: z.string().uuid().nullable().optional(),
+  birthDate: z.string().trim().nullable().optional(),
+  allergies: z.string().trim().nullable().optional(),
 });
 
 /** تسجيل طفل جديد وربطه بولي أمر إن وُجد. */
@@ -137,7 +147,13 @@ export const createChild = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: inserted, error } = await context.supabase
       .from("children")
-      .insert({ name: data.name, stage: data.stage, class_id: data.classId ?? null })
+      .insert({
+        name: data.name,
+        stage: data.stage,
+        class_id: data.classId ?? null,
+        birth_date: data.birthDate || null,
+        allergies: data.allergies || null,
+      })
       .select("id")
       .single();
     if (error || !inserted) throw new Error(error?.message ?? "تعذر تسجيل الطفل.");
