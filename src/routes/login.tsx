@@ -80,8 +80,6 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <GhirasLogoFull className="w-44" />
-          <h1 className="font-display text-xl font-extrabold text-foreground">أهلًا بك في غراس</h1>
-          <p className="text-xs text-muted-foreground">ننمو معًا — روضة غراس، المملكة العربية السعودية</p>
         </div>
 
         <form
