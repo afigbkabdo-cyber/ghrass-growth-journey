@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   LogOut,
-  Repeat,
   ChevronLeft,
 } from "lucide-react";
 import { PageContainer, SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
