@@ -44,7 +44,6 @@ import { Route as TeacherMoreRouteImport } from './routes/teacher.more'
 import { Route as TeacherMyAttendanceRouteImport } from './routes/teacher.my-attendance'
 import { Route as TeacherNotificationsRouteImport } from './routes/teacher.notifications'
 import { Route as TeacherValueGuideRouteImport } from './routes/teacher.value-guide'
-import { Route as ApiPublicSeedDemoRouteImport } from './routes/api/public/seed-demo'
 import { Route as TeacherChildIdRouteImport } from './routes/teacher.child.$id'
 import { Route as TeacherMessagesIdRouteImport } from './routes/teacher.messages.$id'
 
@@ -223,11 +222,6 @@ const TeacherValueGuideRoute = TeacherValueGuideRouteImport.update({
   path: '/value-guide',
   getParentRoute: () => TeacherRoute,
 } as any)
-const ApiPublicSeedDemoRoute = ApiPublicSeedDemoRouteImport.update({
-  id: '/api/public/seed-demo',
-  path: '/api/public/seed-demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TeacherChildIdRoute = TeacherChildIdRouteImport.update({
   id: '/child/$id',
   path: '/child/$id',
@@ -275,7 +269,6 @@ export interface FileRoutesByFullPath {
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin/': typeof AdminIndexRoute
   '/teacher/': typeof TeacherIndexRoute
-  '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
   '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
@@ -313,7 +306,6 @@ export interface FileRoutesByTo {
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin': typeof AdminIndexRoute
   '/teacher': typeof TeacherIndexRoute
-  '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
   '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
@@ -354,7 +346,6 @@ export interface FileRoutesById {
   '/teacher/value-guide': typeof TeacherValueGuideRoute
   '/admin/': typeof AdminIndexRoute
   '/teacher/': typeof TeacherIndexRoute
-  '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
   '/teacher/child/$id': typeof TeacherChildIdRoute
   '/teacher/messages/$id': typeof TeacherMessagesIdRoute
 }
@@ -396,7 +387,6 @@ export interface FileRouteTypes {
     | '/teacher/value-guide'
     | '/admin/'
     | '/teacher/'
-    | '/api/public/seed-demo'
     | '/teacher/child/$id'
     | '/teacher/messages/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -434,7 +424,6 @@ export interface FileRouteTypes {
     | '/teacher/value-guide'
     | '/admin'
     | '/teacher'
-    | '/api/public/seed-demo'
     | '/teacher/child/$id'
     | '/teacher/messages/$id'
   id:
@@ -474,7 +463,6 @@ export interface FileRouteTypes {
     | '/teacher/value-guide'
     | '/admin/'
     | '/teacher/'
-    | '/api/public/seed-demo'
     | '/teacher/child/$id'
     | '/teacher/messages/$id'
   fileRoutesById: FileRoutesById
@@ -493,7 +481,6 @@ export interface RootRouteChildren {
   ParentRoute: typeof ParentRoute
   TeacherRoute: typeof TeacherRouteWithChildren
   ValueRoute: typeof ValueRoute
-  ApiPublicSeedDemoRoute: typeof ApiPublicSeedDemoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -743,13 +730,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherValueGuideRouteImport
       parentRoute: typeof TeacherRoute
     }
-    '/api/public/seed-demo': {
-      id: '/api/public/seed-demo'
-      path: '/api/public/seed-demo'
-      fullPath: '/api/public/seed-demo'
-      preLoaderRoute: typeof ApiPublicSeedDemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/teacher/child/$id': {
       id: '/teacher/child/$id'
       path: '/child/$id'
@@ -856,7 +836,6 @@ const rootRouteChildren: RootRouteChildren = {
   ParentRoute: ParentRoute,
   TeacherRoute: TeacherRouteWithChildren,
   ValueRoute: ValueRoute,
-  ApiPublicSeedDemoRoute: ApiPublicSeedDemoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
