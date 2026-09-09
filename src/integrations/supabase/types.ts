@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          activity_date: string
+          activity_time: string | null
+          class_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          linked_to_value: boolean
+          published: boolean
+          title: string
+          updated_at: string
+          value_id: string | null
+        }
+        Insert: {
+          activity_date?: string
+          activity_time?: string | null
+          class_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          linked_to_value?: boolean
+          published?: boolean
+          title: string
+          updated_at?: string
+          value_id?: string | null
+        }
+        Update: {
+          activity_date?: string
+          activity_time?: string | null
+          class_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          linked_to_value?: boolean
+          published?: boolean
+          title?: string
+          updated_at?: string
+          value_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_value_id_fkey"
+            columns: ["value_id"]
+            isOneToOne: false
+            referencedRelation: "values_week"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_photos: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          path: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          path: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_photos_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_guardians: {
         Row: {
           child_id: string
@@ -47,8 +136,44 @@ export type Database = {
           },
         ]
       }
+      child_notes: {
+        Row: {
+          author_id: string
+          body: string
+          child_id: string
+          created_at: string
+          domain: string | null
+          id: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          child_id: string
+          created_at?: string
+          domain?: string | null
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          child_id?: string
+          created_at?: string
+          domain?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_notes_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
+          allergies: string | null
           birth_date: string | null
           class_id: string | null
           created_at: string
@@ -59,6 +184,7 @@ export type Database = {
           stage: string
         }
         Insert: {
+          allergies?: string | null
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
@@ -69,6 +195,7 @@ export type Database = {
           stage?: string
         }
         Update: {
+          allergies?: string | null
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
@@ -109,6 +236,154 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_logs: {
+        Row: {
+          bathroom_count: number
+          bathroom_notes: string | null
+          child_id: string
+          created_at: string
+          diaper_count: number
+          id: string
+          log_date: string
+          meal_notes: string | null
+          meal_status: string | null
+          meal_time: string | null
+          prayer_done: boolean
+          recorded_by: string | null
+          sleep_end: string | null
+          sleep_start: string | null
+          slept: boolean
+          updated_at: string
+        }
+        Insert: {
+          bathroom_count?: number
+          bathroom_notes?: string | null
+          child_id: string
+          created_at?: string
+          diaper_count?: number
+          id?: string
+          log_date?: string
+          meal_notes?: string | null
+          meal_status?: string | null
+          meal_time?: string | null
+          prayer_done?: boolean
+          recorded_by?: string | null
+          sleep_end?: string | null
+          sleep_start?: string | null
+          slept?: boolean
+          updated_at?: string
+        }
+        Update: {
+          bathroom_count?: number
+          bathroom_notes?: string | null
+          child_id?: string
+          created_at?: string
+          diaper_count?: number
+          id?: string
+          log_date?: string
+          meal_notes?: string | null
+          meal_status?: string | null
+          meal_time?: string | null
+          prayer_done?: boolean
+          recorded_by?: string | null
+          sleep_end?: string | null
+          sleep_start?: string | null
+          slept?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_logs_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_threads: {
+        Row: {
+          child_id: string | null
+          created_at: string
+          id: string
+          last_message_at: string
+          parent_id: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          parent_id: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          parent_id?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_threads_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_threads_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_id: string
+          sender_role: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          sender_role?: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          sender_role?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -135,6 +410,82 @@ export type Database = {
           title?: string | null
         }
         Relationships: []
+      }
+      schedule_items: {
+        Row: {
+          at_time: string | null
+          class_id: string
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          at_time?: string | null
+          class_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          at_time?: string | null
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_items_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedule_progress: {
+        Row: {
+          created_at: string
+          done: boolean
+          id: string
+          item_id: string
+          log_date: string
+          marked_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          item_id: string
+          log_date?: string
+          marked_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          item_id?: string
+          log_date?: string
+          marked_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_progress_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teacher_classes: {
         Row: {
@@ -184,11 +535,57 @@ export type Database = {
         }
         Relationships: []
       }
+      values_week: {
+        Row: {
+          approved: boolean
+          created_at: string
+          description: string | null
+          hadith: string | null
+          id: string
+          is_current: boolean
+          name: string
+          source: string | null
+          tagline: string | null
+          updated_at: string
+          week_start: string | null
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          description?: string | null
+          hadith?: string | null
+          id?: string
+          is_current?: boolean
+          name: string
+          source?: string | null
+          tagline?: string | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          description?: string | null
+          hadith?: string | null
+          id?: string
+          is_current?: boolean
+          name?: string
+          source?: string | null
+          tagline?: string | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_child_in_class: {
+        Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -203,6 +600,10 @@ export type Database = {
       }
       teaches_child: {
         Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
+      teaches_class: {
+        Args: { _class_id: string; _user_id: string }
         Returns: boolean
       }
     }

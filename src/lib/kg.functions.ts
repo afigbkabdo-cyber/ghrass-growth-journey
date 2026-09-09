@@ -1,0 +1,793 @@
+/*
+ * وظائف الخادم لملاحظات الإدارة: القيم، الأنشطة والصور، المتابعة اليومية،
+ * ملاحظات المعلمة، الجدول اليومي، ورسائل ولي الأمر مع الإدارة.
+ * الصلاحيات مفروضة في قاعدة البيانات عبر RLS (كل استدعاء يعمل بهوية المستخدم).
+ */
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+/* ================= أنواع مشتركة ================= */
+
+export interface ValueRow {
+  id: string;
+  name: string;
+  tagline: string | null;
+  hadith: string | null;
+  source: string | null;
+  description: string | null;
+  weekStart: string | null;
+  approved: boolean;
+  isCurrent: boolean;
+}
+
+export interface ActivityRow {
+  id: string;
+  title: string;
+  description: string | null;
+  activityDate: string;
+  activityTime: string | null;
+  classId: string | null;
+  className: string | null;
+  valueId: string | null;
+  valueName: string | null;
+  linkedToValue: boolean;
+  published: boolean;
+  photos: string[];
+}
+
+export interface ClassChildRow {
+  id: string;
+  name: string;
+  stage: string;
+  birthDate: string | null;
+  gender: string | null;
+  allergies: string | null;
+  notes: string | null;
+  classId: string | null;
+  className: string | null;
+}
+
+export interface DailyLogRow {
+  childId: string;
+  logDate: string;
+  mealStatus: string | null;
+  mealTime: string | null;
+  mealNotes: string | null;
+  bathroomCount: number;
+  diaperCount: number;
+  bathroomNotes: string | null;
+  slept: boolean;
+  sleepStart: string | null;
+  sleepEnd: string | null;
+  prayerDone: boolean;
+}
+
+export interface ChildNoteRow {
+  id: string;
+  childId: string;
+  body: string;
+  domain: string | null;
+  createdAt: string;
+  authorName: string | null;
+}
+
+export interface ScheduleRow {
+  id: string;
+  classId: string;
+  title: string;
+  description: string | null;
+  atTime: string | null;
+  orderIndex: number;
+  done: boolean;
+}
+
+export interface ThreadRow {
+  id: string;
+  subject: string;
+  status: string;
+  parentId: string;
+  parentName: string | null;
+  childId: string | null;
+  childName: string | null;
+  lastMessageAt: string;
+}
+
+export interface MessageRow {
+  id: string;
+  body: string;
+  senderRole: string;
+  senderId: string;
+  createdAt: string;
+}
+
+const emptyLog = (childId: string, logDate: string): DailyLogRow => ({
+  childId,
+  logDate,
+  mealStatus: null,
+  mealTime: null,
+  mealNotes: null,
+  bathroomCount: 0,
+  diaperCount: 0,
+  bathroomNotes: null,
+  slept: false,
+  sleepStart: null,
+  sleepEnd: null,
+  prayerDone: false,
+});
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+/* ================= القيم الأسبوعية ================= */
+
+export const listValues = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ValueRow[]> => {
+    const { data, error } = await context.supabase
+      .from("values_week")
+      .select("*")
+      .order("week_start", { ascending: false, nullsFirst: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((v) => ({
+      id: v.id,
+      name: v.name,
+      tagline: v.tagline,
+      hadith: v.hadith,
+      source: v.source,
+      description: v.description,
+      weekStart: v.week_start,
+      approved: v.approved,
+      isCurrent: v.is_current,
+    }));
+  });
+
+export const getCurrentValue = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ValueRow | null> => {
+    const { data, error } = await context.supabase
+      .from("values_week")
+      .select("*")
+      .eq("is_current", true)
+      .eq("approved", true)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    return {
+      id: data.id,
+      name: data.name,
+      tagline: data.tagline,
+      hadith: data.hadith,
+      source: data.source,
+      description: data.description,
+      weekStart: data.week_start,
+      approved: data.approved,
+      isCurrent: data.is_current,
+    };
+  });
+
+const valueInput = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().min(2),
+  tagline: z.string().trim().optional().nullable(),
+  hadith: z.string().trim().optional().nullable(),
+  source: z.string().trim().optional().nullable(),
+  description: z.string().trim().optional().nullable(),
+  weekStart: z.string().trim().optional().nullable(),
+});
+
+export const saveValue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => valueInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const payload = {
+      name: data.name,
+      tagline: data.tagline ?? null,
+      hadith: data.hadith ?? null,
+      source: data.source ?? null,
+      description: data.description ?? null,
+      week_start: data.weekStart || null,
+    };
+    if (data.id) {
+      const { error } = await context.supabase.from("values_week").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { id: data.id };
+    }
+    const { data: row, error } = await context.supabase
+      .from("values_week")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const deleteValue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("values_week").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** اعتماد القيمة (وتحديدها قيمة الأسبوع اختياريًا) — للإدارة فقط عبر RLS. */
+export const approveValue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), approved: z.boolean(), makeCurrent: z.boolean().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    if (data.makeCurrent) {
+      const { error: clearError } = await context.supabase
+        .from("values_week")
+        .update({ is_current: false })
+        .eq("is_current", true);
+      if (clearError) throw new Error(clearError.message);
+    }
+    const patch: { approved: boolean; is_current?: boolean } = { approved: data.approved };
+    if (data.makeCurrent) patch.is_current = true;
+    if (!data.approved) patch.is_current = false;
+    const { error } = await context.supabase.from("values_week").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ================= الفصول والأطفال ================= */
+
+/** فصول المعلمة الحالية. */
+export const myClasses = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ id: string; name: string; stage: string }[]> => {
+    const { data, error } = await context.supabase
+      .from("teacher_classes")
+      .select("class_id, classes(name, stage)")
+      .eq("teacher_id", context.userId);
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as unknown as { class_id: string; classes: { name: string; stage: string } | null }[])
+      .filter((r) => r.classes)
+      .map((r) => ({ id: r.class_id, name: r.classes!.name, stage: r.classes!.stage }));
+  });
+
+function mapChild(r: {
+  id: string;
+  name: string;
+  stage: string;
+  birth_date: string | null;
+  gender: string | null;
+  allergies: string | null;
+  notes: string | null;
+  class_id: string | null;
+  classes: { name: string } | null;
+}): ClassChildRow {
+  return {
+    id: r.id,
+    name: r.name,
+    stage: r.stage,
+    birthDate: r.birth_date,
+    gender: r.gender,
+    allergies: r.allergies,
+    notes: r.notes,
+    classId: r.class_id,
+    className: r.classes?.name ?? null,
+  };
+}
+
+const childSelect = "id, name, stage, birth_date, gender, allergies, notes, class_id, classes(name)";
+
+/** أطفال فصول المعلمة — RLS يمنع رؤية أطفال الفصول الأخرى. */
+export const myClassChildren = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ClassChildRow[]> => {
+    const { data, error } = await context.supabase.from("children").select(childSelect).order("name");
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as unknown as Parameters<typeof mapChild>[0][]).map(mapChild);
+  });
+
+/** أطفال ولي الأمر الحالي. */
+export const myChildren = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ClassChildRow[]> => {
+    const { data: links, error: linkError } = await context.supabase
+      .from("child_guardians")
+      .select("child_id")
+      .eq("guardian_id", context.userId);
+    if (linkError) throw new Error(linkError.message);
+    const ids = (links ?? []).map((l) => l.child_id);
+    if (ids.length === 0) return [];
+    const { data, error } = await context.supabase
+      .from("children")
+      .select(childSelect)
+      .in("id", ids)
+      .order("name");
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as unknown as Parameters<typeof mapChild>[0][]).map(mapChild);
+  });
+
+/* ================= المتابعة اليومية ================= */
+
+function mapLog(r: Record<string, unknown>): DailyLogRow {
+  return {
+    childId: r["child_id"] as string,
+    logDate: r["log_date"] as string,
+    mealStatus: (r["meal_status"] as string) ?? null,
+    mealTime: (r["meal_time"] as string) ?? null,
+    mealNotes: (r["meal_notes"] as string) ?? null,
+    bathroomCount: (r["bathroom_count"] as number) ?? 0,
+    diaperCount: (r["diaper_count"] as number) ?? 0,
+    bathroomNotes: (r["bathroom_notes"] as string) ?? null,
+    slept: Boolean(r["slept"]),
+    sleepStart: (r["sleep_start"] as string) ?? null,
+    sleepEnd: (r["sleep_end"] as string) ?? null,
+    prayerDone: Boolean(r["prayer_done"]),
+  };
+}
+
+export const getDailyLog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ childId: z.string().uuid(), date: z.string().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<DailyLogRow> => {
+    const date = data.date || today();
+    const { data: row, error } = await context.supabase
+      .from("daily_logs")
+      .select("*")
+      .eq("child_id", data.childId)
+      .eq("log_date", date)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row ? mapLog(row as Record<string, unknown>) : emptyLog(data.childId, date);
+  });
+
+const logInput = z.object({
+  childId: z.string().uuid(),
+  date: z.string().optional(),
+  mealStatus: z.string().nullable().optional(),
+  mealTime: z.string().nullable().optional(),
+  mealNotes: z.string().nullable().optional(),
+  bathroomCount: z.number().int().min(0).max(50).optional(),
+  diaperCount: z.number().int().min(0).max(50).optional(),
+  bathroomNotes: z.string().nullable().optional(),
+  slept: z.boolean().optional(),
+  sleepStart: z.string().nullable().optional(),
+  sleepEnd: z.string().nullable().optional(),
+  prayerDone: z.boolean().optional(),
+});
+
+/** حفظ المتابعة اليومية — المعلمة لأطفال فصلها فقط (RLS). */
+export const saveDailyLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => logInput.parse(d))
+  .handler(async ({ data, context }): Promise<DailyLogRow> => {
+    const date = data.date || today();
+    const payload = {
+      child_id: data.childId,
+      log_date: date,
+      meal_status: data.mealStatus ?? null,
+      meal_time: data.mealTime || null,
+      meal_notes: data.mealNotes ?? null,
+      bathroom_count: data.bathroomCount ?? 0,
+      diaper_count: data.diaperCount ?? 0,
+      bathroom_notes: data.bathroomNotes ?? null,
+      slept: data.slept ?? false,
+      sleep_start: data.sleepStart || null,
+      sleep_end: data.sleepEnd || null,
+      prayer_done: data.prayerDone ?? false,
+      recorded_by: context.userId,
+    };
+    const { data: row, error } = await context.supabase
+      .from("daily_logs")
+      .upsert(payload, { onConflict: "child_id,log_date" })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return mapLog(row as Record<string, unknown>);
+  });
+
+/* ================= ملاحظات المعلمة على الطفل ================= */
+
+export const listChildNotes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ childId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<ChildNoteRow[]> => {
+    const { data: rows, error } = await context.supabase
+      .from("child_notes")
+      .select("id, child_id, body, domain, created_at, author_id")
+      .eq("child_id", data.childId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const notes = rows ?? [];
+    const authorIds = [...new Set(notes.map((n) => n.author_id).filter(Boolean))] as string[];
+    const names = new Map<string, string>();
+    if (authorIds.length > 0) {
+      // أسماء الكاتبات فقط — ولي الأمر لا يستطيع قراءة ملفات الكادر مباشرة.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", authorIds);
+      for (const p of profiles ?? []) names.set(p.id, p.full_name);
+    }
+    return notes.map((n) => ({
+      id: n.id,
+      childId: n.child_id,
+      body: n.body,
+      domain: n.domain,
+      createdAt: n.created_at,
+      authorName: names.get(n.author_id) ?? null,
+    }));
+  });
+
+export const addChildNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        childId: z.string().uuid(),
+        body: z.string().trim().min(2),
+        domain: z.string().trim().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("child_notes").insert({
+      child_id: data.childId,
+      body: data.body,
+      domain: data.domain ?? null,
+      author_id: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ================= الجدول اليومي ================= */
+
+export const listSchedule = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ classId: z.string().uuid(), date: z.string().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<ScheduleRow[]> => {
+    const date = data.date || today();
+    const { data: items, error } = await context.supabase
+      .from("schedule_items")
+      .select("id, class_id, title, description, at_time, order_index")
+      .eq("class_id", data.classId)
+      .order("order_index");
+    if (error) throw new Error(error.message);
+    const ids = (items ?? []).map((i) => i.id);
+    const done = new Set<string>();
+    if (ids.length > 0) {
+      const { data: progress } = await context.supabase
+        .from("schedule_progress")
+        .select("item_id, done")
+        .eq("log_date", date)
+        .in("item_id", ids);
+      for (const p of progress ?? []) if (p.done) done.add(p.item_id);
+    }
+    return (items ?? []).map((i) => ({
+      id: i.id,
+      classId: i.class_id,
+      title: i.title,
+      description: i.description,
+      atTime: i.at_time,
+      orderIndex: i.order_index,
+      done: done.has(i.id),
+    }));
+  });
+
+export const saveScheduleItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid().optional(),
+        classId: z.string().uuid(),
+        title: z.string().trim().min(2),
+        description: z.string().trim().nullable().optional(),
+        atTime: z.string().nullable().optional(),
+        orderIndex: z.number().int().min(0).max(100).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const payload = {
+      class_id: data.classId,
+      title: data.title,
+      description: data.description ?? null,
+      at_time: data.atTime || null,
+      order_index: data.orderIndex ?? 0,
+    };
+    if (data.id) {
+      const { error } = await context.supabase.from("schedule_items").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+    const { error } = await context.supabase.from("schedule_items").insert(payload);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteScheduleItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("schedule_items").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** تعليم عنصر الجدول كمنجز — المعلمة لفصلها فقط (RLS). */
+export const markScheduleDone = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ itemId: z.string().uuid(), done: z.boolean(), date: z.string().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const date = data.date || today();
+    const { error } = await context.supabase.from("schedule_progress").upsert(
+      { item_id: data.itemId, log_date: date, done: data.done, marked_by: context.userId },
+      { onConflict: "item_id,log_date" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ================= الأنشطة ================= */
+
+const activitySelect =
+  "id, title, description, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name), values_week(name), activity_photos(path)";
+
+type ActivityQueryRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  activity_date: string;
+  activity_time: string | null;
+  class_id: string | null;
+  value_id: string | null;
+  linked_to_value: boolean;
+  published: boolean;
+  classes: { name: string } | null;
+  values_week: { name: string } | null;
+  activity_photos: { path: string }[] | null;
+};
+
+function mapActivity(r: ActivityQueryRow): ActivityRow {
+  return {
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    activityDate: r.activity_date,
+    activityTime: r.activity_time,
+    classId: r.class_id,
+    className: r.classes?.name ?? null,
+    valueId: r.value_id,
+    valueName: r.values_week?.name ?? null,
+    linkedToValue: r.linked_to_value,
+    published: r.published,
+    photos: (r.activity_photos ?? []).map((p) => p.path),
+  };
+}
+
+/** الأنشطة المرئية للمستخدم الحالي حسب صلاحياته (RLS). */
+export const listActivities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ActivityRow[]> => {
+    const { data, error } = await context.supabase
+      .from("activities")
+      .select(activitySelect)
+      .order("activity_date", { ascending: false })
+      .order("activity_time", { ascending: true, nullsFirst: true });
+    if (error) throw new Error(error.message);
+    const rows = ((data ?? []) as unknown as ActivityQueryRow[]).map(mapActivity);
+    // روابط موقّتة آمنة لصور الأنشطة (المستودع خاص).
+    const paths = rows.flatMap((r) => r.photos);
+    if (paths.length > 0) {
+      const { data: signed } = await context.supabase.storage
+        .from("activity-photos")
+        .createSignedUrls(paths, 60 * 60);
+      const map = new Map<string, string>();
+      for (const s of signed ?? []) if (s.path && s.signedUrl) map.set(s.path, s.signedUrl);
+      for (const r of rows) r.photos = r.photos.map((p) => map.get(p) ?? p);
+    }
+    return rows;
+  });
+
+export const saveActivity = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid().optional(),
+        title: z.string().trim().min(2),
+        description: z.string().trim().nullable().optional(),
+        activityDate: z.string(),
+        activityTime: z.string().nullable().optional(),
+        classId: z.string().uuid(),
+        linkedToValue: z.boolean(),
+        valueId: z.string().uuid().nullable().optional(),
+        published: z.boolean().optional(),
+        photoPaths: z.array(z.string()).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const payload = {
+      title: data.title,
+      description: data.description ?? null,
+      activity_date: data.activityDate,
+      activity_time: data.activityTime || null,
+      class_id: data.classId,
+      linked_to_value: data.linkedToValue,
+      value_id: data.linkedToValue ? (data.valueId ?? null) : null,
+      published: data.published ?? false,
+      created_by: context.userId,
+    };
+    let activityId = data.id;
+    if (activityId) {
+      const { error } = await context.supabase.from("activities").update(payload).eq("id", activityId);
+      if (error) throw new Error(error.message);
+    } else {
+      const { data: row, error } = await context.supabase
+        .from("activities")
+        .insert(payload)
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      activityId = row.id;
+    }
+    if (data.photoPaths && data.photoPaths.length > 0) {
+      const { error } = await context.supabase
+        .from("activity_photos")
+        .insert(data.photoPaths.map((path) => ({ activity_id: activityId!, path })));
+      if (error) throw new Error(error.message);
+    }
+    return { id: activityId! };
+  });
+
+export const setActivityPublished = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), published: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("activities")
+      .update({ published: data.published })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteActivity = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("activities").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ================= رسائل ولي الأمر مع الإدارة ================= */
+
+async function nameLookup(ids: string[]) {
+  const names = new Map<string, string>();
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return names;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("profiles").select("id, full_name").in("id", unique);
+  for (const p of data ?? []) names.set(p.id, p.full_name);
+  return names;
+}
+
+/** محادثات ولي الأمر نفسه، أو جميع المحادثات للإدارة (RLS). */
+export const listThreads = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ThreadRow[]> => {
+    const { data, error } = await context.supabase
+      .from("message_threads")
+      .select("id, subject, status, parent_id, child_id, last_message_at, children(name)")
+      .order("last_message_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as unknown as {
+      id: string;
+      subject: string;
+      status: string;
+      parent_id: string;
+      child_id: string | null;
+      last_message_at: string;
+      children: { name: string } | null;
+    }[];
+    const names = await nameLookup(rows.map((r) => r.parent_id));
+    return rows.map((r) => ({
+      id: r.id,
+      subject: r.subject,
+      status: r.status,
+      parentId: r.parent_id,
+      parentName: names.get(r.parent_id) ?? null,
+      childId: r.child_id,
+      childName: r.children?.name ?? null,
+      lastMessageAt: r.last_message_at,
+    }));
+  });
+
+export const listThreadMessages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ threadId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<MessageRow[]> => {
+    const { data: rows, error } = await context.supabase
+      .from("messages")
+      .select("id, body, sender_role, sender_id, created_at")
+      .eq("thread_id", data.threadId)
+      .order("created_at");
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((m) => ({
+      id: m.id,
+      body: m.body,
+      senderRole: m.sender_role,
+      senderId: m.sender_id,
+      createdAt: m.created_at,
+    }));
+  });
+
+/** ولي الأمر يفتح محادثة جديدة مع الإدارة. */
+export const createThread = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        subject: z.string().trim().min(2),
+        body: z.string().trim().min(2),
+        childId: z.string().uuid().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: thread, error } = await context.supabase
+      .from("message_threads")
+      .insert({
+        parent_id: context.userId,
+        child_id: data.childId ?? null,
+        subject: data.subject,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    const { error: msgError } = await context.supabase.from("messages").insert({
+      thread_id: thread.id,
+      sender_id: context.userId,
+      sender_role: "parent",
+      body: data.body,
+    });
+    if (msgError) throw new Error(msgError.message);
+    return { id: thread.id };
+  });
+
+/** إرسال رسالة داخل محادثة قائمة — ولي الأمر أو الإدارة. */
+export const sendMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        threadId: z.string().uuid(),
+        body: z.string().trim().min(1),
+        asAdmin: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    // الدور يُستنتج من الخادم ولا يُقبل من العميل.
+    const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+    const { error } = await context.supabase.from("messages").insert({
+      thread_id: data.threadId,
+      sender_id: context.userId,
+      sender_role: isAdmin ? "admin" : "parent",
+      body: data.body,
+    });
+    if (error) throw new Error(error.message);
+    // تحديث وقت آخر رسالة — مسموح لصاحب المحادثة أو الإدارة عبر RLS.
+    await context.supabase
+      .from("message_threads")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", data.threadId);
+    return { ok: true };
+  });

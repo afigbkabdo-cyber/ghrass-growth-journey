@@ -12,7 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import type { Tone } from "@/lib/data";
 import ghirasLogoFull from "@/assets/ghiras-logo-full.png.asset.json";
-import ghirasLogoMark from "@/assets/ghiras-logo-mark.png.asset.json";
 
 /* ---------- خريطة درجات الألوان ---------- */
 
@@ -59,31 +58,32 @@ export function GhirasLogoFull({ className }: { className?: string }) {
   return (
     <img
       src={ghirasLogoFull.url}
-      alt="شعار روضة غراس — نمو معًا"
+      alt="شعار روضة غراس — ننمو معًا"
       className={cn("h-auto w-40 select-none object-contain", className)}
     />
   );
 }
 
+/**
+ * شعار الترويسة — الاسم موجود داخل الشعار نفسه، فلا يُكتب نصًا بجانبه.
+ */
 export function GhirasLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const box = size === "lg" ? "h-14 w-14" : size === "sm" ? "h-8 w-8" : "h-10 w-10";
+  const box = size === "lg" ? "h-14" : size === "sm" ? "h-8" : "h-11";
   return (
-    <div className="flex items-center gap-2.5">
-      <img
-        src={ghirasLogoMark.url}
-        alt="شعار غراس"
-        className={cn("shrink-0 select-none object-contain", box)}
-      />
-      <div className="leading-tight">
-        <p className={cn("font-display font-extrabold text-foreground", size === "lg" ? "text-2xl" : "text-lg")}>
-          غراس
-        </p>
-        {size !== "sm" && (
-          <p className="text-[10px] font-medium text-muted-foreground">نمو معًا</p>
-        )}
-      </div>
-    </div>
+    <img
+      src={ghirasLogoFull.url}
+      alt="روضة غراس"
+      className={cn("w-auto shrink-0 select-none object-contain", box)}
+    />
+  );
+}
 
+/** العبارة التعريفية — كلمة «غراس» باللون البرتقالي المعتمد. */
+export function GhirasTagline({ className }: { className?: string }) {
+  return (
+    <p className={cn("text-xs font-bold text-muted-foreground", className)}>
+      <span className="text-brand-orange-deep">غراس</span> — ننمو معًا
+    </p>
   );
 }
 
