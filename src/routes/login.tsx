@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LogIn, Mail, Lock, Phone, Info } from "lucide-react";
+import { LogIn, Mail, Lock, Phone } from "lucide-react";
 import { GhirasLogoFull, ToneBadge } from "@/components/ghiras";
-import {
-  demoAccounts,
-  findAccount,
-  roleLabels,
-  roleHome,
-  writeSession,
-  type Role,
-} from "@/lib/session";
+import { supabase } from "@/integrations/supabase/client";
+import { normalizePhone, phoneToEmail } from "@/lib/phone";
+import { loadSession, roleHome } from "@/lib/session";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -28,39 +23,57 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-const roles: Role[] = ["parent", "teacher", "admin"];
-
-function accountFor(role: Role) {
-  return demoAccounts.find((a) => a.role === role)!;
-}
-
 function LoginPage() {
   const navigate = useNavigate();
-  const [role, setRole] = useState<Role>("teacher");
-  const [email, setEmail] = useState(accountFor("teacher").email);
-  const [password, setPassword] = useState("ghiras123");
-  const [method, setMethod] = useState<"email" | "phone">("email");
+  const [method, setMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const account = findAccount(email);
-    if (!account || account.password !== password) {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+    setError(null);
+
+    let authEmail = email.trim();
+    if (method === "phone") {
+      const normalized = normalizePhone(phone);
+      if (!normalized) {
+        setError("رقم الجوال غير صحيح. استخدم الصيغة 05XXXXXXXX.");
+        return;
+      }
+      authEmail = phoneToEmail(normalized);
+    }
+
+    setLoading(true);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: authEmail,
+      password,
+    });
+    if (signInError) {
+      setLoading(false);
+      setError("بيانات الدخول غير صحيحة. تأكد من الرقم وكلمة المرور.");
       return;
     }
-    setError(null);
-    setLoading(true);
-    writeSession({
-      role: account.role,
-      name: account.name,
-      email: account.email,
-      accountId: account.id,
-    });
-    setTimeout(() => navigate({ to: roleHome[account.role], replace: true }), 350);
+
+    try {
+      const session = await loadSession();
+      const to = session ? roleHome[session.role] : "/";
+      navigate({ to, replace: true });
+    } catch {
+      navigate({ to: "/", replace: true });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const tabClass = (active: boolean) =>
+    `flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
+      active
+        ? "border-primary bg-brand-orange-soft text-brand-orange-deep"
+        : "border-border bg-card text-muted-foreground hover:bg-muted"
+    }`;
 
   return (
     <main className="grid min-h-screen place-items-center bg-background px-4 py-10">
@@ -76,111 +89,67 @@ function LoginPage() {
           className="space-y-4 rounded-3xl border border-border bg-card p-5 shadow-soft"
         >
           <div>
-            <p className="mb-2 text-xs font-bold text-foreground">اختر نوع الحساب</p>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => {
-                    setRole(r);
-                    setEmail(accountFor(r).email);
-                    setPassword("ghiras123");
-                    setError(null);
-                  }}
-                  className={`rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
-                    role === r
-                      ? "border-primary bg-brand-orange-soft text-brand-orange-deep"
-                      : "border-border bg-card text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {roleLabels[r]}
-                </button>
-              ))}
-            </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">{accountFor(role).title}</p>
-          </div>
-
-          <div>
             <p className="mb-2 text-xs font-bold text-foreground">طريقة تسجيل الدخول</p>
             <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setMethod("email");
-                  setError(null);
-                }}
-                className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
-                  method === "email"
-                    ? "border-primary bg-brand-orange-soft text-brand-orange-deep"
-                    : "border-border bg-card text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                <Mail className="h-4 w-4" />
-                البريد الإلكتروني
-              </button>
               <button
                 type="button"
                 onClick={() => {
                   setMethod("phone");
                   setError(null);
                 }}
-                className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
-                  method === "phone"
-                    ? "border-primary bg-brand-orange-soft text-brand-orange-deep"
-                    : "border-border bg-card text-muted-foreground hover:bg-muted"
-                }`}
+                className={tabClass(method === "phone")}
               >
                 <Phone className="h-4 w-4" />
-                رقم الهاتف
+                رقم الجوال
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod("email");
+                  setError(null);
+                }}
+                className={tabClass(method === "email")}
+              >
+                <Mail className="h-4 w-4" />
+                البريد الإلكتروني
               </button>
             </div>
           </div>
 
-          {method === "phone" && (
-            <div className="space-y-3">
-              <label className="block">
-                <span className="mb-1.5 block text-xs font-bold text-foreground">رقم الهاتف</span>
-                <span className="relative block">
-                  <Phone className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+9665XXXXXXXX"
-                    dir="ltr"
-                    className="w-full rounded-2xl border border-border bg-background py-3 ps-10 pe-4 text-sm outline-none transition-shadow focus:shadow-soft"
-                  />
-                </span>
-              </label>
-              <p className="flex items-start gap-2 rounded-xl bg-brand-blue-soft px-3 py-2.5 text-[11px] font-bold leading-relaxed text-brand-blue-deep">
-                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                الدخول برقم الهاتف يتطلب تفعيل خدمة إرسال رسائل التحقق (SMS) من إعدادات المشروع. بعد التفعيل سيعمل هذا الخيار مباشرة. حاليًا استخدم الدخول بالبريد الإلكتروني.
-              </p>
-            </div>
+          {method === "phone" ? (
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-bold text-foreground">رقم الجوال</span>
+              <span className="relative block">
+                <Phone className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="05XXXXXXXX"
+                  dir="ltr"
+                  className="w-full rounded-2xl border border-border bg-background py-3 ps-10 pe-4 text-sm outline-none transition-shadow focus:shadow-soft"
+                />
+              </span>
+            </label>
+          ) : (
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-bold text-foreground">البريد الإلكتروني</span>
+              <span className="relative block">
+                <Mail className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  dir="ltr"
+                  className="w-full rounded-2xl border border-border bg-background py-3 ps-10 pe-4 text-sm outline-none transition-shadow focus:shadow-soft"
+                />
+              </span>
+            </label>
           )}
 
-          {method === "email" && (
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold text-foreground">البريد الإلكتروني</span>
-            <span className="relative block">
-              <Mail className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                dir="ltr"
-                className="w-full rounded-2xl border border-border bg-background py-3 ps-10 pe-4 text-sm outline-none transition-shadow focus:shadow-soft"
-              />
-            </span>
-          </label>
-          )}
-
-
-
-          {method === "email" && (
           <label className="block">
             <span className="mb-1.5 block text-xs font-bold text-foreground">كلمة المرور</span>
             <span className="relative block">
@@ -195,7 +164,6 @@ function LoginPage() {
               />
             </span>
           </label>
-          )}
 
           {error && (
             <p className="rounded-xl bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive">
@@ -205,15 +173,15 @@ function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading || method === "phone"}
+            disabled={loading}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground transition-opacity disabled:opacity-60"
           >
             <LogIn className="h-4.5 w-4.5" />
-            {method === "phone" ? "الدخول برقم الهاتف غير مفعّل بعد" : loading ? "جارٍ الدخول…" : "دخول"}
+            {loading ? "جارٍ الدخول…" : "دخول"}
           </button>
 
-          <p className="text-center text-[11px] text-muted-foreground">
-            نموذج عرض تجريبي — كلمة المرور لجميع الحسابات: ghiras123
+          <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+            الحسابات تُنشأ من قِبل إدارة الروضة. إذا نسيت كلمة المرور تواصل مع الإدارة.
           </p>
         </form>
 
