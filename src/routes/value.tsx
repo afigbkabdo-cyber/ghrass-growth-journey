@@ -52,7 +52,13 @@ function ValuePage() {
           <div className="relative text-center">
             <ToneBadge tone={v.tone} className="mb-3">
               <Sparkles className="h-3.5 w-3.5" />
-              {v.weekStart} — {v.weekEnd}
+              {db?.weekStart
+                ? new Intl.DateTimeFormat("ar-SA-u-ca-islamic", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  }).format(new Date(db.weekStart))
+                : `${currentValue.weekStart} — ${currentValue.weekEnd}`}
             </ToneBadge>
             <h1 className={`font-display text-4xl font-extrabold ${t.deep}`}>{v.name}</h1>
             <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-foreground/80">
