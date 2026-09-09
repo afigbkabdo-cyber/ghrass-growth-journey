@@ -113,10 +113,11 @@ export const seedDemoData = createServerFn({ method: "POST" }).handler(async () 
         .single();
       childId = inserted?.id;
     }
-    if (childId && child.guardian && ids[child.guardian]) {
+    const guardianId = child.guardian ? ids[child.guardian] : undefined;
+    if (childId && guardianId) {
       await supabaseAdmin
         .from("child_guardians")
-        .upsert({ child_id: childId, guardian_id: ids[child.guardian] }, { onConflict: "child_id,guardian_id" });
+        .upsert({ child_id: childId, guardian_id: guardianId }, { onConflict: "child_id,guardian_id" });
     }
   }
 

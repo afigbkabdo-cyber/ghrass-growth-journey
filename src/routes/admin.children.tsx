@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Baby, Search, UserPlus } from "lucide-react";
-import { Avatar, EmptyState, SectionHeader, ToneBadge } from "@/components/ghiras";
-import { children, classes, stageLabels, type Stage } from "@/lib/data";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Baby, Search, UserPlus, Trash2 } from "lucide-react";
+import { Avatar, EmptyState, ErrorState, LoadingCards, SectionHeader, ToneBadge } from "@/components/ghiras";
+import { createChild, deleteChild, listChildren, listClasses, listParents } from "@/lib/directory.functions";
+import { stageLabels, type Stage } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/children")({
@@ -25,22 +28,66 @@ const stageFilters: { key: Stage | "all"; label: string }[] = [
 ];
 
 function AdminChildren() {
+  const qc = useQueryClient();
+  const fetchChildren = useServerFn(listChildren);
+  const fetchClasses = useServerFn(listClasses);
+  const fetchParents = useServerFn(listParents);
+  const addChild = useServerFn(createChild);
+  const removeChild = useServerFn(deleteChild);
+
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<Stage | "all">("all");
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", stage: "kg1" as Stage, classId: "", guardianId: "" });
+  const [message, setMessage] = useState<string | null>(null);
 
-  const list = useMemo(
-    () =>
-      children.filter(
-        (c) => (stage === "all" || c.stage === stage) && (c.name.includes(q.trim()) || c.className.includes(q.trim())),
-      ),
-    [q, stage],
-  );
+  const childrenQuery = useQuery({ queryKey: ["admin-children"], queryFn: () => fetchChildren({}) });
+  const classesQuery = useQuery({ queryKey: ["admin-classes"], queryFn: () => fetchClasses({}) });
+  const parentsQuery = useQuery({ queryKey: ["admin-parents"], queryFn: () => fetchParents({}) });
+
+  const create = useMutation({
+    mutationFn: () =>
+      addChild({
+        data: {
+          name: form.name,
+          stage: form.stage,
+          classId: form.classId || null,
+          guardianId: form.guardianId || null,
+        },
+      }),
+    onSuccess: () => {
+      setForm({ name: "", stage: "kg1", classId: "", guardianId: "" });
+      setOpen(false);
+      setMessage("تم تسجيل الطفل وحفظه.");
+      qc.invalidateQueries({ queryKey: ["admin-children"] });
+    },
+    onError: (e: Error) => setMessage(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => removeChild({ data: { id } }),
+    onSuccess: () => {
+      setMessage("تم حذف الطفل من السجل.");
+      qc.invalidateQueries({ queryKey: ["admin-children"] });
+    },
+    onError: (e: Error) => setMessage(e.message),
+  });
+
+  const rows = childrenQuery.data ?? [];
+  const list = useMemo(() => {
+    const term = q.trim();
+    return rows.filter(
+      (c) =>
+        (stage === "all" || c.stage === stage) &&
+        (!term || c.name.includes(term) || (c.className ?? "").includes(term)),
+    );
+  }, [rows, q, stage]);
 
   return (
     <div className="space-y-5">
       <SectionHeader
         title="سجل الأطفال"
-        subtitle={`${children.length} طفلًا في ${classes.length} فصول`}
+        subtitle={`${rows.length} طفلًا في ${(classesQuery.data ?? []).length} فصول`}
         icon={Baby}
         tone="orange"
       />
@@ -72,7 +119,17 @@ function AdminChildren() {
         ))}
       </div>
 
-      {list.length === 0 ? (
+      {message && (
+        <p className="rounded-xl bg-brand-green-soft px-3 py-2.5 text-[11px] font-bold text-brand-green-deep">
+          {message}
+        </p>
+      )}
+
+      {childrenQuery.isPending ? (
+        <LoadingCards count={4} />
+      ) : childrenQuery.isError ? (
+        <ErrorState onRetry={() => childrenQuery.refetch()} />
+      ) : list.length === 0 ? (
         <EmptyState
           icon={Baby}
           title="لا نتائج مطابقة"
@@ -86,26 +143,106 @@ function AdminChildren() {
               key={c.id}
               className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-soft"
             >
-              <Avatar name={c.name} tone={c.tone} />
+              <Avatar name={c.name} tone="orange" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-foreground">{c.name}</p>
                 <p className="truncate text-[11px] text-muted-foreground">
-                  {c.className} — {c.age} · ولي الأمر: {c.guardian}
+                  {c.className ?? "بدون فصل"} · ولي الأمر:{" "}
+                  {c.guardians.length ? c.guardians.join("، ") : "غير مرتبط"}
                 </p>
               </div>
-              <ToneBadge tone={c.tone}>{stageLabels[c.stage]}</ToneBadge>
+              <ToneBadge tone="orange">{stageLabels[c.stage as Stage] ?? c.stage}</ToneBadge>
+              <button
+                onClick={() => remove.mutate(c.id)}
+                aria-label={`حذف ${c.name}`}
+                className="rounded-xl border border-brand-pink/40 bg-brand-pink-soft/50 p-2 text-brand-pink-deep"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           ))}
         </div>
       )}
 
-      <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-soft transition-transform active:scale-95">
-        <UserPlus className="h-4.5 w-4.5" />
-        تسجيل طفل جديد
-      </button>
-      <p className="text-center text-[11px] text-muted-foreground">
-        نموذج تجريبي — التسجيل الفعلي يُفعّل مع ربط قاعدة البيانات.
-      </p>
+      {open ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setMessage(null);
+            create.mutate();
+          }}
+          className="space-y-3 rounded-3xl border border-border bg-card p-4 shadow-soft"
+        >
+          <p className="text-sm font-bold text-foreground">تسجيل طفل جديد</p>
+          <input
+            required
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="اسم الطفل"
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+          />
+          <select
+            value={form.stage}
+            onChange={(e) => setForm({ ...form, stage: e.target.value as Stage })}
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+          >
+            <option value="nursery">{stageLabels.nursery}</option>
+            <option value="kg1">{stageLabels.kg1}</option>
+            <option value="kg2">{stageLabels.kg2}</option>
+          </select>
+          <select
+            value={form.classId}
+            onChange={(e) => setForm({ ...form, classId: e.target.value })}
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+          >
+            <option value="">بدون فصل</option>
+            {(classesQuery.data ?? []).map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={form.guardianId}
+            onChange={(e) => setForm({ ...form, guardianId: e.target.value })}
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+          >
+            <option value="">بدون ولي أمر</option>
+            {(parentsQuery.data ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={create.isPending}
+              className="flex-1 rounded-2xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
+            >
+              {create.isPending ? "جارٍ الحفظ…" : "حفظ"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-2xl border border-border bg-card px-4 py-3 text-sm font-bold text-muted-foreground"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      ) : (
+        <button
+          onClick={() => {
+            setMessage(null);
+            setOpen(true);
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-soft transition-transform active:scale-95"
+        >
+          <UserPlus className="h-4.5 w-4.5" />
+          تسجيل طفل جديد
+        </button>
+      )}
     </div>
   );
 }

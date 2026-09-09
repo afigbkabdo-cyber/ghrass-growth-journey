@@ -29,8 +29,8 @@ function AdminLogoutButton() {
   const navigate = useNavigate();
   return (
     <button
-      onClick={() => {
-        clearSession();
+      onClick={async () => {
+        await clearSession();
         navigate({ to: "/login", replace: true });
       }}
       className="flex w-full items-center gap-2.5 rounded-xl border border-brand-pink/40 bg-brand-pink-soft/50 px-3.5 py-2.5 text-xs font-bold text-brand-pink-deep transition-colors hover:bg-brand-pink-soft"

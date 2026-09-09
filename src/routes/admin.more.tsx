@@ -13,7 +13,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
-import { clearSession, readSession, roleLabels } from "@/lib/session";
+import { clearSession, roleLabels, useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/admin/more")({
   head: () => ({
@@ -44,14 +44,10 @@ const sections = [
 
 function AdminMorePage() {
   const navigate = useNavigate();
-  const [session, setSession] = useState<ReturnType<typeof readSession>>(null);
+  const { session } = useAppSession();
 
-  useEffect(() => {
-    setSession(readSession());
-  }, []);
-
-  const logout = () => {
-    clearSession();
+  const logout = async () => {
+    await clearSession();
     navigate({ to: "/login", replace: true });
   };
 
@@ -74,7 +70,8 @@ function AdminMorePage() {
             {session?.name || "حساب الإدارة"}
           </h2>
           <p className="truncate text-xs text-muted-foreground" dir="ltr">
-            {session?.email || "admin@ghiras.sa"}
+            {session?.phone ? `0${session.phone.slice(3)}` : "—"}
+
           </p>
           <div className="mt-2">
             <ToneBadge tone="green">{roleLabels[session?.role ?? "admin"]}</ToneBadge>
