@@ -118,13 +118,6 @@ function TeacherMorePage() {
       </section>
 
       <section className="space-y-2">
-        <Link
-          to="/"
-          className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-sm font-bold text-foreground shadow-soft transition-shadow hover:shadow-md"
-        >
-          <Repeat className="h-4.5 w-4.5 text-brand-orange-deep" />
-          تبديل العرض إلى واجهة ولي الأمر
-        </Link>
         <button
           onClick={logout}
           className="flex w-full items-center gap-3 rounded-2xl border border-brand-pink/40 bg-brand-pink-soft/50 p-4 text-sm font-bold text-brand-pink-deep transition-colors hover:bg-brand-pink-soft"

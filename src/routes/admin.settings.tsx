@@ -43,7 +43,7 @@ const notificationSettings = [
 ];
 
 const rolePermissions = [
-  { role: "ولي الأمر", tone: "orange" as const, items: ["متابعة طفله فقط", "قيمة الأسبوع والأنشطة", "التواصل مع المعلمة"] },
+  { role: "ولي الأمر", tone: "orange" as const, items: ["متابعة طفله فقط", "قيمة الأسبوع والأنشطة", "التواصل مع الإدارة"] },
   { role: "المعلمة", tone: "blue" as const, items: ["حضور أطفال فصلها", "تسجيل دوامها", "إضافة الأنشطة والملاحظات"] },
   { role: "الإدارة", tone: "green" as const, items: ["إدارة الأطفال والكادر", "خطة القيم والإعلانات", "التقارير العامة"] },
 ];
