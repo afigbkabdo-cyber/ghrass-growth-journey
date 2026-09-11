@@ -8,6 +8,7 @@ export const teacher: Record<string, string> = {
 
   // دوام المعلمة
   "حاضرة": "Present",
+  "متأخر": "Late",
   "مكتمل": "Completed",
 
   // أنشطة المواد الأخرى (للعرض فقط)
