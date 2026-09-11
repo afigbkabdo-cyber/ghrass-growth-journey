@@ -36,6 +36,7 @@ function ListEditor({
   setItems: (v: string[]) => void;
   placeholder: string;
 }) {
+  const { t: tr } = useI18n();
   const [draft, setDraft] = useState("");
   const addItem = () => {
     const v = draft.trim();
@@ -52,7 +53,7 @@ function ListEditor({
             <span className="min-w-0 flex-1 text-xs text-foreground">{it}</span>
             <button
               type="button"
-              aria-label={`حذف: ${it}`}
+              aria-label={`${tr("حذف")}: ${it}`}
               onClick={() => setItems(items.filter((_, idx) => idx !== i))}
               className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-destructive/25 text-destructive"
             >
@@ -78,7 +79,7 @@ function ListEditor({
         <button
           type="button"
           onClick={addItem}
-          aria-label="إضافة"
+          aria-label={tr("إضافة")}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"
         >
           <Plus className="h-4.5 w-4.5" />
@@ -145,7 +146,7 @@ function AdminValuesPage() {
         },
       }),
     onSuccess: () => {
-      toast.success(editId ? "تم تحديث القيمة" : "تمت إضافة القيمة — تحتاج اعتمادًا لتظهر للمعلمات وأولياء الأمور");
+      toast.success(editId ? tr("تم تحديث القيمة") : tr("تمت إضافة القيمة — تحتاج اعتمادًا لتظهر للمعلمات وأولياء الأمور"));
       reset();
       setOpen(false);
       invalidate();
@@ -156,7 +157,7 @@ function AdminValuesPage() {
   const setApproval = useMutation({
     mutationFn: (v: { id: string; approved: boolean; makeCurrent?: boolean }) => approve({ data: v }),
     onSuccess: () => {
-      toast.success("تم تحديث حالة القيمة");
+      toast.success(tr("تم تحديث حالة القيمة"));
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -165,7 +166,7 @@ function AdminValuesPage() {
   const del = useMutation({
     mutationFn: (id: string) => removeValue({ data: { id } }),
     onSuccess: () => {
-      toast.success("تم حذف القيمة");
+      toast.success(tr("تم حذف القيمة"));
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -256,7 +257,7 @@ function AdminValuesPage() {
         <button
           type="button"
           onClick={() => del.mutate(v.id)}
-          aria-label="حذف القيمة"
+          aria-label={tr("حذف القيمة")}
           className="grid h-8 w-8 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
         >
           <Trash2 className="h-4 w-4" />
@@ -270,7 +271,7 @@ function AdminValuesPage() {
       <div className="flex items-center justify-between gap-3 rounded-3xl border border-border bg-card p-4 shadow-soft">
         <div>
           <h2 className="font-display text-lg font-extrabold text-foreground">{tr("خطة القيم")}</h2>
-          <p className="text-xs text-muted-foreground">القيم والأحاديث والمحتوى تُدار من الإدارة فقط</p>
+          <p className="text-xs text-muted-foreground">{tr("القيم والأحاديث والمحتوى تُدار من الإدارة فقط")}</p>
         </div>
         <button
           type="button"
@@ -279,7 +280,7 @@ function AdminValuesPage() {
             setOpen((o) => !o);
           }}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"
-          aria-label="إضافة قيمة"
+          aria-label={tr("إضافة قيمة")}
         >
           {open ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
         </button>
@@ -290,7 +291,7 @@ function AdminValuesPage() {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="اسم القيمة (مثال: الرحمة)"
+            placeholder={tr("اسم القيمة (مثال: الرحمة)")}
             aria-label={tr("اسم القيمة")}
             className={field}
           />
@@ -320,8 +321,8 @@ function AdminValuesPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            placeholder="كيف نغرس هذه القيمة"
-            aria-label="وصف القيمة"
+            placeholder={tr("كيف نغرس هذه القيمة")}
+            aria-label={tr("وصف القيمة")}
             className={area}
           />
           <label className="block text-[11px] font-bold text-muted-foreground">
@@ -333,19 +334,19 @@ function AdminValuesPage() {
             title={tr("ماذا سيتعلم طفلك؟")}
             items={learnings}
             setItems={setLearnings}
-            placeholder="أضف هدف تعلم…"
+            placeholder={tr("أضف هدف تعلم…")}
           />
           <ListEditor
             title={tr("ماذا نفعل في الروضة؟")}
             items={atSchool}
             setItems={setAtSchool}
-            placeholder="أضف نشاطًا في الروضة…"
+            placeholder={tr("أضف نشاطًا في الروضة…")}
           />
           <ListEditor
             title={tr("كيف تشارك من البيت؟")}
             items={atHome}
             setItems={setAtHome}
-            placeholder="أضف فكرة منزلية…"
+            placeholder={tr("أضف فكرة منزلية…")}
           />
 
           <button
@@ -363,7 +364,7 @@ function AdminValuesPage() {
       {values.isLoading ? (
         <p className="text-sm text-muted-foreground">{tr("جارٍ التحميل…")}</p>
       ) : rows.length === 0 ? (
-        <EmptyState title="لا توجد قيم" message="أضف أول قيمة أسبوعية." />
+        <EmptyState title={tr("لا توجد قيم")} message={tr("أضف أول قيمة أسبوعية.")} />
       ) : (
         <>
           <div className="space-y-3">{current.map(card)}</div>

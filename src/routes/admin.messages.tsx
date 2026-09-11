@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { MessagesSquare, ShieldCheck, ChevronLeft } from "lucide-react";
 import { SectionHeader, ToneBadge, Avatar, EmptyState } from "@/components/ghiras";
 import { listThreads } from "@/lib/kg.functions";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/messages")({
   head: () => ({
@@ -23,48 +24,49 @@ export const Route = createFileRoute("/admin/messages")({
 });
 
 function AdminMessagesPage() {
+  const { t, dt } = useI18n();
   const fetchThreads = useServerFn(listThreads);
   const threads = useQuery({ queryKey: ["admin-threads"], queryFn: () => fetchThreads({}) });
 
   return (
     <div className="space-y-6">
       <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
-        <h2 className="font-display text-lg font-extrabold text-foreground">صندوق الوارد</h2>
-        <p className="text-xs text-muted-foreground">{(threads.data ?? []).length} محادثة مع أولياء الأمور</p>
+        <h2 className="font-display text-lg font-extrabold text-foreground">{t("صندوق الوارد")}</h2>
+        <p className="text-xs text-muted-foreground">{t("{count} محادثة مع أولياء الأمور", { count: (threads.data ?? []).length })}</p>
         <p className="mt-3 flex items-start gap-2 rounded-2xl bg-brand-green-soft px-3 py-2.5 text-[11px] font-bold leading-relaxed text-brand-green-deep">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          التواصل الرسمي يكون بين ولي الأمر والإدارة فقط — لا توجد مراسلة مباشرة مع المعلمات.
+          {t("التواصل الرسمي يكون بين ولي الأمر والإدارة فقط — لا توجد مراسلة مباشرة مع المعلمات.")}
         </p>
       </div>
 
       <section>
-        <SectionHeader title="المحادثات" icon={MessagesSquare} tone="blue" />
+        <SectionHeader title={t("المحادثات")} icon={MessagesSquare} tone="blue" />
         {threads.isLoading ? (
-          <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+          <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
         ) : (threads.data ?? []).length === 0 ? (
-          <EmptyState title="لا توجد رسائل" message="ستظهر رسائل أولياء الأمور هنا." />
+          <EmptyState title={t("لا توجد رسائل")} message={t("ستظهر رسائل أولياء الأمور هنا.")} />
         ) : (
           <div className="space-y-3">
-            {(threads.data ?? []).map((t) => (
+            {(threads.data ?? []).map((thread) => (
               <Link
-                key={t.id}
+                key={thread.id}
                 to="/admin/messages/$id"
-                params={{ id: t.id }}
+                params={{ id: thread.id }}
                 className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-soft transition-shadow hover:shadow-md"
               >
-                <Avatar name={t.parentName ?? "ولي أمر"} tone="orange" />
+                <Avatar name={thread.parentName ?? t("ولي أمر")} tone="orange" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-bold text-foreground">{t.parentName ?? "ولي أمر"}</p>
+                    <p className="truncate text-sm font-bold text-foreground">{thread.parentName ?? t("ولي أمر")}</p>
                     <span className="shrink-0 text-[11px] font-bold text-muted-foreground">
-                      {new Date(t.lastMessageAt).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                      {dt(thread.lastMessageAt)}
                     </span>
                   </div>
-                  <p className="mt-0.5 truncate text-xs font-bold text-foreground">{t.subject}</p>
+                  <p className="mt-0.5 truncate text-xs font-bold text-foreground">{thread.subject}</p>
                   <div className="mt-2 flex items-center gap-1.5">
-                    {t.childName && <ToneBadge tone="blue">{t.childName}</ToneBadge>}
-                    <ToneBadge tone={t.status === "closed" ? "green" : "yellow"}>
-                      {t.status === "closed" ? "مغلقة" : "قيد المتابعة"}
+                    {thread.childName && <ToneBadge tone="blue">{thread.childName}</ToneBadge>}
+                    <ToneBadge tone={thread.status === "closed" ? "green" : "yellow"}>
+                      {thread.status === "closed" ? t("مغلقة") : t("قيد المتابعة")}
                     </ToneBadge>
                   </div>
                 </div>

@@ -9,6 +9,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface ClassDetailRow {
   id: string;
   name: string;
+  nameEn: string | null;
   stage: string;
   childCount: number;
   children: { id: string; name: string }[];
@@ -20,7 +21,7 @@ export const listClassDetails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ClassDetailRow[]> => {
     const [{ data: classes, error }, { data: kids }, { data: links }] = await Promise.all([
-      context.supabase.from("classes").select("id, name, stage").order("name"),
+      context.supabase.from("classes").select("id, name, name_en, stage").order("name"),
       context.supabase.from("children").select("id, name, class_id").order("name"),
       context.supabase.from("teacher_classes").select("teacher_id, class_id, profiles(full_name)"),
     ]);
@@ -39,6 +40,7 @@ export const listClassDetails = createServerFn({ method: "GET" })
       return {
         id: c.id,
         name: c.name,
+        nameEn: (c as { name_en?: string | null }).name_en ?? null,
         stage: c.stage,
         childCount: children.length,
         children,
@@ -53,12 +55,18 @@ export const listClassDetails = createServerFn({ method: "GET" })
 export const createClass = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ name: z.string().trim().min(2), stage: z.enum(["nursery", "kg1", "kg2"]) }).parse(d),
+    z
+      .object({
+        name: z.string().trim().min(2),
+        stage: z.enum(["nursery", "kg1", "kg2"]),
+        nameEn: z.string().trim().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("classes")
-      .insert({ name: data.name, stage: data.stage })
+      .insert({ name: data.name, stage: data.stage, name_en: data.nameEn ?? null })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -69,12 +77,16 @@ export const createClass = createServerFn({ method: "POST" })
 export const renameClass = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), name: z.string().trim().min(2) }).parse(d),
+    z
+      .object({ id: z.string().uuid(), name: z.string().trim().min(2), nameEn: z.string().trim().optional() })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
+    const patch: { name: string; name_en?: string } = { name: data.name };
+    if (data.nameEn !== undefined) patch.name_en = data.nameEn;
     const { error } = await context.supabase
       .from("classes")
-      .update({ name: data.name })
+      .update(patch)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

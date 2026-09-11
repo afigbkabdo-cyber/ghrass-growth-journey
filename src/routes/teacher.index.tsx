@@ -33,6 +33,7 @@ import {
   activityStateLabels,
 } from "@/lib/teacher-data";
 import { TeacherShiftCard } from "@/components/teacher-shift-card";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/")({
   head: () => ({
@@ -51,9 +52,10 @@ const quickActions = [
   { to: "/teacher/activities", label: "إضافة نشاط", icon: Blocks, tone: "orange" as const },
   { to: "/teacher/children", label: "ملاحظة طفل", icon: Baby, tone: "pink" as const },
   { to: "/teacher/value-guide", label: "دليل القيمة", icon: HeartHandshake, tone: "blue" as const },
-];
+] as const;
 
 function TeacherHome() {
+  const { t, n } = useI18n();
   const published = teacherActivities.filter((a) => a.state === "published");
   const fetchValue = useServerFn(getCurrentValue);
   const fetchChildren = useServerFn(myClassChildren);
@@ -69,10 +71,10 @@ function TeacherHome() {
         <div className="flex items-center gap-3">
           <Avatar name={currentTeacher.name} tone="blue" size="lg" />
           <div className="min-w-0">
-            <p className="text-xs font-bold text-muted-foreground">صباح الخير 🌤️</p>
-            <h1 className="font-display text-xl font-extrabold text-foreground">{currentTeacher.name}</h1>
+            <p className="text-xs font-bold text-muted-foreground">{t("صباح الخير")} 🌤️</p>
+            <h1 className="font-display text-xl font-extrabold text-foreground">{n(currentTeacher.name)}</h1>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {subjectLabels[currentTeacher.subject]} · {teacherClassTitle}
+              {t(subjectLabels[currentTeacher.subject])} · {teacherClassTitle}
             </p>
           </div>
         </div>
@@ -84,29 +86,29 @@ function TeacherHome() {
 
 
       {/* إحصاءات اليوم */}
-      <SectionHeader title="ملخص اليوم" subtitle="حالة فصلي الآن" icon={CalendarCheck} tone="green" />
+      <SectionHeader title={t("ملخص اليوم")} subtitle={t("حالة فصلي الآن")} icon={CalendarCheck} tone="green" />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard icon={Baby} value={childCount} label="أطفال الفصل" tone="blue" />
-        <StatCard icon={UserCheck} value={teacherTodaySummary.present} label="حاضر" tone="green" />
-        <StatCard icon={UserX} value={teacherTodaySummary.absent} label="غائب" tone="pink" />
-        <StatCard icon={Blocks} value={teacherTodaySummary.activities} label="أنشطة اليوم" tone="orange" />
+        <StatCard icon={Baby} value={childCount} label={t("أطفال الفصل")} tone="blue" />
+        <StatCard icon={UserCheck} value={teacherTodaySummary.present} label={t("حاضر")} tone="green" />
+        <StatCard icon={UserX} value={teacherTodaySummary.absent} label={t("غائب")} tone="pink" />
+        <StatCard icon={Blocks} value={teacherTodaySummary.activities} label={t("أنشطة اليوم")} tone="orange" />
       </div>
 
       {/* إجراءات سريعة */}
-      <SectionHeader title="إجراءات سريعة" icon={Bell} tone="orange" />
+      <SectionHeader title={t("إجراءات سريعة")} icon={Bell} tone="orange" />
       <div className="mb-6 grid grid-cols-2 gap-3">
         {quickActions.map((a) => {
-          const t = toneClasses[a.tone];
+          const tone = toneClasses[a.tone];
           return (
             <Link
               key={a.to}
               to={a.to}
               className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-soft transition-shadow hover:shadow-md"
             >
-              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${t.soft}`}>
-                <a.icon className={`h-5 w-5 ${t.deep}`} strokeWidth={2.2} />
+              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${tone.soft}`}>
+                <a.icon className={`h-5 w-5 ${tone.deep}`} strokeWidth={2.2} />
               </span>
-              <span className="text-sm font-bold text-foreground">{a.label}</span>
+              <span className="text-sm font-bold text-foreground">{t(a.label)}</span>
             </Link>
           );
         })}
@@ -114,11 +116,11 @@ function TeacherHome() {
 
       {/* قيمة الأسبوع */}
       <SectionHeader
-        title="قيمة الأسبوع"
-        subtitle="معتمدة من إدارة غراس"
+        title={t("قيمة الأسبوع")}
+        subtitle={t("معتمدة من إدارة غراس")}
         icon={HeartHandshake}
         tone="orange"
-        action={{ label: "الدليل الكامل", to: "/teacher/value-guide" }}
+        action={{ label: t("الدليل الكامل"), to: "/teacher/value-guide" }}
       />
       <section className="mb-6 rounded-3xl border border-brand-orange-soft bg-brand-orange-soft/50 p-5">
         <div className="flex items-center justify-between gap-2">
@@ -140,28 +142,28 @@ function TeacherHome() {
 
       {/* أنشطة اليوم */}
       <SectionHeader
-        title="أنشطة فصلي"
-        subtitle={`${published.length} نشاط منشور لأولياء الأمور`}
+        title={t("أنشطة فصلي")}
+        subtitle={t("{count} نشاط منشور لأولياء الأمور", { count: published.length })}
         icon={Blocks}
         tone="blue"
-        action={{ label: "إدارة الأنشطة", to: "/teacher/activities" }}
+        action={{ label: t("إدارة الأنشطة"), to: "/teacher/activities" }}
       />
       <div className="mb-6 space-y-3">
         {teacherActivities.slice(0, 3).map((a) => {
-          const t = toneClasses[a.tone];
+          const tone = toneClasses[a.tone];
           return (
             <article
               key={a.id}
               className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-soft"
             >
-              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl ${t.soft}`}>
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl ${tone.soft}`}>
                 {a.emoji}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
                   <ToneBadge tone={a.state === "published" ? "green" : "yellow"}>
-                    {activityStateLabels[a.state]}
+                    {t(activityStateLabels[a.state])}
                   </ToneBadge>
                 </div>
                 <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
@@ -175,11 +177,11 @@ function TeacherHome() {
 
       {/* أطفال يحتاجون متابعة */}
       <SectionHeader
-        title="يحتاجون متابعة"
-        subtitle="أقل نسبة حضور هذا الشهر"
+        title={t("يحتاجون متابعة")}
+        subtitle={t("أقل نسبة حضور هذا الشهر")}
         icon={Baby}
         tone="pink"
-        action={{ label: "كل الأطفال", to: "/teacher/children" }}
+        action={{ label: t("كل الأطفال"), to: "/teacher/children" }}
       />
       <div className="mb-6 space-y-2">
         {[...teacherChildren]
@@ -194,8 +196,8 @@ function TeacherHome() {
             >
               <Avatar name={c.name} tone={c.tone} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-foreground">{c.name}</p>
-                <p className="text-[11px] text-muted-foreground">نسبة الحضور {c.attendanceRate}%</p>
+                <p className="truncate text-sm font-bold text-foreground">{n(c.name)}</p>
+                <p className="text-[11px] text-muted-foreground">{t("نسبة الحضور {rate}%", { rate: c.attendanceRate })}</p>
               </div>
               <ArrowLeft className="h-4 w-4 shrink-0 text-muted-foreground" />
             </Link>
@@ -204,19 +206,19 @@ function TeacherHome() {
 
       {/* إعلانات الإدارة */}
       <SectionHeader
-        title="من الإدارة"
+        title={t("من الإدارة")}
         icon={Megaphone}
         tone="green"
-        action={{ label: "كل الإعلانات", to: "/teacher/announcements" }}
+        action={{ label: t("كل الإعلانات"), to: "/teacher/announcements" }}
       />
       <div className="space-y-2">
         {teacherAnnouncements.slice(0, 2).map((an) => (
           <article key={an.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="truncate text-sm font-extrabold text-foreground">{an.title}</h3>
-              <ToneBadge tone={an.tone}>{an.date}</ToneBadge>
+              <h3 className="truncate text-sm font-extrabold text-foreground">{t(an.title)}</h3>
+              <ToneBadge tone={an.tone}>{t(an.date)}</ToneBadge>
             </div>
-            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{an.body}</p>
+            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{t(an.body)}</p>
           </article>
         ))}
       </div>

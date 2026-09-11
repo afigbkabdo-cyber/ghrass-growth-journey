@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Blocks, Clock, Sparkles } from "lucide-react";
 import { AppShell, parentNav } from "@/components/shells";
+import { useI18n } from "@/lib/i18n";
 import { PageContainer, ToneBadge, EmptyState } from "@/components/ghiras";
 import { RoleGuard } from "@/components/role-guard";
 import { sectionRoles } from "@/lib/session";
@@ -45,6 +46,7 @@ export function ActivityCard({
   valueName: string | null;
   photos: string[];
 }) {
+  const { t, d } = useI18n();
   return (
     <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
       {photos.length > 0 && (
@@ -53,7 +55,7 @@ export function ActivityCard({
             <img
               key={src}
               src={src}
-              alt={`صورة من نشاط ${title}`}
+              alt={t("صورة من نشاط {title}", { title })}
               loading="lazy"
               className="h-40 w-full object-cover"
             />
@@ -65,7 +67,7 @@ export function ActivityCard({
           <h3 className="text-sm font-extrabold leading-snug text-foreground">{title}</h3>
           <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-muted-foreground">
             <Clock className="h-3.5 w-3.5" />
-            {activityTime ? activityTime.slice(0, 5) : new Date(activityDate).toLocaleDateString("ar-SA")}
+            {activityTime ? activityTime.slice(0, 5) : d(activityDate)}
           </span>
         </div>
         {description && <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{description}</p>}
@@ -74,7 +76,7 @@ export function ActivityCard({
           {linkedToValue && valueName && (
             <ToneBadge tone="green">
               <Sparkles className="h-3 w-3" />
-              مرتبط بقيمة {valueName}
+              {t("مرتبط بقيمة {value}", { value: valueName })}
             </ToneBadge>
           )}
         </div>
@@ -84,27 +86,28 @@ export function ActivityCard({
 }
 
 function ActivitiesPage() {
+  const { t } = useI18n();
   const fetchActivities = useServerFn(listActivities);
   const activities = useQuery({ queryKey: ["activities"], queryFn: () => fetchActivities({}) });
   const list = (activities.data ?? []).filter((a) => a.published);
 
   return (
-    <AppShell navItems={parentNav} roleLabel="ولي أمر" tone="orange">
+    <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
       <PageContainer>
         <header className="mb-5 flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-blue-soft">
             <Blocks className="h-5.5 w-5.5 text-brand-blue-deep" strokeWidth={2.2} />
           </span>
           <div>
-            <h1 className="font-display text-2xl font-extrabold text-foreground">الأنشطة</h1>
-            <p className="text-xs text-muted-foreground">ما عمله طفلك في الروضة مع الصور</p>
+            <h1 className="font-display text-2xl font-extrabold text-foreground">{t("الأنشطة")}</h1>
+            <p className="text-xs text-muted-foreground">{t("ما عمله طفلك في الروضة مع الصور")}</p>
           </div>
         </header>
 
         {activities.isLoading ? (
-          <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+          <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
         ) : list.length === 0 ? (
-          <EmptyState title="لا توجد أنشطة منشورة" message="ستظهر الأنشطة هنا بعد نشرها من الروضة." />
+          <EmptyState title={t("لا توجد أنشطة منشورة")} message={t("ستظهر الأنشطة هنا بعد نشرها من الروضة.")} />
         ) : (
           <div className="space-y-4">
             {list.map((a) => (

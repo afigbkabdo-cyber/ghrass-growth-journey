@@ -35,7 +35,7 @@ function ValuePage() {
   const t = toneClasses.orange;
 
   return (
-    <AppShell navItems={parentNav} roleLabel="ولي أمر" tone="orange">
+    <AppShell navItems={parentNav} roleLabel={tr("ولي أمر")} tone="orange">
       <PageContainer>
         {valueQuery.isLoading ? (
           <p className="text-sm text-muted-foreground">{tr("جارٍ التحميل…")}</p>

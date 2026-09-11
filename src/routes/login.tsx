@@ -5,6 +5,7 @@ import { GhirasLogoFull, ToneBadge } from "@/components/ghiras";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePhone, phoneToEmail } from "@/lib/phone";
 import { loadSession, roleHome } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [method, setMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -40,7 +42,7 @@ function LoginPage() {
     if (method === "phone") {
       const normalized = normalizePhone(phone);
       if (!normalized) {
-        setError("رقم الجوال غير صحيح. استخدم الصيغة 05XXXXXXXX.");
+        setError(t("رقم الجوال غير صحيح. استخدم الصيغة 05XXXXXXXX."));
         return;
       }
       authEmail = phoneToEmail(normalized);
@@ -53,7 +55,7 @@ function LoginPage() {
     });
     if (signInError) {
       setLoading(false);
-      setError("بيانات الدخول غير صحيحة. تأكد من الرقم وكلمة المرور.");
+      setError(t("بيانات الدخول غير صحيحة. تأكد من الرقم وكلمة المرور."));
       return;
     }
 
@@ -87,7 +89,7 @@ function LoginPage() {
           className="space-y-4 rounded-3xl border border-border bg-card p-5 shadow-soft"
         >
           <div>
-            <p className="mb-2 text-xs font-bold text-foreground">طريقة تسجيل الدخول</p>
+            <p className="mb-2 text-xs font-bold text-foreground">{t("طريقة تسجيل الدخول")}</p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -98,7 +100,7 @@ function LoginPage() {
                 className={tabClass(method === "phone")}
               >
                 <Phone className="h-4 w-4" />
-                رقم الجوال
+                {t("رقم الجوال")}
               </button>
               <button
                 type="button"
@@ -109,14 +111,14 @@ function LoginPage() {
                 className={tabClass(method === "email")}
               >
                 <Mail className="h-4 w-4" />
-                البريد الإلكتروني
+                {t("البريد الإلكتروني")}
               </button>
             </div>
           </div>
 
           {method === "phone" ? (
             <label className="block">
-              <span className="mb-1.5 block text-xs font-bold text-foreground">رقم الجوال</span>
+              <span className="mb-1.5 block text-xs font-bold text-foreground">{t("رقم الجوال")}</span>
               <span className="relative block">
                 <Phone className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -133,7 +135,7 @@ function LoginPage() {
             </label>
           ) : (
             <label className="block">
-              <span className="mb-1.5 block text-xs font-bold text-foreground">البريد الإلكتروني</span>
+              <span className="mb-1.5 block text-xs font-bold text-foreground">{t("البريد الإلكتروني")}</span>
               <span className="relative block">
                 <Mail className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -149,7 +151,7 @@ function LoginPage() {
           )}
 
           <label className="block">
-            <span className="mb-1.5 block text-xs font-bold text-foreground">كلمة المرور</span>
+            <span className="mb-1.5 block text-xs font-bold text-foreground">{t("كلمة المرور")}</span>
             <span className="relative block">
               <Lock className="pointer-events-none absolute top-1/2 start-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -175,16 +177,16 @@ function LoginPage() {
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground transition-opacity disabled:opacity-60"
           >
             <LogIn className="h-4.5 w-4.5" />
-            {loading ? "جارٍ الدخول…" : "دخول"}
+            {loading ? t("جارٍ الدخول…") : t("دخول")}
           </button>
 
           <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-            الحسابات تُنشأ من قِبل إدارة الروضة. إذا نسيت كلمة المرور تواصل مع الإدارة.
+            {t("الحسابات تُنشأ من قِبل إدارة الروضة. إذا نسيت كلمة المرور تواصل مع الإدارة.")}
           </p>
         </form>
 
         <div className="mt-4 flex justify-center">
-          <ToneBadge tone="green">بياناتك ومحتوى طفلك محمي داخل غراس</ToneBadge>
+          <ToneBadge tone="green">{t("بياناتك ومحتوى طفلك محمي داخل غراس")}</ToneBadge>
         </div>
       </div>
     </main>

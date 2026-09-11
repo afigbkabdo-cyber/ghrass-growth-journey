@@ -11,8 +11,10 @@ export interface ClassRow {
 export interface ChildRow {
   id: string;
   name: string;
+  nameEn: string | null;
   stage: string;
   className: string | null;
+  classNameEn: string | null;
   classId: string | null;
   birthDate: string | null;
   allergies: string | null;
@@ -22,6 +24,7 @@ export interface ChildRow {
 export interface StaffRow {
   id: string;
   name: string;
+  nameEn: string | null;
   phone: string | null;
   title: string | null;
   role: string;
@@ -47,7 +50,7 @@ export const listChildren = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("children")
       .select(
-        "id, name, stage, class_id, birth_date, allergies, classes(name), child_guardians(profiles(full_name))",
+        "id, name, name_en, stage, class_id, birth_date, allergies, classes(name, name_en), child_guardians(profiles(full_name))",
       )
       .order("name");
     if (error) throw new Error(error.message);
@@ -55,19 +58,22 @@ export const listChildren = createServerFn({ method: "GET" })
       const r = row as unknown as {
         id: string;
         name: string;
+        name_en: string | null;
         stage: string;
         class_id: string | null;
         birth_date: string | null;
         allergies: string | null;
-        classes: { name: string } | null;
+        classes: { name: string; name_en: string | null } | null;
         child_guardians: { profiles: { full_name: string } | null }[] | null;
       };
       return {
         id: r.id,
         name: r.name,
+        nameEn: r.name_en ?? null,
         stage: r.stage,
         classId: r.class_id,
         className: r.classes?.name ?? null,
+        classNameEn: r.classes?.name_en ?? null,
         birthDate: r.birth_date,
         allergies: r.allergies,
         guardians: (r.child_guardians ?? [])
@@ -84,7 +90,7 @@ export const listStaff = createServerFn({ method: "GET" })
     const [{ data: roles, error: rolesError }, { data: profiles, error: profilesError }, { data: links }] =
       await Promise.all([
         context.supabase.from("user_roles").select("user_id, role"),
-        context.supabase.from("profiles").select("id, full_name, phone, title"),
+        context.supabase.from("profiles").select("id, full_name, full_name_en, phone, title"),
         context.supabase.from("teacher_classes").select("teacher_id, classes(name)"),
       ]);
     if (rolesError) throw new Error(rolesError.message);
@@ -107,6 +113,7 @@ export const listStaff = createServerFn({ method: "GET" })
       .map((p) => ({
         id: p.id,
         name: p.full_name,
+        nameEn: (p as { full_name_en?: string | null }).full_name_en ?? null,
         phone: p.phone,
         title: p.title,
         role: roleOf.get(p.id) ?? "parent",
@@ -122,17 +129,18 @@ export const listParents = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<StaffRow[]> => {
     const [{ data: roles }, { data: profiles }] = await Promise.all([
       context.supabase.from("user_roles").select("user_id, role").eq("role", "parent"),
-      context.supabase.from("profiles").select("id, full_name, phone, title"),
+      context.supabase.from("profiles").select("id, full_name, full_name_en, phone, title"),
     ]);
     const parentIds = new Set((roles ?? []).map((r) => r.user_id));
     return (profiles ?? [])
       .filter((p) => parentIds.has(p.id))
-      .map((p) => ({ id: p.id, name: p.full_name, phone: p.phone, title: p.title, role: "parent", classes: [] }))
+      .map((p) => ({ id: p.id, name: p.full_name, nameEn: (p as { full_name_en?: string | null }).full_name_en ?? null, phone: p.phone, title: p.title, role: "parent", classes: [] }))
       .sort((a, b) => a.name.localeCompare(b.name, "ar"));
   });
 
 const childSchema = z.object({
   name: z.string().trim().min(2),
+  nameEn: z.string().trim().optional(),
   stage: z.enum(["nursery", "kg1", "kg2"]),
   classId: z.string().uuid().nullable().optional(),
   guardianId: z.string().uuid().nullable().optional(),
@@ -151,6 +159,7 @@ export const createChild = createServerFn({ method: "POST" })
       .from("children")
       .insert({
         name: data.name,
+        name_en: data.nameEn ?? null,
         stage: data.stage,
         class_id: data.classId ?? null,
         birth_date: data.birthDate || null,
@@ -185,9 +194,11 @@ export const deleteChild = createServerFn({ method: "POST" })
 export interface ChildDetailRow {
   id: string;
   name: string;
+  nameEn: string | null;
   stage: string;
   classId: string | null;
   className: string | null;
+  classNameEn: string | null;
   birthDate: string | null;
   gender: string | null;
   allergies: string | null;
@@ -195,7 +206,7 @@ export interface ChildDetailRow {
   sessionPeriod: string | null;
   enrollmentTerm: string | null;
   createdAt: string;
-  guardians: { id: string; name: string; phone: string | null; relation: string | null }[];
+  guardians: { id: string; name: string; nameEn: string | null; phone: string | null; relation: string | null }[];
 }
 
 /** بيانات تسجيل الطفل كاملة — للعرض فقط (لا تعديل). */
@@ -206,7 +217,7 @@ export const getChildDetails = createServerFn({ method: "GET" })
     const { data: row, error } = await context.supabase
       .from("children")
       .select(
-        "id, name, stage, class_id, birth_date, gender, allergies, notes, session_period, enrollment_term, created_at, classes(name), child_guardians(relation, guardian_id, profiles(full_name, phone))",
+        "id, name, name_en, stage, class_id, birth_date, gender, allergies, notes, session_period, enrollment_term, created_at, classes(name, name_en), child_guardians(relation, guardian_id, profiles(full_name, full_name_en, phone))",
       )
       .eq("id", data.id)
       .maybeSingle();
@@ -215,6 +226,7 @@ export const getChildDetails = createServerFn({ method: "GET" })
     const r = row as unknown as {
       id: string;
       name: string;
+      name_en: string | null;
       stage: string;
       class_id: string | null;
       birth_date: string | null;
@@ -224,17 +236,23 @@ export const getChildDetails = createServerFn({ method: "GET" })
       session_period: string | null;
       enrollment_term: string | null;
       created_at: string;
-      classes: { name: string } | null;
+      classes: { name: string; name_en: string | null } | null;
       child_guardians:
-        | { relation: string | null; guardian_id: string; profiles: { full_name: string; phone: string | null } | null }[]
+        | {
+            relation: string | null;
+            guardian_id: string;
+            profiles: { full_name: string; full_name_en: string | null; phone: string | null } | null;
+          }[]
         | null;
     };
     return {
       id: r.id,
       name: r.name,
+      nameEn: r.name_en ?? null,
       stage: r.stage,
       classId: r.class_id,
       className: r.classes?.name ?? null,
+      classNameEn: r.classes?.name_en ?? null,
       birthDate: r.birth_date,
       gender: r.gender,
       allergies: r.allergies,
@@ -245,6 +263,7 @@ export const getChildDetails = createServerFn({ method: "GET" })
       guardians: (r.child_guardians ?? []).map((g) => ({
         id: g.guardian_id,
         name: g.profiles?.full_name ?? "—",
+        nameEn: g.profiles?.full_name_en ?? null,
         phone: g.profiles?.phone ?? null,
         relation: g.relation,
       })),

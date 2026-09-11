@@ -35,7 +35,7 @@ const inputCls =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary";
 
 function AdminChildren() {
-  const { t: tr } = useI18n();
+  const { t: tr, n, d } = useI18n();
   const qc = useQueryClient();
   const fetchChildren = useServerFn(listChildren);
   const fetchClasses = useServerFn(listClasses);
@@ -74,9 +74,9 @@ function AdminChildren() {
 
   const stageFilters: { key: Stage | "all"; label: string }[] = [
     { key: "all", label: tr("الكل") },
-    { key: "nursery", label: stageLabels.nursery },
-    { key: "kg1", label: stageLabels.kg1 },
-    { key: "kg2", label: stageLabels.kg2 },
+    { key: "nursery", label: tr(stageLabels.nursery) },
+    { key: "kg1", label: tr(stageLabels.kg1) },
+    { key: "kg2", label: tr(stageLabels.kg2) },
   ];
 
   const create = useMutation({
@@ -105,7 +105,7 @@ function AdminChildren() {
         enrollmentTerm: "",
       });
       setOpen(false);
-      setMessage("تم تسجيل الطفل وحفظه.");
+      setMessage(tr("تم تسجيل الطفل وحفظه."));
       qc.invalidateQueries({ queryKey: ["admin-children"] });
     },
     onError: (e: Error) => setMessage(e.message),
@@ -114,7 +114,7 @@ function AdminChildren() {
   const remove = useMutation({
     mutationFn: (id: string) => removeChild({ data: { id } }),
     onSuccess: () => {
-      setMessage("تم حذف الطفل من السجل.");
+      setMessage(tr("تم حذف الطفل من السجل."));
       setConfirmDeleteId(null);
       setDetailId(null);
       qc.invalidateQueries({ queryKey: ["admin-children"] });
@@ -125,7 +125,7 @@ function AdminChildren() {
   const move = useMutation({
     mutationFn: (v: { id: string; classId: string | null }) => moveChild({ data: v }),
     onSuccess: () => {
-      setMessage("تم نقل الطفل إلى الفصل الجديد دون تغيير بياناته الأساسية.");
+      setMessage(tr("تم نقل الطفل إلى الفصل الجديد دون تغيير بياناته الأساسية."));
       setMoveTarget("");
       qc.invalidateQueries({ queryKey: ["admin-children"] });
       qc.invalidateQueries({ queryKey: ["child-details"] });
@@ -139,7 +139,7 @@ function AdminChildren() {
     return rows.filter(
       (c) =>
         (stage === "all" || c.stage === stage) &&
-        (!term || c.name.includes(term) || (c.className ?? "").includes(term)),
+        (!term || c.name.includes(term) || (c.nameEn ?? "").includes(term) || (c.className ?? "").includes(term)),
     );
   }, [rows, q, stage]);
 
@@ -159,7 +159,7 @@ function AdminChildren() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="ابحث باسم الطفل أو الفصل…"
+          placeholder={tr("ابحث باسم الطفل أو الفصل…")}
           aria-label={tr("بحث")}
           className="w-full rounded-2xl border border-border bg-card py-3 ps-10 pe-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
         />
@@ -195,8 +195,8 @@ function AdminChildren() {
       ) : list.length === 0 ? (
         <EmptyState
           icon={Baby}
-          title="لا نتائج مطابقة"
-          message="جرّب اسمًا آخر أو غيّر المرحلة المحددة."
+          title={tr("لا نتائج مطابقة")}
+          message={tr("جرّب اسمًا آخر أو غيّر المرحلة المحددة.")}
           tone="orange"
         />
       ) : (
@@ -212,11 +212,11 @@ function AdminChildren() {
               }}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-start shadow-soft transition-colors hover:bg-muted/60"
             >
-              <Avatar name={c.name} tone="orange" />
+              <Avatar name={n(c.name, c.nameEn)} tone="orange" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-foreground">{c.name}</p>
+                <p className="truncate text-sm font-bold text-foreground">{n(c.name, c.nameEn)}</p>
                 <p className="truncate text-[11px] text-muted-foreground">
-                  {c.className ?? tr("بدون فصل")} · {tr("ولي الأمر")}:{" "}
+                  {c.className ? n(c.className, c.classNameEn) : tr("بدون فصل")} · {tr("ولي الأمر")}:{" "}
                   {c.guardians.length ? c.guardians.join("، ") : tr("غير مرتبط")}
                 </p>
                 {c.allergies && (
@@ -225,7 +225,7 @@ function AdminChildren() {
                   </p>
                 )}
               </div>
-              <ToneBadge tone="orange">{stageLabels[c.stage as Stage] ?? c.stage}</ToneBadge>
+              <ToneBadge tone="orange">{tr(stageLabels[c.stage as Stage] ?? c.stage)}</ToneBadge>
             </button>
           ))}
         </div>
@@ -257,15 +257,15 @@ function AdminChildren() {
               <>
                 <div className="divide-y divide-border rounded-2xl border border-border">
                   {[
-                    [tr("اسم الطفل"), detail.name],
-                    [tr("تاريخ الميلاد"), detail.birthDate],
-                    [tr("الفئة العمرية"), stageLabels[detail.stage as Stage] ?? detail.stage],
-                    [tr("الفصل"), detail.className],
+                    [tr("اسم الطفل"), n(detail.name, detail.nameEn)],
+                    [tr("تاريخ الميلاد"), detail.birthDate ? d(detail.birthDate) : ""],
+                    [tr("الفئة العمرية"), tr(stageLabels[detail.stage as Stage] ?? detail.stage)],
+                    [tr("الفصل"), detail.className ? n(detail.className, detail.classNameEn) : ""],
                     [tr("الفترة"), detail.sessionPeriod],
                     [tr("فترة التسجيل"), detail.enrollmentTerm],
                     [tr("الحساسية"), detail.allergies],
-                    ["ملاحظات", detail.notes],
-                    [tr("تاريخ الإضافة"), new Date(detail.createdAt).toLocaleDateString("ar-SA")],
+                    [tr("ملاحظات"), detail.notes],
+                    [tr("تاريخ الإضافة"), d(detail.createdAt)],
                   ].map(([label, value]) => (
                     <div key={label as string} className="flex items-start justify-between gap-3 p-3">
                       <span className="text-[11px] font-bold text-muted-foreground">{label}</span>
@@ -276,7 +276,7 @@ function AdminChildren() {
                     <div key={g.id} className="flex items-start justify-between gap-3 p-3">
                       <span className="text-[11px] font-bold text-muted-foreground">{tr("ولي الأمر")}</span>
                       <span className="text-xs font-bold text-foreground">
-                        {g.name}
+                        {n(g.name, g.nameEn)}
                         {g.phone ? ` · ${g.phone}` : ""}
                       </span>
                     </div>
@@ -298,7 +298,7 @@ function AdminChildren() {
                     <option value="">{tr("بدون فصل")}</option>
                     {(classesQuery.data ?? []).map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.name}
+                        {n(c.name)}
                       </option>
                     ))}
                   </select>
@@ -377,9 +377,9 @@ function AdminChildren() {
             aria-label={tr("الفئة العمرية")}
             className={inputCls}
           >
-            <option value="nursery">{stageLabels.nursery}</option>
-            <option value="kg1">{stageLabels.kg1}</option>
-            <option value="kg2">{stageLabels.kg2}</option>
+            <option value="nursery">{tr(stageLabels.nursery)}</option>
+            <option value="kg1">{tr(stageLabels.kg1)}</option>
+            <option value="kg2">{tr(stageLabels.kg2)}</option>
           </select>
           <select
             value={form.classId}
@@ -390,7 +390,7 @@ function AdminChildren() {
             <option value="">{tr("بدون فصل")}</option>
             {(classesQuery.data ?? []).map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {n(c.name)}
               </option>
             ))}
           </select>
@@ -403,7 +403,7 @@ function AdminChildren() {
             <option value="">{tr("بدون ولي أمر")}</option>
             {(parentsQuery.data ?? []).map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {n(p.name, p.nameEn)}
               </option>
             ))}
           </select>
@@ -419,21 +419,21 @@ function AdminChildren() {
           <input
             value={form.sessionPeriod}
             onChange={(e) => setForm({ ...form, sessionPeriod: e.target.value })}
-            placeholder="الفترة (مثال: صباحية ٧:٠٠ — ١٢:٣٠)"
+            placeholder={tr("الفترة (مثال: صباحية ٧:٠٠ — ١٢:٣٠)")}
             aria-label={tr("الفترة")}
             className={inputCls}
           />
           <input
             value={form.enrollmentTerm}
             onChange={(e) => setForm({ ...form, enrollmentTerm: e.target.value })}
-            placeholder="فترة التسجيل (مثال: الفصل الأول ١٤٤٨هـ)"
+            placeholder={tr("فترة التسجيل (مثال: الفصل الأول ١٤٤٨هـ)")}
             aria-label={tr("فترة التسجيل")}
             className={inputCls}
           />
           <input
             value={form.allergies}
             onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-            placeholder="الحساسية (اتركه فارغًا إن لا يوجد)"
+            placeholder={tr("الحساسية (اتركه فارغًا إن لا يوجد)")}
             aria-label={tr("الحساسية")}
             className={inputCls}
           />

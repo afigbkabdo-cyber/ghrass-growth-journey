@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Sprout, RefreshCw, ShieldAlert } from "lucide-react";
 import { canAccess, roleHome, useAppSession, type Role } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
 
 /**
  * حماية المسارات حسب الدور (جلسة حقيقية من قاعدة البيانات).
@@ -11,6 +12,7 @@ import { canAccess, roleHome, useAppSession, type Role } from "@/lib/session";
  */
 export function RoleGuard({ allow, children }: { allow: Role[]; children: ReactNode }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { session, loading, error, reload } = useAppSession();
 
   const allowed = session ? canAccess(session.role, allow) : false;
@@ -31,20 +33,20 @@ export function RoleGuard({ allow, children }: { allow: Role[]; children: ReactN
           <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-pink-soft">
             <ShieldAlert className="h-7 w-7 text-brand-pink-deep" strokeWidth={2.2} />
           </span>
-          <p className="text-sm font-bold text-foreground">{error}</p>
+          <p className="text-sm font-bold text-foreground">{t(error)}</p>
           <div className="flex flex-wrap justify-center gap-2">
             <button
               onClick={reload}
               className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-extrabold text-primary-foreground"
             >
               <RefreshCw className="h-4 w-4" />
-              إعادة المحاولة
+              {t("إعادة المحاولة")}
             </button>
             <button
               onClick={() => navigate({ to: "/login", replace: true })}
               className="rounded-xl border border-border bg-card px-4 py-2.5 text-xs font-bold text-foreground"
             >
-              صفحة الدخول
+              {t("صفحة الدخول")}
             </button>
           </div>
         </div>
@@ -59,7 +61,7 @@ export function RoleGuard({ allow, children }: { allow: Role[]; children: ReactN
           <span className="grid h-14 w-14 animate-pulse place-items-center rounded-2xl bg-brand-green-soft">
             <Sprout className="h-7 w-7 text-brand-green-deep" strokeWidth={2.2} />
           </span>
-          <p className="text-xs font-bold text-muted-foreground">جارٍ التحقق من الصلاحيات…</p>
+          <p className="text-xs font-bold text-muted-foreground">{t("جارٍ التحقق من الصلاحيات…")}</p>
         </div>
       </div>
     );

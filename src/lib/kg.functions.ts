@@ -32,6 +32,7 @@ export interface ActivityRow {
   activityTime: string | null;
   classId: string | null;
   className: string | null;
+  classNameEn: string | null;
   valueId: string | null;
   valueName: string | null;
   linkedToValue: boolean;
@@ -42,6 +43,7 @@ export interface ActivityRow {
 export interface ClassChildRow {
   id: string;
   name: string;
+  nameEn: string | null;
   stage: string;
   birthDate: string | null;
   gender: string | null;
@@ -49,6 +51,7 @@ export interface ClassChildRow {
   notes: string | null;
   classId: string | null;
   className: string | null;
+  classNameEn: string | null;
 }
 
 export interface DailyLogRow {
@@ -73,6 +76,7 @@ export interface ChildNoteRow {
   domain: string | null;
   createdAt: string;
   authorName: string | null;
+  authorNameEn: string | null;
 }
 
 export interface ScheduleRow {
@@ -91,8 +95,10 @@ export interface ThreadRow {
   status: string;
   parentId: string;
   parentName: string | null;
+  parentNameEn: string | null;
   childId: string | null;
   childName: string | null;
+  childNameEn: string | null;
   lastMessageAt: string;
 }
 
@@ -252,31 +258,43 @@ export const approveValue = createServerFn({ method: "POST" })
 /** فصول المعلمة الحالية. */
 export const myClasses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ id: string; name: string; stage: string }[]> => {
+  .handler(async ({ context }): Promise<{ id: string; name: string; nameEn: string | null; stage: string }[]> => {
     const { data, error } = await context.supabase
       .from("teacher_classes")
-      .select("class_id, classes(name, stage)")
+      .select("class_id, classes(name, name_en, stage)")
       .eq("teacher_id", context.userId);
     if (error) throw new Error(error.message);
-    return ((data ?? []) as unknown as { class_id: string; classes: { name: string; stage: string } | null }[])
+    return (
+      (data ?? []) as unknown as {
+        class_id: string;
+        classes: { name: string; name_en: string | null; stage: string } | null;
+      }[]
+    )
       .filter((r) => r.classes)
-      .map((r) => ({ id: r.class_id, name: r.classes!.name, stage: r.classes!.stage }));
+      .map((r) => ({
+        id: r.class_id,
+        name: r.classes!.name,
+        nameEn: r.classes!.name_en ?? null,
+        stage: r.classes!.stage,
+      }));
   });
 
 function mapChild(r: {
   id: string;
   name: string;
+  name_en: string | null;
   stage: string;
   birth_date: string | null;
   gender: string | null;
   allergies: string | null;
   notes: string | null;
   class_id: string | null;
-  classes: { name: string } | null;
+  classes: { name: string; name_en: string | null } | null;
 }): ClassChildRow {
   return {
     id: r.id,
     name: r.name,
+    nameEn: r.name_en ?? null,
     stage: r.stage,
     birthDate: r.birth_date,
     gender: r.gender,
@@ -284,10 +302,11 @@ function mapChild(r: {
     notes: r.notes,
     classId: r.class_id,
     className: r.classes?.name ?? null,
+    classNameEn: r.classes?.name_en ?? null,
   };
 }
 
-const childSelect = "id, name, stage, birth_date, gender, allergies, notes, class_id, classes(name)";
+const childSelect = "id, name, name_en, stage, birth_date, gender, allergies, notes, class_id, classes(name, name_en)";
 
 /** أطفال فصول المعلمة — RLS يمنع رؤية أطفال الفصول الأخرى. */
 export const myClassChildren = createServerFn({ method: "GET" })
@@ -414,14 +433,16 @@ export const listChildNotes = createServerFn({ method: "GET" })
     const notes = rows ?? [];
     const authorIds = [...new Set(notes.map((n) => n.author_id).filter(Boolean))] as string[];
     const names = new Map<string, string>();
+    const namesEn = new Map<string, string>();
     if (authorIds.length > 0) {
       // أسماء الكاتبات فقط — ولي الأمر لا يستطيع قراءة ملفات الكادر مباشرة.
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
-        .select("id, full_name")
+        .select("id, full_name, full_name_en")
         .in("id", authorIds);
       for (const p of profiles ?? []) names.set(p.id, p.full_name);
+      for (const p of profiles ?? []) if (p.full_name_en) namesEn.set(p.id, p.full_name_en);
     }
     return notes.map((n) => ({
       id: n.id,
@@ -430,6 +451,7 @@ export const listChildNotes = createServerFn({ method: "GET" })
       domain: n.domain,
       createdAt: n.created_at,
       authorName: names.get(n.author_id) ?? null,
+      authorNameEn: namesEn.get(n.author_id) ?? null,
     }));
   });
 
@@ -551,7 +573,7 @@ export const markScheduleDone = createServerFn({ method: "POST" })
 /* ================= الأنشطة ================= */
 
 const activitySelect =
-  "id, title, description, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name), values_week(name), activity_photos(path)";
+  "id, title, description, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name), activity_photos(path)";
 
 type ActivityQueryRow = {
   id: string;
@@ -563,7 +585,7 @@ type ActivityQueryRow = {
   value_id: string | null;
   linked_to_value: boolean;
   published: boolean;
-  classes: { name: string } | null;
+  classes: { name: string; name_en: string | null } | null;
   values_week: { name: string } | null;
   activity_photos: { path: string }[] | null;
 };
@@ -577,6 +599,7 @@ function mapActivity(r: ActivityQueryRow): ActivityRow {
     activityTime: r.activity_time,
     classId: r.class_id,
     className: r.classes?.name ?? null,
+    classNameEn: r.classes?.name_en ?? null,
     valueId: r.value_id,
     valueName: r.values_week?.name ?? null,
     linkedToValue: r.linked_to_value,
@@ -686,12 +709,16 @@ export const deleteActivity = createServerFn({ method: "POST" })
 
 async function nameLookup(ids: string[]) {
   const names = new Map<string, string>();
+  const namesEn = new Map<string, string>();
   const unique = [...new Set(ids.filter(Boolean))];
-  if (unique.length === 0) return names;
+  if (unique.length === 0) return { names, namesEn };
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("profiles").select("id, full_name").in("id", unique);
-  for (const p of data ?? []) names.set(p.id, p.full_name);
-  return names;
+  const { data } = await supabaseAdmin.from("profiles").select("id, full_name, full_name_en").in("id", unique);
+  for (const p of data ?? []) {
+    names.set(p.id, p.full_name);
+    if (p.full_name_en) namesEn.set(p.id, p.full_name_en);
+  }
+  return { names, namesEn };
 }
 
 /** محادثات ولي الأمر نفسه، أو جميع المحادثات للإدارة (RLS). */
@@ -700,7 +727,7 @@ export const listThreads = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<ThreadRow[]> => {
     const { data, error } = await context.supabase
       .from("message_threads")
-      .select("id, subject, status, parent_id, child_id, last_message_at, children(name)")
+      .select("id, subject, status, parent_id, child_id, last_message_at, children(name, name_en)")
       .order("last_message_at", { ascending: false });
     if (error) throw new Error(error.message);
     const rows = (data ?? []) as unknown as {
@@ -710,17 +737,19 @@ export const listThreads = createServerFn({ method: "GET" })
       parent_id: string;
       child_id: string | null;
       last_message_at: string;
-      children: { name: string } | null;
+      children: { name: string; name_en: string | null } | null;
     }[];
-    const names = await nameLookup(rows.map((r) => r.parent_id));
+    const { names, namesEn } = await nameLookup(rows.map((r) => r.parent_id));
     return rows.map((r) => ({
       id: r.id,
       subject: r.subject,
       status: r.status,
       parentId: r.parent_id,
       parentName: names.get(r.parent_id) ?? null,
+      parentNameEn: namesEn.get(r.parent_id) ?? null,
       childId: r.child_id,
       childName: r.children?.name ?? null,
+      childNameEn: r.children?.name_en ?? null,
       lastMessageAt: r.last_message_at,
     }));
   });

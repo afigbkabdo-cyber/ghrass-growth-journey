@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
 import { clearSession, roleLabels, useAppSession } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/more")({
   head: () => ({
@@ -45,6 +46,7 @@ const sections = [
 function AdminMorePage() {
   const navigate = useNavigate();
   const { session } = useAppSession();
+  const { t, n } = useI18n();
 
   const logout = async () => {
     await clearSession();
@@ -58,29 +60,29 @@ function AdminMorePage() {
           <LayoutGrid className="h-5.5 w-5.5 text-brand-green-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">القائمة</h1>
-          <p className="text-xs text-muted-foreground">كل أقسام الإدارة وحسابك</p>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("القائمة")}</h1>
+          <p className="text-xs text-muted-foreground">{t("كل أقسام الإدارة وحسابك")}</p>
         </div>
       </header>
 
       <section className="flex items-center gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
-        <Avatar name={session?.name || "الإدارة"} tone="green" size="xl" />
+        <Avatar name={session?.name ? n(session.name) : t("الإدارة")} tone="green" size="xl" />
         <div className="min-w-0">
           <h2 className="truncate font-display text-lg font-extrabold text-foreground">
-            {session?.name || "حساب الإدارة"}
+            {session?.name ? n(session.name) : t("حساب الإدارة")}
           </h2>
           <p className="truncate text-xs text-muted-foreground" dir="ltr">
-            {session?.phone ? `0${session.phone.slice(3)}` : "—"}
+            {session?.phone ? `0${session.phone.slice(3)}` : t("—")}
 
           </p>
           <div className="mt-2">
-            <ToneBadge tone="green">{roleLabels[session?.role ?? "admin"]}</ToneBadge>
+            <ToneBadge tone="green">{t(roleLabels[session?.role ?? "admin"])}</ToneBadge>
           </div>
         </div>
       </section>
 
       <section>
-        <SectionHeader title="الأقسام" icon={LayoutGrid} tone="blue" />
+        <SectionHeader title={t("الأقسام")} icon={LayoutGrid} tone="blue" />
         <div className="space-y-2">
           {sections.map((s) => (
             <Link
@@ -91,7 +93,7 @@ function AdminMorePage() {
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-muted">
                 <s.icon className="h-4.5 w-4.5 text-muted-foreground" strokeWidth={2.2} />
               </span>
-              <span className="flex-1 text-sm font-bold text-foreground">{s.label}</span>
+              <span className="flex-1 text-sm font-bold text-foreground">{t(s.label)}</span>
               <ChevronLeft className="h-4 w-4 text-muted-foreground" />
             </Link>
           ))}
@@ -103,7 +105,7 @@ function AdminMorePage() {
         className="flex w-full items-center gap-3 rounded-2xl border border-brand-pink/40 bg-brand-pink-soft/50 p-4 text-sm font-bold text-brand-pink-deep transition-colors hover:bg-brand-pink-soft"
       >
         <LogOut className="h-4.5 w-4.5" />
-        تسجيل الخروج
+        {t("تسجيل الخروج")}
       </button>
     </div>
   );
