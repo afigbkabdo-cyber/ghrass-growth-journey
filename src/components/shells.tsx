@@ -23,11 +23,13 @@ import {
 import { cn } from "@/lib/utils";
 import { GhirasLogo, toneClasses } from "@/components/ghiras";
 import { clearSession } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
 import type { Tone } from "@/lib/data";
 
 /** تسجيل خروج آمن للإدارة — مسح الجلسة والعودة لصفحة الدخول بدون رجوع للخلف. */
 function AdminLogoutButton() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   return (
     <button
       onClick={async () => {
@@ -37,7 +39,7 @@ function AdminLogoutButton() {
       className="flex w-full items-center gap-2.5 rounded-xl border border-brand-pink/40 bg-brand-pink-soft/50 px-3.5 py-2.5 text-xs font-bold text-brand-pink-deep transition-colors hover:bg-brand-pink-soft"
     >
       <LogOut className="h-4 w-4" />
-      تسجيل الخروج
+      {t("تسجيل الخروج")}
     </button>
   );
 }
@@ -54,13 +56,14 @@ export interface NavItem {
 
 function TopBar({ roleLabel, tone }: { roleLabel: string; tone: Tone }) {
   const t = toneClasses[tone];
+  const { t: tr } = useI18n();
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-2xl items-center justify-between px-4">
         <GhirasLogo />
         <div className="flex items-center gap-2">
           <span className={cn("hidden rounded-full px-3 py-1 text-[11px] font-bold sm:inline", t.soft, t.deep)}>
-            {roleLabel}
+            {tr(roleLabel)}
           </span>
           <button
             aria-label="الإشعارات"
@@ -78,6 +81,7 @@ function TopBar({ roleLabel, tone }: { roleLabel: string; tone: Tone }) {
 /* ---------- شريط تنقل سفلي ---------- */
 
 function BottomNav({ items }: { items: NavItem[] }) {
+  const { t: tr } = useI18n();
   return (
     <nav
       aria-label="التنقل الرئيسي"
@@ -113,7 +117,7 @@ function BottomNav({ items }: { items: NavItem[] }) {
                     isActive ? "text-brand-orange-deep" : "text-muted-foreground",
                   )}
                 >
-                  {item.label}
+                  {tr(item.label)}
                 </span>
               </>
             )}
@@ -155,6 +159,7 @@ export function AdminShell({
   sidebarItems: NavItem[];
   bottomItems: NavItem[];
 }) {
+  const { t: tr } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current =
     [...sidebarItems]
@@ -185,7 +190,7 @@ export function AdminShell({
                 )}
               >
                 <item.icon className="h-4.5 w-4.5 shrink-0" strokeWidth={active ? 2.4 : 2} />
-                {item.label}
+                {tr(item.label)}
               </Link>
             );
           })}
