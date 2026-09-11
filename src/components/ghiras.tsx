@@ -56,10 +56,11 @@ export const toneClasses: Record<
 
 /** الشعار الرسمي الكامل (الرمز + الاسم) — لشاشة الدخول والشاشات التعريفية. */
 export function GhirasLogoFull({ className }: { className?: string }) {
+  const { t } = useI18n();
   return (
     <img
       src={ghirasLogoFull.url}
-      alt="شعار روضة غراس — ننمو معًا"
+      alt={t("شعار روضة غراس — ننمو معًا")}
       className={cn("h-auto w-40 select-none object-contain", className)}
     />
   );
@@ -69,11 +70,12 @@ export function GhirasLogoFull({ className }: { className?: string }) {
  * شعار الترويسة — الاسم موجود داخل الشعار نفسه، فلا يُكتب نصًا بجانبه.
  */
 export function GhirasLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const { t } = useI18n();
   const box = size === "lg" ? "h-14" : size === "sm" ? "h-8" : "h-11";
   return (
     <img
       src={ghirasLogoFull.url}
-      alt="روضة غراس"
+      alt={t("روضة غراس")}
       className={cn("w-auto shrink-0 select-none object-contain", box)}
     />
   );
@@ -81,9 +83,11 @@ export function GhirasLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
 
 /** العبارة التعريفية — كلمة «غراس» باللون البرتقالي المعتمد. */
 export function GhirasTagline({ className }: { className?: string }) {
+  const { lang } = useI18n();
   return (
     <p className={cn("text-xs font-bold text-muted-foreground", className)}>
-      <span className="text-brand-orange-deep">غراس</span> — ننمو معًا
+      <span className="text-brand-orange-deep">{lang === "ar" ? "غراس" : "Ghiras"}</span>
+      {lang === "ar" ? " — ننمو معًا" : " — Growing together"}
     </p>
   );
 }
