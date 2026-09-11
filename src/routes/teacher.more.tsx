@@ -9,6 +9,7 @@ import {
   LogOut,
   ChevronLeft,
 } from "lucide-react";
+import { LanguageSwitcher } from "@/lib/i18n";
 import { PageContainer, SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
 import { currentTeacher, teacherClassTitle, subjectLabels, teacherPermissions } from "@/lib/teacher-data";
 import { clearSession } from "@/lib/session";
@@ -46,6 +47,7 @@ function TeacherMorePage() {
 
   return (
     <PageContainer>
+      <div className="mb-4"><LanguageSwitcher /></div>
       <header className="mb-4 flex items-center gap-3">
         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-blue-soft">
           <Menu className="h-5.5 w-5.5 text-brand-blue-deep" strokeWidth={2.2} />
