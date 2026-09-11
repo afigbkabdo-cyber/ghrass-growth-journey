@@ -7,7 +7,6 @@ export const teacher: Record<string, string> = {
   "الحضانة والقيم": "Nursery & Values",
 
   // دوام المعلمة
-  "الإثنين": "Monday",
   "حاضرة": "Present",
   "مكتمل": "Completed",
 
@@ -58,7 +57,6 @@ export const teacher: Record<string, string> = {
   "المشاركة": "Participation",
   "التواصل": "Communication",
   "السلوك": "Behavior",
-  "المهارات الاجتماعية": "Social skills",
   "التعلم": "Learning",
   "ملاحظة عامة": "General note",
 
@@ -101,7 +99,6 @@ export const teacher: Record<string, string> = {
   "فعالية أسبوع الشجرة": "Tree Week event",
   "سيزرع كل طفل بذرته في حديقة الروضة الأسبوع القادم. يُرجى تجهيز قائمة أطفال الفصل.":
     "Each child will plant their seed in the nursery garden next week. Please prepare the class children's list.",
-  "الأسبوع القادم": "Next week",
 
   // إشعارات المعلمة
   "تم نشر قيمة الأسبوع الجديدة: الصدق.": "The new value of the week has been published: Honesty.",
@@ -139,7 +136,6 @@ export const teacher: Record<string, string> = {
   "وصف مختصر لما فعله الأطفال…": "A brief description of what the children did…",
   "وصف النشاط": "Activity description",
   "وقت النشاط": "Activity time",
-  "الفصل": "Class",
   "مرتبط بقيمة الأسبوع": "Linked to the value of the week",
   "ربط النشاط بقيمة الأسبوع": "Link the activity to the value of the week",
   "{count} صورة مختارة": "{count} photos selected",
@@ -149,14 +145,9 @@ export const teacher: Record<string, string> = {
     "The value, the hadith and its source are approved by the administration and cannot be edited from the teacher interface.",
   "تم حفظ النشاط كمسودة": "The activity was saved as a draft",
   "تعذر حفظ النشاط": "Could not save the activity",
-  "تم حذف النشاط": "The activity was deleted",
-  "لا توجد أنشطة": "No activities",
   "أضيفي أول نشاط لفصلك.": "Add your class's first activity.",
-  "صورة من نشاط {title}": "Photo from the activity {title}",
-  "مرتبط بقيمة {value}": "Linked to the value {value}",
   "مرئي لأولياء الأمور": "Visible to parents",
   "غير منشور": "Not published",
-  "حذف النشاط": "Delete activity",
   "لا توجد قيمة معتمدة حاليًا": "No value is currently approved",
   "قيمة الأسبوع: {name}": "Value of the week: {name}",
 
@@ -168,7 +159,6 @@ export const teacher: Record<string, string> = {
   // إعلانات الإدارة (صفحة)
   "إعلانات الإدارة": "Administration announcements",
   "للقراءة فقط": "Read-only",
-  "لا توجد إعلانات": "No announcements",
   "ستظهر إعلانات الإدارة هنا عند نشرها.": "Administration announcements will appear here once published.",
   "من: {name}": "From: {name}",
 };

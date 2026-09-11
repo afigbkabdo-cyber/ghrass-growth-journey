@@ -59,7 +59,7 @@ function AdminAttendance() {
               <div key={c.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-bold text-foreground">{n(c.name)}</p>
+                    <p className="text-sm font-bold text-foreground">{t(c.name)}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {t(stageLabels[c.stage])} — {n(c.teacher)}
                     </p>
