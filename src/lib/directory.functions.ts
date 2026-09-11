@@ -138,6 +138,8 @@ const childSchema = z.object({
   guardianId: z.string().uuid().nullable().optional(),
   birthDate: z.string().trim().nullable().optional(),
   allergies: z.string().trim().nullable().optional(),
+  sessionPeriod: z.string().trim().nullable().optional(),
+  enrollmentTerm: z.string().trim().nullable().optional(),
 });
 
 /** تسجيل طفل جديد وربطه بولي أمر إن وُجد. */
@@ -153,6 +155,8 @@ export const createChild = createServerFn({ method: "POST" })
         class_id: data.classId ?? null,
         birth_date: data.birthDate || null,
         allergies: data.allergies || null,
+        session_period: data.sessionPeriod || null,
+        enrollment_term: data.enrollmentTerm || null,
       })
       .select("id")
       .single();
