@@ -94,4 +94,8 @@ export const teacherExtra: Record<string, string> = {
   "حديث الأسبوع": "Hadith of the week",
   "شعار روضة غراس — ننمو معًا": "Ghiras Kindergarten logo — Growing together",
   "روضة غراس": "Ghiras Kindergarten",
+
+  // دليل قيمة الأسبوع — تذييل
+  "القيمة والحديث ومصدرهما تُدار من الإدارة فقط، ولا يمكن تعديلها من واجهة المعلمة.":
+    "The value, the hadith, and its source are managed by the administration only, and cannot be edited from the teacher's interface.",
 };

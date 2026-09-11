@@ -106,7 +106,7 @@ function TeacherValueGuidePage() {
 
       <p className="flex items-start gap-2 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
         <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        القيمة والحديث ومصدرهما تُدار من الإدارة فقط، ولا يمكن تعديلها من واجهة المعلمة.
+        {tr("القيمة والحديث ومصدرهما تُدار من الإدارة فقط، ولا يمكن تعديلها من واجهة المعلمة.")}
       </p>
     </PageContainer>
   );
