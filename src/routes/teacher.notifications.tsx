@@ -3,6 +3,7 @@ import { Bell } from "lucide-react";
 import { PageContainer, EmptyState } from "@/components/ghiras";
 import { toneClasses } from "@/components/ghiras";
 import { teacherNotifications } from "@/lib/teacher-data";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/notifications")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/teacher/notifications")({
 });
 
 function TeacherNotificationsPage() {
+  const { t } = useI18n();
   const unread = teacherNotifications.filter((n) => n.unread).length;
 
   return (
@@ -31,15 +33,15 @@ function TeacherNotificationsPage() {
           <Bell className="h-5.5 w-5.5 text-brand-yellow-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">الإشعارات</h1>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("الإشعارات")}</h1>
           <p className="text-xs text-muted-foreground">
-            {unread > 0 ? `${unread} إشعار غير مقروء` : "كل الإشعارات مقروءة"}
+            {unread > 0 ? t("{count} إشعار غير مقروء", { count: unread }) : t("كل الإشعارات مقروءة")}
           </p>
         </div>
       </header>
 
       {teacherNotifications.length === 0 ? (
-        <EmptyState title="لا توجد إشعارات" message="سنخبرك هنا بكل جديد يخص فصلك." />
+        <EmptyState title={t("لا توجد إشعارات")} message={t("سنخبرك هنا بكل جديد يخص فصلك.")} />
       ) : (
         <div className="space-y-2">
           {teacherNotifications.map((n) => {
@@ -58,9 +60,9 @@ function TeacherNotificationsPage() {
                   <p
                     className={`text-sm leading-relaxed ${n.unread ? "font-bold text-foreground" : "text-muted-foreground"}`}
                   >
-                    {n.text}
+                    {t(n.text)}
                   </p>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">{n.time}</p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">{t(n.time)}</p>
                 </div>
                 {n.unread && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-pink" />}
               </div>
