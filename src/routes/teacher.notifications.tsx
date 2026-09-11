@@ -45,7 +45,7 @@ function TeacherNotificationsPage() {
       ) : (
         <div className="space-y-2">
           {teacherNotifications.map((n) => {
-            const t = toneClasses[n.tone];
+            const tone = toneClasses[n.tone];
             return (
               <div
                 key={n.id}
@@ -53,7 +53,7 @@ function TeacherNotificationsPage() {
                   n.unread ? "border-primary/30 bg-card" : "border-border bg-card/60"
                 }`}
               >
-                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg ${t.soft}`}>
+                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg ${tone.soft}`}>
                   <span aria-hidden>{n.emoji}</span>
                 </span>
                 <div className="min-w-0 flex-1">
