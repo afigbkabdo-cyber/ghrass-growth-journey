@@ -86,4 +86,12 @@ export const teacherExtra: Record<string, string> = {
   // ولي الأمر — الخصوصية
   "الموافقات (مثل نشر صور الأنشطة) تُعطى مرة واحدة عند تسجيل الطفل في الروضة، وتُدار من إدارة الروضة. لتعديل أي موافقة تواصل مع الإدارة من صفحة الرسائل.":
     "Consents (such as publishing activity photos) are given once when the child is enrolled and are managed by the nursery administration. To change a consent, contact the administration from the Messages page.",
+
+  // متفرقات
+  "الأسماء والأطفال والمعلمات": "Names, children and teachers",
+  "دليل قيمة الأسبوع": "Value of the week guide",
+  "كيف نغرسها": "How we nurture it",
+  "حديث الأسبوع": "Hadith of the week",
+  "شعار روضة غراس — ننمو معًا": "Ghiras Kindergarten logo — Growing together",
+  "روضة غراس": "Ghiras Kindergarten",
 };
