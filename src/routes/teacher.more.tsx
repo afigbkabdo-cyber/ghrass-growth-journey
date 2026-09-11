@@ -9,7 +9,7 @@ import {
   LogOut,
   ChevronLeft,
 } from "lucide-react";
-import { LanguageSwitcher } from "@/lib/i18n";
+import { LanguageSwitcher, useI18n } from "@/lib/i18n";
 import { PageContainer, SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
 import { currentTeacher, teacherClassTitle, subjectLabels, teacherPermissions } from "@/lib/teacher-data";
 import { clearSession } from "@/lib/session";
@@ -38,6 +38,7 @@ const links = [
 ] as const;
 
 function TeacherMorePage() {
+  const { t, n } = useI18n();
   const navigate = useNavigate();
 
   const logout = () => {
@@ -53,8 +54,8 @@ function TeacherMorePage() {
           <Menu className="h-5.5 w-5.5 text-brand-blue-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">المزيد</h1>
-          <p className="text-xs text-muted-foreground">حسابك وصلاحياتك في غراس</p>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("المزيد")}</h1>
+          <p className="text-xs text-muted-foreground">{t("حسابك وصلاحياتك في غراس")}</p>
         </div>
       </header>
 
@@ -62,12 +63,12 @@ function TeacherMorePage() {
         <Avatar name={currentTeacher.name} tone={currentTeacher.tone} size="xl" />
         <div className="min-w-0">
           <h2 className="truncate font-display text-lg font-extrabold text-foreground">
-            {currentTeacher.name}
+            {n(currentTeacher.name)}
           </h2>
           <p className="text-xs text-muted-foreground">{currentTeacher.email}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <ToneBadge tone="orange">{subjectLabels[currentTeacher.subject]}</ToneBadge>
-            <ToneBadge tone="blue">{teacherClassTitle}</ToneBadge>
+            <ToneBadge tone="orange">{t(subjectLabels[currentTeacher.subject])}</ToneBadge>
+            <ToneBadge tone="blue">{n(teacherClassTitle)}</ToneBadge>
           </div>
         </div>
       </section>
@@ -82,35 +83,35 @@ function TeacherMorePage() {
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-muted">
               <l.icon className="h-4.5 w-4.5 text-muted-foreground" strokeWidth={2.2} />
             </span>
-            <span className="flex-1 text-sm font-bold text-foreground">{l.label}</span>
+            <span className="flex-1 text-sm font-bold text-foreground">{t(l.label)}</span>
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </Link>
         ))}
       </section>
 
       <section className="mb-5">
-        <SectionHeader title="صلاحياتي" subtitle="ما أستطيع فعله وما هو محجوب" icon={ShieldCheck} tone="green" />
+        <SectionHeader title={t("صلاحياتي")} subtitle={t("ما أستطيع فعله وما هو محجوب")} icon={ShieldCheck} tone="green" />
         <div className="space-y-2">
           <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-extrabold text-brand-green-deep">
-              <ShieldCheck className="h-4 w-4" /> مسموح
+              <ShieldCheck className="h-4 w-4" /> {t("مسموح")}
             </p>
             <ul className="space-y-1.5">
               {teacherPermissions.allowed.map((p) => (
                 <li key={p} className="text-xs text-muted-foreground">
-                  • {p}
+                  • {t(p)}
                 </li>
               ))}
             </ul>
           </div>
           <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-extrabold text-brand-pink-deep">
-              <ShieldAlert className="h-4 w-4" /> غير مسموح
+              <ShieldAlert className="h-4 w-4" /> {t("غير مسموح")}
             </p>
             <ul className="space-y-1.5">
               {teacherPermissions.denied.map((p) => (
                 <li key={p} className="text-xs text-muted-foreground">
-                  • {p}
+                  • {t(p)}
                 </li>
               ))}
             </ul>
@@ -124,7 +125,7 @@ function TeacherMorePage() {
           className="flex w-full items-center gap-3 rounded-2xl border border-brand-pink/40 bg-brand-pink-soft/50 p-4 text-sm font-bold text-brand-pink-deep transition-colors hover:bg-brand-pink-soft"
         >
           <LogOut className="h-4.5 w-4.5" />
-          تسجيل الخروج
+          {t("تسجيل الخروج")}
         </button>
       </section>
     </PageContainer>

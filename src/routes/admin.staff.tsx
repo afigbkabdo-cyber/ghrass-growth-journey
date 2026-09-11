@@ -67,7 +67,7 @@ function AdminStaff() {
       qc.invalidateQueries({ queryKey: ["admin-staff"] });
       qc.invalidateQueries({ queryKey: ["admin-parents"] });
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => setError(t(e.message)),
   });
 
   const reset = useMutation({
@@ -76,7 +76,7 @@ function AdminStaff() {
       setError(null);
       setNotice(t("كلمة مرور مؤقتة جديدة: {password}", { password: result.password }));
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => setError(t(e.message)),
   });
 
   const staff = staffQuery.data ?? [];

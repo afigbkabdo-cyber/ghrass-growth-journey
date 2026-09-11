@@ -60,7 +60,7 @@ function MessagesPage() {
   });
 
   return (
-    <AppShell navItems={parentNav} roleLabel="ولي أمر" tone="orange">
+    <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
       <PageContainer>
         <header className="mb-4 flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-pink-soft">

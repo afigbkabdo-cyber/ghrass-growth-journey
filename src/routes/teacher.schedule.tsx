@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ListChecks, CheckCircle2, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer, EmptyState } from "@/components/ghiras";
+import { useI18n } from "@/lib/i18n";
 import { listSchedule, markScheduleDone, myClasses } from "@/lib/kg.functions";
 
 export const Route = createFileRoute("/teacher/schedule")({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/teacher/schedule")({
 });
 
 function TeacherSchedulePage() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const fetchClasses = useServerFn(myClasses);
   const fetchSchedule = useServerFn(listSchedule);
@@ -50,8 +52,8 @@ function TeacherSchedulePage() {
           <ListChecks className="h-5.5 w-5.5 text-brand-green-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">الجدول اليومي</h1>
-          <p className="text-xs text-muted-foreground">علّمي ما تم إنجازه اليوم</p>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("الجدول اليومي")}</h1>
+          <p className="text-xs text-muted-foreground">{t("علّمي ما تم إنجازه اليوم")}</p>
         </div>
       </header>
 
@@ -76,9 +78,9 @@ function TeacherSchedulePage() {
       )}
 
       {schedule.isLoading ? (
-        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+        <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
       ) : (schedule.data ?? []).length === 0 ? (
-        <EmptyState title="لا يوجد جدول" message="الإدارة تضيف فقرات الجدول اليومي للفصل." />
+        <EmptyState title={t("لا يوجد جدول")} message={t("الإدارة تضيف فقرات الجدول اليومي للفصل.")} />
       ) : (
         <div className="space-y-2.5">
           {(schedule.data ?? []).map((s) => (

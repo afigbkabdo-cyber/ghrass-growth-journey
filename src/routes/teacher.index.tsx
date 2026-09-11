@@ -74,7 +74,7 @@ function TeacherHome() {
             <p className="text-xs font-bold text-muted-foreground">{t("صباح الخير")} 🌤️</p>
             <h1 className="font-display text-xl font-extrabold text-foreground">{n(currentTeacher.name)}</h1>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {t(subjectLabels[currentTeacher.subject])} · {teacherClassTitle}
+              {t(subjectLabels[currentTeacher.subject])} · {n(teacherClassTitle)}
             </p>
           </div>
         </div>

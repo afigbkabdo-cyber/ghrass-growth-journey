@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Blocks, Plus, X, Eye, EyeOff, ImagePlus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer, ToneBadge, EmptyState } from "@/components/ghiras";
+import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import {
   deleteActivity,
@@ -33,6 +34,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function TeacherActivitiesPage() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const fetchActivities = useServerFn(listActivities);
   const fetchClasses = useServerFn(myClasses);
@@ -86,7 +88,7 @@ function TeacherActivitiesPage() {
       }
     },
     onSuccess: () => {
-      toast.success("تم حفظ النشاط كمسودة");
+      toast.success(t("تم حفظ النشاط كمسودة"));
       setTitle("");
       setDescription("");
       setTime("");
@@ -94,22 +96,22 @@ function TeacherActivitiesPage() {
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["activities"] });
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر حفظ النشاط"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر حفظ النشاط")),
   });
 
   const togglePublish = useMutation({
     mutationFn: (v: { id: string; published: boolean }) => publish({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["activities"] }),
-    onError: (e: Error) => toast.error(e.message || "تعذر التحديث"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر التحديث")),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
-      toast.success("تم حذف النشاط");
+      toast.success(t("تم حذف النشاط"));
       qc.invalidateQueries({ queryKey: ["activities"] });
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر الحذف"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر الحذف")),
   });
 
   return (
@@ -120,9 +122,9 @@ function TeacherActivitiesPage() {
             <Blocks className="h-5.5 w-5.5 text-brand-orange-deep" strokeWidth={2.2} />
           </span>
           <div>
-            <h1 className="font-display text-2xl font-extrabold text-foreground">أنشطة فصلي</h1>
+            <h1 className="font-display text-2xl font-extrabold text-foreground">{t("أنشطة فصلي")}</h1>
             <p className="text-xs text-muted-foreground">
-              {value.data ? `قيمة الأسبوع: ${value.data.name}` : "لا توجد قيمة معتمدة حاليًا"}
+              {value.data ? t("قيمة الأسبوع: {name}", { name: value.data.name }) : t("لا توجد قيمة معتمدة حاليًا")}
             </p>
           </div>
         </div>
@@ -130,7 +132,7 @@ function TeacherActivitiesPage() {
           type="button"
           onClick={() => setOpen((o) => !o)}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft"
-          aria-label="إضافة نشاط"
+          aria-label={t("إضافة نشاط")}
         >
           {open ? <X className="h-5 w-5" strokeWidth={2.4} /> : <Plus className="h-5 w-5" strokeWidth={2.4} />}
         </button>
@@ -138,19 +140,19 @@ function TeacherActivitiesPage() {
 
       {open && (
         <section className="mb-5 space-y-2.5 rounded-3xl border border-brand-orange-soft bg-card p-4 shadow-soft">
-          <h2 className="text-sm font-extrabold text-foreground">نشاط جديد</h2>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="عنوان النشاط" aria-label="عنوان النشاط" className={field} />
+          <h2 className="text-sm font-extrabold text-foreground">{t("نشاط جديد")}</h2>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("عنوان النشاط")} aria-label={t("عنوان النشاط")} className={field} />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            placeholder="وصف مختصر لما فعله الأطفال…"
-            aria-label="وصف النشاط"
+            placeholder={t("وصف مختصر لما فعله الأطفال…")}
+            aria-label={t("وصف النشاط")}
             className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none"
           />
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label="وقت النشاط" className={field} />
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label={t("وقت النشاط")} className={field} />
           {(classes.data ?? []).length > 1 && (
-            <select value={activeClass} onChange={(e) => setClassId(e.target.value)} aria-label="الفصل" className={field}>
+            <select value={activeClass} onChange={(e) => setClassId(e.target.value)} aria-label={t("الفصل")} className={field}>
               {(classes.data ?? []).map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -162,7 +164,7 @@ function TeacherActivitiesPage() {
           <label className="flex items-center justify-between rounded-2xl border border-border bg-background p-3.5">
             <span className="flex items-center gap-2 text-xs font-bold text-foreground">
               <Sparkles className="h-4 w-4 text-brand-green-deep" />
-              مرتبط بقيمة الأسبوع {value.data ? `(${value.data.name})` : ""}
+              {t("مرتبط بقيمة الأسبوع")} {value.data ? `(${value.data.name})` : ""}
             </span>
             <input
               type="checkbox"
@@ -170,13 +172,13 @@ function TeacherActivitiesPage() {
               disabled={!value.data}
               onChange={(e) => setLinked(e.target.checked)}
               className="h-5 w-5 accent-[var(--brand-green,green)]"
-              aria-label="ربط النشاط بقيمة الأسبوع"
+              aria-label={t("ربط النشاط بقيمة الأسبوع")}
             />
           </label>
 
           <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-border bg-background p-3.5 text-xs font-bold text-muted-foreground">
             <ImagePlus className="h-4.5 w-4.5" />
-            {files.length > 0 ? `${files.length} صورة مختارة` : "إضافة صور النشاط"}
+            {files.length > 0 ? t("{count} صورة مختارة", { count: files.length }) : t("إضافة صور النشاط")}
             <input
               type="file"
               accept="image/*"
@@ -190,11 +192,11 @@ function TeacherActivitiesPage() {
             type="button"
             onClick={() => {
               if (!title.trim()) {
-                toast.error("اكتبي عنوان النشاط");
+                toast.error(t("اكتبي عنوان النشاط"));
                 return;
               }
               if (!activeClass) {
-                toast.error("لا يوجد فصل مرتبط بحسابك");
+                toast.error(t("لا يوجد فصل مرتبط بحسابك"));
                 return;
               }
               create.mutate();
@@ -202,18 +204,18 @@ function TeacherActivitiesPage() {
             disabled={create.isPending || uploading}
             className="w-full rounded-2xl bg-primary py-3 text-sm font-extrabold text-primary-foreground disabled:opacity-50"
           >
-            {create.isPending || uploading ? "جارٍ الحفظ…" : "حفظ كمسودة"}
+            {create.isPending || uploading ? t("جارٍ الحفظ…") : t("حفظ كمسودة")}
           </button>
           <p className="rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-            القيمة والحديث ومصدرهما معتمدان من الإدارة ولا يمكن تعديلهما من واجهة المعلمة.
+            {t("القيمة والحديث ومصدرهما معتمدان من الإدارة ولا يمكن تعديلهما من واجهة المعلمة.")}
           </p>
         </section>
       )}
 
       {activities.isLoading ? (
-        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+        <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
       ) : (activities.data ?? []).length === 0 ? (
-        <EmptyState title="لا توجد أنشطة" message="أضيفي أول نشاط لفصلك." />
+        <EmptyState title={t("لا توجد أنشطة")} message={t("أضيفي أول نشاط لفصلك.")} />
       ) : (
         <div className="space-y-3">
           {(activities.data ?? []).map((a) => (
@@ -221,19 +223,19 @@ function TeacherActivitiesPage() {
               {a.photos.length > 0 && (
                 <div className={a.photos.length === 1 ? "" : "grid grid-cols-2 gap-0.5"}>
                   {a.photos.slice(0, 4).map((src) => (
-                    <img key={src} src={src} alt={`صورة من نشاط ${a.title}`} loading="lazy" className="h-32 w-full object-cover" />
+                    <img key={src} src={src} alt={t("صورة من نشاط {title}", { title: a.title })} loading="lazy" className="h-32 w-full object-cover" />
                   ))}
                 </div>
               )}
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
-                  <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? "منشور" : "مسودة"}</ToneBadge>
+                  <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? t("منشور") : t("مسودة")}</ToneBadge>
                 </div>
                 {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   {a.className && <ToneBadge tone="blue">{a.className}</ToneBadge>}
-                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">مرتبط بقيمة {a.valueName}</ToneBadge>}
+                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: a.valueName })}</ToneBadge>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <button
@@ -243,18 +245,18 @@ function TeacherActivitiesPage() {
                   >
                     {a.published ? (
                       <>
-                        <Eye className="h-3.5 w-3.5 text-brand-green-deep" strokeWidth={2.2} /> مرئي لأولياء الأمور
+                        <Eye className="h-3.5 w-3.5 text-brand-green-deep" strokeWidth={2.2} /> {t("مرئي لأولياء الأمور")}
                       </>
                     ) : (
                       <>
-                        <EyeOff className="h-3.5 w-3.5" strokeWidth={2.2} /> غير منشور
+                        <EyeOff className="h-3.5 w-3.5" strokeWidth={2.2} /> {t("غير منشور")}
                       </>
                     )}
                   </button>
                   <button
                     type="button"
                     onClick={() => del.mutate(a.id)}
-                    aria-label="حذف النشاط"
+                    aria-label={t("حذف النشاط")}
                     className="grid h-9 w-9 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />

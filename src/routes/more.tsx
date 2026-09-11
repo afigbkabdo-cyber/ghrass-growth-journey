@@ -50,7 +50,7 @@ function MorePage() {
         <SectionHeader title={t("الخصوصية")} subtitle={t("بيانات طفلك محفوظة ومحمية")} icon={ShieldCheck} tone="green" />
         <div className="mb-6 rounded-2xl border border-border bg-card p-4 shadow-soft">
           <p className="text-xs leading-relaxed text-muted-foreground">
-            {t("الموافقات (مثل نشر صور الأنشطة) تُعطى مرة واحدة عند تسجيل الطفل في الروضة، وتُدار من إدارة الروضة.\n            لتعديل أي موافقة تواصل مع الإدارة من صفحة الرسائل.")}
+            {t("الموافقات (مثل نشر صور الأنشطة) تُعطى مرة واحدة عند تسجيل الطفل في الروضة، وتُدار من إدارة الروضة. لتعديل أي موافقة تواصل مع الإدارة من صفحة الرسائل.")}
           </p>
         </div>
 

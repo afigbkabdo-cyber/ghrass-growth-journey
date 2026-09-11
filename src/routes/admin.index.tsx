@@ -104,17 +104,17 @@ function AdminHome() {
       <section>
         <SectionHeader
           title={t("قيمة الأسبوع")}
-          subtitle={`${currentValue.weekStart} — ${currentValue.weekEnd}`}
+          subtitle={`${t(currentValue.weekStart)} — ${t(currentValue.weekEnd)}`}
           icon={HeartHandshake}
           tone="orange"
           action={{ label: t("خطة القيم"), to: "/admin/values" }}
         />
         <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-lg font-extrabold text-foreground">{currentValue.name}</p>
+            <p className="font-display text-lg font-extrabold text-foreground">{t(currentValue.name)}</p>
             <ToneBadge tone="green">{t(statusLabels[currentValue.status])}</ToneBadge>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{currentValue.tagline}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t(currentValue.tagline)}</p>
           {pending.length > 0 && (
             <p className="mt-3 rounded-xl bg-brand-yellow-soft px-3 py-2 text-[11px] font-bold text-brand-yellow-deep">
               {t("لديك {count} قيم بانتظار الاعتماد أو الإكمال", { count: pending.length })}
@@ -133,7 +133,7 @@ function AdminHome() {
               <div key={c.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-foreground">{n(c.name)}</p>
+                    <p className="truncate text-sm font-bold text-foreground">{t(c.name)}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {t(stageLabels[c.stage])} — {n(c.teacher)}
                     </p>
