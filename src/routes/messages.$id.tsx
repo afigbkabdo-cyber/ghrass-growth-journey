@@ -9,6 +9,25 @@ import { PageContainer, EmptyState } from "@/components/ghiras";
 import { RoleGuard } from "@/components/role-guard";
 import { sectionRoles } from "@/lib/session";
 import { listThreadMessages, listThreads, sendMessage } from "@/lib/kg.functions";
+import { useI18n } from "@/lib/i18n";
+
+function ThreadErrorState() {
+  const { t } = useI18n();
+  return (
+    <PageContainer>
+      <EmptyState title={t("تعذر عرض المحادثة")} message={t("حاول تحديث الصفحة.")} />
+    </PageContainer>
+  );
+}
+
+function ThreadNotFoundState() {
+  const { t } = useI18n();
+  return (
+    <PageContainer>
+      <EmptyState title={t("لم نجد المحادثة")} message={t("ربما حُذفت أو لا تملك صلاحية عرضها.")} />
+    </PageContainer>
+  );
+}
 
 export const Route = createFileRoute("/messages/$id")({
   head: () => ({
@@ -21,16 +40,8 @@ export const Route = createFileRoute("/messages/$id")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  errorComponent: () => (
-    <PageContainer>
-      <EmptyState title="تعذر عرض المحادثة" message="حاول تحديث الصفحة." />
-    </PageContainer>
-  ),
-  notFoundComponent: () => (
-    <PageContainer>
-      <EmptyState title="لم نجد المحادثة" message="ربما حُذفت أو لا تملك صلاحية عرضها." />
-    </PageContainer>
-  ),
+  errorComponent: () => <ThreadErrorState />,
+  notFoundComponent: () => <ThreadNotFoundState />,
   component: () => (
     <RoleGuard allow={sectionRoles.parent}>
       <ThreadPage />
@@ -39,6 +50,7 @@ export const Route = createFileRoute("/messages/$id")({
 });
 
 function ThreadPage() {
+  const { t, dt } = useI18n();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const fetchMessages = useServerFn(listThreadMessages);
@@ -60,22 +72,22 @@ function ThreadPage() {
       qc.invalidateQueries({ queryKey: ["thread-messages", id] });
       qc.invalidateQueries({ queryKey: ["parent-threads"] });
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر الإرسال"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر الإرسال")),
   });
 
   return (
     <AppShell navItems={parentNav} roleLabel="ولي أمر" tone="orange">
       <PageContainer className="pb-36">
         <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-soft">
-          <Link to="/messages" aria-label="عودة للرسائل" className="grid h-9 w-9 place-items-center rounded-xl hover:bg-muted">
+          <Link to="/messages" aria-label={t("عودة للرسائل")} className="grid h-9 w-9 place-items-center rounded-xl hover:bg-muted">
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </Link>
           <div className="min-w-0">
             <h1 className="truncate text-sm font-extrabold text-foreground">
-              {thread?.subject ?? "محادثة مع الإدارة"}
+              {thread?.subject ?? t("محادثة مع الإدارة")}
             </h1>
             <p className="text-[11px] text-muted-foreground">
-              {thread?.childName ? `بخصوص ${thread.childName} • ` : ""}إدارة الروضة
+              {thread?.childName ? t("بخصوص {name} • ", { name: thread.childName }) : ""}{t("إدارة الروضة")}
             </p>
           </div>
         </div>
@@ -98,8 +110,8 @@ function ThreadPage() {
                     {m.body}
                   </p>
                   <p className={`mt-1 text-[10px] ${mine ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-                    {mine ? "أنت" : "الإدارة"} •{" "}
-                    {new Date(m.createdAt).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                    {mine ? t("أنت") : t("الإدارة")} •{" "}
+                    {dt(m.createdAt)}
                   </p>
                 </div>
               </div>
@@ -118,12 +130,12 @@ function ThreadPage() {
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="اكتب رسالتك للإدارة…"
+              placeholder={t("اكتب رسالتك للإدارة…")}
               className="h-11 flex-1 rounded-2xl border border-input bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <button
               type="submit"
-              aria-label="إرسال"
+              aria-label={t("إرسال")}
               disabled={reply.isPending}
               className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft transition-transform active:scale-95 disabled:opacity-50"
             >

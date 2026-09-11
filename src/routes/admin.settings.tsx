@@ -28,13 +28,6 @@ export const Route = createFileRoute("/admin/settings")({
 
 const field = "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary";
 
-const shiftSettings = [
-  { label: "بداية الدوام", value: "٧:٠٠ ص" },
-  { label: "نهاية الدوام", value: "١٢:٣٠ م" },
-  { label: "حد التأخير", value: "١٥ دقيقة" },
-  { label: "أيام العمل", value: "الأحد — الخميس" },
-];
-
 const notificationSettings = [
   { label: "إشعار حضور الطفل لولي الأمر", enabled: true },
   { label: "إشعار الأنشطة اليومية", enabled: true },
@@ -61,7 +54,7 @@ const rolePermissions = [
 ];
 
 function AdminSettingsPage() {
-  const { t: tr } = useI18n();
+  const { t: tr, time } = useI18n();
   const qc = useQueryClient();
   const fetchSettings = useServerFn(getNurserySettings);
   const saveSettings = useServerFn(saveNurserySettings);
@@ -75,7 +68,23 @@ function AdminSettingsPage() {
   }, [settings.data]);
 
   const save = useMutation({
-    mutationFn: (data: NurseryInfo) => saveSettings({ data }),
+    mutationFn: (data: NurseryInfo) =>
+      saveSettings({
+        data: {
+          id: data.id,
+          name: data.name,
+          tagline: data.tagline,
+          city: data.city,
+          phone: data.phone,
+          email: data.email,
+          instagram: data.instagram,
+          nameEn: data.nameEn || "",
+          taglineEn: data.taglineEn || "",
+          cityEn: data.cityEn || "",
+          dayStart: data.dayStart || "",
+          dayEnd: data.dayEnd || "",
+        },
+      }),
     onSuccess: () => {
       toast.success(tr("تم الحفظ"));
       setEditing(false);
@@ -93,6 +102,12 @@ function AdminSettingsPage() {
     { label: tr("إنستقرام"), key: "instagram" },
   ];
 
+  const enRows: { label: string; key: keyof NurseryInfo }[] = [
+    { label: tr("اسم الروضة (إنجليزي)"), key: "nameEn" },
+    { label: tr("الشعار (إنجليزي)"), key: "taglineEn" },
+    { label: tr("المدينة (إنجليزي)"), key: "cityEn" },
+  ];
+
   return (
     <div className="space-y-6">
       <header className="flex items-center gap-3">
@@ -101,7 +116,7 @@ function AdminSettingsPage() {
         </span>
         <div>
           <h1 className="font-display text-2xl font-extrabold text-foreground">{tr("الإعدادات")}</h1>
-          <p className="text-xs text-muted-foreground">بيانات الروضة واللغة والدوام والصلاحيات</p>
+          <p className="text-xs text-muted-foreground">{tr("بيانات الروضة واللغة والدوام والصلاحيات")}</p>
         </div>
       </header>
 
@@ -131,12 +146,43 @@ function AdminSettingsPage() {
               <label key={r.key} className="block text-[11px] font-bold text-muted-foreground">
                 {r.label}
                 <input
-                  value={form[r.key]}
+                  value={form[r.key] ?? ""}
                   onChange={(e) => setForm({ ...form, [r.key]: e.target.value })}
                   className={field}
                 />
               </label>
             ))}
+            {enRows.map((r) => (
+              <label key={r.key} className="block text-[11px] font-bold text-muted-foreground">
+                {r.label}
+                <input
+                  value={form[r.key] ?? ""}
+                  onChange={(e) => setForm({ ...form, [r.key]: e.target.value })}
+                  className={field}
+                  dir="ltr"
+                />
+              </label>
+            ))}
+            <div className="grid grid-cols-2 gap-2.5">
+              <label className="block text-[11px] font-bold text-muted-foreground">
+                {tr("بداية الدوام")}
+                <input
+                  type="time"
+                  value={form.dayStart ?? ""}
+                  onChange={(e) => setForm({ ...form, dayStart: e.target.value })}
+                  className={field}
+                />
+              </label>
+              <label className="block text-[11px] font-bold text-muted-foreground">
+                {tr("نهاية الدوام")}
+                <input
+                  type="time"
+                  value={form.dayEnd ?? ""}
+                  onChange={(e) => setForm({ ...form, dayEnd: e.target.value })}
+                  className={field}
+                />
+              </label>
+            </div>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -166,14 +212,27 @@ function AdminSettingsPage() {
                 <span className="text-sm font-bold text-foreground">{form[r.key] || tr("غير محدد")}</span>
               </div>
             ))}
+            {enRows.map((r) => (
+              <div key={r.key} className="flex items-center justify-between gap-3 p-4">
+                <span className="text-xs font-bold text-muted-foreground">{r.label}</span>
+                <span className="text-sm font-bold text-foreground" dir="ltr">
+                  {form[r.key] || tr("غير محدد")}
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </section>
 
       <section>
-        <SectionHeader title="أوقات الدوام" subtitle="تُطبَّق على دوام المعلمات" icon={Clock} tone="blue" />
+        <SectionHeader title={tr("أوقات الدوام")} subtitle={tr("تُطبَّق على دوام المعلمات")} icon={Clock} tone="blue" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {shiftSettings.map((s) => (
+          {[
+            { label: tr("بداية الدوام"), value: form?.dayStart ? time(form.dayStart) : tr("غير محدد") },
+            { label: tr("نهاية الدوام"), value: form?.dayEnd ? time(form.dayEnd) : tr("غير محدد") },
+            { label: tr("حد التأخير"), value: `١٥ ${tr("دقيقة")}` },
+            { label: tr("أيام العمل"), value: tr("الأحد — الخميس") },
+          ].map((s) => (
             <div key={s.label} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
               <p className="text-[11px] font-bold text-muted-foreground">{s.label}</p>
               <p className="mt-1 text-sm font-extrabold text-foreground">{s.value}</p>
@@ -183,27 +242,27 @@ function AdminSettingsPage() {
       </section>
 
       <section>
-        <SectionHeader title="الإشعارات" icon={Bell} tone="orange" />
+        <SectionHeader title={tr("الإشعارات")} icon={Bell} tone="orange" />
         <div className="divide-y divide-border rounded-3xl border border-border bg-card shadow-soft">
           {notificationSettings.map((n) => (
             <div key={n.label} className="flex items-center justify-between gap-3 p-4">
-              <span className="text-sm font-bold text-foreground">{n.label}</span>
-              <ToneBadge tone={n.enabled ? "green" : "yellow"}>{n.enabled ? "مفعّل" : "متوقف"}</ToneBadge>
+              <span className="text-sm font-bold text-foreground">{tr(n.label)}</span>
+              <ToneBadge tone={n.enabled ? "green" : "yellow"}>{n.enabled ? tr("مفعّل") : tr("متوقف")}</ToneBadge>
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <SectionHeader title="الصلاحيات حسب الدور" icon={ShieldCheck} tone="pink" />
+        <SectionHeader title={tr("الصلاحيات حسب الدور")} icon={ShieldCheck} tone="pink" />
         <div className="grid gap-3 sm:grid-cols-3">
           {rolePermissions.map((r) => (
             <div key={r.role} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
-              <ToneBadge tone={r.tone}>{r.role}</ToneBadge>
+              <ToneBadge tone={r.tone}>{tr(r.role)}</ToneBadge>
               <ul className="mt-2.5 space-y-1.5">
                 {r.items.map((i) => (
                   <li key={i} className="text-xs text-muted-foreground">
-                    • {i}
+                    • {tr(i)}
                   </li>
                 ))}
               </ul>
@@ -214,7 +273,7 @@ function AdminSettingsPage() {
 
       <section className="flex items-start gap-3 rounded-3xl border border-brand-green-soft bg-brand-green-soft/40 p-4">
         <Info className="mt-0.5 h-4.5 w-4.5 shrink-0 text-brand-green-deep" strokeWidth={2.2} />
-        <p className="text-xs leading-relaxed text-foreground/80">{adminPrivacyNote}</p>
+        <p className="text-xs leading-relaxed text-foreground/80">{tr(adminPrivacyNote)}</p>
       </section>
     </div>
   );

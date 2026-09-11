@@ -6,6 +6,17 @@ import { ChevronRight, SendHorizonal } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, ToneBadge } from "@/components/ghiras";
 import { listThreadMessages, listThreads, sendMessage } from "@/lib/kg.functions";
+import { useI18n } from "@/lib/i18n";
+
+function AdminThreadError() {
+  const { t } = useI18n();
+  return <EmptyState title={t("تعذر عرض المحادثة")} message={t("حاول تحديث الصفحة.")} />;
+}
+
+function AdminThreadNotFound() {
+  const { t } = useI18n();
+  return <EmptyState title={t("لم نجد المحادثة")} message={t("ربما حُذفت.")} />;
+}
 
 export const Route = createFileRoute("/admin/messages/$id")({
   head: () => ({
@@ -18,12 +29,13 @@ export const Route = createFileRoute("/admin/messages/$id")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  errorComponent: () => <EmptyState title="تعذر عرض المحادثة" message="حاول تحديث الصفحة." />,
-  notFoundComponent: () => <EmptyState title="لم نجد المحادثة" message="ربما حُذفت." />,
+  errorComponent: () => <AdminThreadError />,
+  notFoundComponent: () => <AdminThreadNotFound />,
   component: AdminThreadPage,
 });
 
 function AdminThreadPage() {
+  const { t, dt } = useI18n();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const fetchMessages = useServerFn(listThreadMessages);
@@ -44,20 +56,20 @@ function AdminThreadPage() {
       setDraft("");
       qc.invalidateQueries({ queryKey: ["thread-messages", id] });
       qc.invalidateQueries({ queryKey: ["admin-threads"] });
-      toast.success("تم إرسال الرد لولي الأمر");
+      toast.success(t("تم إرسال الرد لولي الأمر"));
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر الإرسال"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر الإرسال")),
   });
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-soft">
-        <Link to="/admin/messages" aria-label="عودة" className="grid h-9 w-9 place-items-center rounded-xl hover:bg-muted">
+        <Link to="/admin/messages" aria-label={t("عودة")} className="grid h-9 w-9 place-items-center rounded-xl hover:bg-muted">
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </Link>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-sm font-extrabold text-foreground">{thread?.subject ?? "محادثة"}</h1>
-          <p className="text-[11px] text-muted-foreground">{thread?.parentName ?? "ولي أمر"}</p>
+          <h1 className="truncate text-sm font-extrabold text-foreground">{thread?.subject ?? t("محادثة")}</h1>
+          <p className="text-[11px] text-muted-foreground">{thread?.parentName ?? t("ولي أمر")}</p>
         </div>
         {thread?.childName && <ToneBadge tone="blue">{thread.childName}</ToneBadge>}
       </div>
@@ -78,8 +90,8 @@ function AdminThreadPage() {
                   {m.body}
                 </p>
                 <p className={`mt-1 text-[10px] ${mine ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
-                  {mine ? "الإدارة" : (thread?.parentName ?? "ولي الأمر")} •{" "}
-                  {new Date(m.createdAt).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                  {mine ? t("الإدارة") : (thread?.parentName ?? t("ولي الأمر"))} •{" "}
+                  {dt(m.createdAt)}
                 </p>
               </div>
             </div>
@@ -97,12 +109,12 @@ function AdminThreadPage() {
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="اكتب الرد لولي الأمر…"
+          placeholder={t("اكتب الرد لولي الأمر…")}
           className="h-11 flex-1 rounded-2xl border border-input bg-background px-4 text-sm outline-none"
         />
         <button
           type="submit"
-          aria-label="إرسال"
+          aria-label={t("إرسال")}
           disabled={reply.isPending}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-50"
         >

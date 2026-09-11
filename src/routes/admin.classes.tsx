@@ -37,7 +37,7 @@ const inputCls =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary";
 
 function AdminClassesPage() {
-  const { t: tr } = useI18n();
+  const { t: tr, n } = useI18n();
   const qc = useQueryClient();
   const fetchClasses = useServerFn(listClassDetails);
   const fetchStaff = useServerFn(listStaff);
@@ -67,7 +67,7 @@ function AdminClassesPage() {
   const createMut = useMutation({
     mutationFn: () => add({ data: { name: name.trim(), stage } }),
     onSuccess: () => {
-      toast.success("تمت إضافة الفصل");
+      toast.success(tr("تمت إضافة الفصل"));
       setName("");
       setOpen(false);
       invalidate();
@@ -78,7 +78,7 @@ function AdminClassesPage() {
   const renameMut = useMutation({
     mutationFn: (v: { id: string; name: string }) => rename({ data: v }),
     onSuccess: () => {
-      toast.success("تم تحديث اسم الفصل");
+      toast.success(tr("تم تحديث اسم الفصل"));
       setEditingId(null);
       invalidate();
     },
@@ -88,7 +88,7 @@ function AdminClassesPage() {
   const deleteMut = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
-      toast.success("تم حذف الفصل");
+      toast.success(tr("تم حذف الفصل"));
       setConfirmId(null);
       invalidate();
     },
@@ -98,7 +98,7 @@ function AdminClassesPage() {
   const teacherMut = useMutation({
     mutationFn: (v: { classId: string; teacherId: string; linked: boolean }) => linkTeacher({ data: v }),
     onSuccess: () => {
-      toast.success("تم تحديث ربط المعلمة بالفصل");
+      toast.success(tr("تم تحديث ربط المعلمة بالفصل"));
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -107,7 +107,7 @@ function AdminClassesPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <SectionHeader title={tr("إدارة الفصول")} subtitle="الأسماء والأطفال والمعلمات" icon={School} tone="green" />
+        <SectionHeader title={tr("إدارة الفصول")} subtitle={tr("الأسماء والأطفال والمعلمات")} icon={School} tone="green" />
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -133,9 +133,9 @@ function AdminClassesPage() {
             aria-label={tr("المرحلة")}
             className={inputCls}
           >
-            <option value="nursery">{stageLabels.nursery}</option>
-            <option value="kg1">{stageLabels.kg1}</option>
-            <option value="kg2">{stageLabels.kg2}</option>
+            <option value="nursery">{tr(stageLabels.nursery)}</option>
+            <option value="kg1">{tr(stageLabels.kg1)}</option>
+            <option value="kg2">{tr(stageLabels.kg2)}</option>
           </select>
           <button
             type="button"
@@ -151,7 +151,7 @@ function AdminClassesPage() {
       {classes.isLoading ? (
         <p className="text-sm text-muted-foreground">{tr("جارٍ التحميل…")}</p>
       ) : (classes.data ?? []).length === 0 ? (
-        <EmptyState icon={School} title="لا توجد فصول" message="أضف أول فصل للروضة." tone="green" />
+        <EmptyState icon={School} title={tr("لا توجد فصول")} message={tr("أضف أول فصل للروضة.")} tone="green" />
       ) : (
         (classes.data ?? []).map((c) => (
           <article key={c.id} className="rounded-3xl border border-border bg-card p-4 shadow-soft">
@@ -185,9 +185,9 @@ function AdminClassesPage() {
                   </div>
                 ) : (
                   <>
-                    <p className="font-display text-base font-extrabold text-foreground">{c.name}</p>
+                    <p className="font-display text-base font-extrabold text-foreground">{n(c.name, c.nameEn)}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {stageLabels[c.stage as Stage] ?? c.stage} · {tr("عدد الأطفال")}: {c.childCount}
+                      {tr(stageLabels[c.stage as Stage] ?? c.stage)} · {tr("عدد الأطفال")}: {c.childCount}
                     </p>
                   </>
                 )}
@@ -220,7 +220,7 @@ function AdminClassesPage() {
             {confirmId === c.id && (
               <div className="mt-3 space-y-2 rounded-2xl border border-destructive/30 bg-destructive/5 p-3">
                 <p className="text-xs font-bold text-destructive">
-                  حذف الفصل نهائيًا؟ لن يُحذف إن كان مرتبطًا بأطفال أو بيانات.
+                  {tr("حذف الفصل نهائيًا؟ لن يُحذف إن كان مرتبطًا بأطفال أو بيانات.")}
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -261,7 +261,7 @@ function AdminClassesPage() {
                             : "rounded-full border border-border px-3 py-1.5 text-[11px] font-bold text-muted-foreground hover:bg-muted"
                         }
                       >
-                        {t.name}
+                        {n(t.name, t.nameEn)}
                       </button>
                     );
                   })
@@ -278,7 +278,7 @@ function AdminClassesPage() {
                       key={k.id}
                       className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
                     >
-                      {k.name}
+                      {n(k.name)}
                     </span>
                   ))}
                 </div>

@@ -12,23 +12,24 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { LanguageProvider } from "@/lib/i18n";
+import { LanguageProvider, useI18n } from "@/lib/i18n";
 
 function NotFoundComponent() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl font-extrabold text-foreground">٤٠٤</h1>
-        <h2 className="mt-4 text-xl font-bold text-foreground">الصفحة غير موجودة</h2>
+        <h1 className="font-display text-7xl font-extrabold text-foreground">{t("٤٠٤")}</h1>
+        <h2 className="mt-4 text-xl font-bold text-foreground">{t("الصفحة غير موجودة")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          الصفحة التي تبحث عنها غير موجودة أو تم نقلها.
+          {t("الصفحة التي تبحث عنها غير موجودة أو تم نقلها.")}
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-transform active:scale-95"
           >
-            العودة للرئيسية
+            {t("العودة للرئيسية")}
           </Link>
         </div>
       </div>
@@ -39,6 +40,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const { t } = useI18n();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -47,10 +49,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="font-display text-xl font-bold tracking-tight text-foreground">
-          تعذر تحميل الصفحة
+          {t("تعذر تحميل الصفحة")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          حدث خطأ من جهتنا. يمكنك إعادة المحاولة أو العودة للرئيسية.
+          {t("حدث خطأ من جهتنا. يمكنك إعادة المحاولة أو العودة للرئيسية.")}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -60,13 +62,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-transform active:scale-95"
           >
-            إعادة المحاولة
+            {t("إعادة المحاولة")}
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-xl border border-input bg-background px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-accent"
           >
-            العودة للرئيسية
+            {t("العودة للرئيسية")}
           </a>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { PageContainer, Avatar, SuccessNote, toneClasses } from "@/components/gh
 import { teacherChildren, teacherClassTitle } from "@/lib/teacher-data";
 import type { AttendanceStatus } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/attendance")({
   head: () => ({
@@ -26,6 +27,7 @@ const options: { key: AttendanceStatus; label: string; icon: typeof Check; tone:
 ];
 
 function AttendancePage() {
+  const { t, n } = useI18n();
   const [state, setState] = useState<Record<string, AttendanceStatus>>(
     () => Object.fromEntries(teacherChildren.map((c) => [c.id, c.attendance])),
   );
@@ -43,24 +45,24 @@ function AttendancePage() {
           <CalendarCheck className="h-5.5 w-5.5 text-brand-green-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">تسجيل الحضور</h1>
-          <p className="text-xs text-muted-foreground">{teacherClassTitle} — اليوم</p>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("تسجيل الحضور")}</h1>
+          <p className="text-xs text-muted-foreground">{n(teacherClassTitle)} — {t("اليوم")}</p>
         </div>
       </header>
 
       <div className="mb-4 grid grid-cols-3 gap-2">
         {counts.map((c) => {
-          const t = toneClasses[c.tone];
+          const tone = toneClasses[c.tone];
           return (
-            <div key={c.key} className={cn("rounded-2xl p-3 text-center", t.soft)}>
-              <p className={cn("font-display text-xl font-extrabold", t.deep)}>{c.count}</p>
-              <p className="text-[11px] font-bold text-muted-foreground">{c.label}</p>
+            <div key={c.key} className={cn("rounded-2xl p-3 text-center", tone.soft)}>
+              <p className={cn("font-display text-xl font-extrabold", tone.deep)}>{c.count}</p>
+              <p className="text-[11px] font-bold text-muted-foreground">{t(c.label)}</p>
             </div>
           );
         })}
       </div>
 
-      {saved && <SuccessNote>تم حفظ حضور اليوم بنجاح وإشعار أولياء الأمور.</SuccessNote>}
+      {saved && <SuccessNote>{t("تم حفظ حضور اليوم بنجاح وإشعار أولياء الأمور.")}</SuccessNote>}
 
       <div className="mt-4 space-y-2">
         {teacherChildren.map((child) => (
@@ -71,16 +73,16 @@ function AttendancePage() {
             <div className="flex items-center gap-3">
               <Avatar name={child.name} tone={child.tone} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-extrabold text-foreground">{child.name}</p>
+                <p className="truncate text-sm font-extrabold text-foreground">{n(child.name)}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {child.guardian} · نسبة الحضور {child.attendanceRate}%
+                  {n(child.guardian)} · {t("نسبة الحضور {rate}%", { rate: child.attendanceRate })}
                 </p>
               </div>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {options.map((o) => {
                 const active = state[child.id] === o.key;
-                const t = toneClasses[o.tone];
+                const tone = toneClasses[o.tone];
                 return (
                   <button
                     key={o.key}
@@ -93,12 +95,12 @@ function AttendancePage() {
                     className={cn(
                       "flex items-center justify-center gap-1.5 rounded-xl border py-2 text-xs font-bold transition-all",
                       active
-                        ? cn(t.soft, t.deep, "border-transparent")
+                        ? cn(tone.soft, tone.deep, "border-transparent")
                         : "border-border text-muted-foreground hover:bg-muted",
                     )}
                   >
                     <o.icon className="h-4 w-4" strokeWidth={2.4} />
-                    {o.label}
+                    {t(o.label)}
                   </button>
                 );
               })}
@@ -111,12 +113,12 @@ function AttendancePage() {
         type="button"
         onClick={() => {
           setSaved(true);
-          toast.success("تم حفظ سجل الحضور لهذا اليوم");
+          toast.success(t("تم حفظ سجل الحضور لهذا اليوم"));
         }}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-soft transition-opacity hover:opacity-90"
       >
         <Save className="h-4.5 w-4.5" strokeWidth={2.4} />
-        حفظ سجل اليوم
+        {t("حفظ سجل اليوم")}
       </button>
     </PageContainer>
   );

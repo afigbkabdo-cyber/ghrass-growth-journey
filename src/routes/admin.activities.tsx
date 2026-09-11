@@ -5,6 +5,7 @@ import { Blocks, Eye, EyeOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { deleteActivity, listActivities, setActivityPublished } from "@/lib/kg.functions";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/activities")({
   head: () => ({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/admin/activities")({
 });
 
 function AdminActivitiesPage() {
+  const { t, d } = useI18n();
   const qc = useQueryClient();
   const fetchActivities = useServerFn(listActivities);
   const publish = useServerFn(setActivityPublished);
@@ -31,16 +33,16 @@ function AdminActivitiesPage() {
   const togglePublish = useMutation({
     mutationFn: (v: { id: string; published: boolean }) => publish({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["activities"] }),
-    onError: (e: Error) => toast.error(e.message || "تعذر التحديث"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر التحديث")),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
-      toast.success("تم حذف النشاط");
+      toast.success(t("تم حذف النشاط"));
       qc.invalidateQueries({ queryKey: ["activities"] });
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر الحذف"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر الحذف")),
   });
 
   const list = activities.data ?? [];
@@ -48,17 +50,17 @@ function AdminActivitiesPage() {
   return (
     <div className="space-y-5">
       <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
-        <h2 className="font-display text-lg font-extrabold text-foreground">أنشطة الفصول</h2>
+        <h2 className="font-display text-lg font-extrabold text-foreground">{t("أنشطة الفصول")}</h2>
         <p className="text-xs text-muted-foreground">
-          {list.filter((a) => a.published).length} منشور من {list.length} نشاط
+          {t("{published} منشور من {total} نشاط", { published: list.filter((a) => a.published).length, total: list.length })}
         </p>
       </div>
 
-      <SectionHeader title="كل الأنشطة" icon={Blocks} tone="blue" />
+      <SectionHeader title={t("كل الأنشطة")} icon={Blocks} tone="blue" />
       {activities.isLoading ? (
-        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+        <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
       ) : list.length === 0 ? (
-        <EmptyState title="لا توجد أنشطة" message="ستظهر أنشطة المعلمات هنا." />
+        <EmptyState title={t("لا توجد أنشطة")} message={t("ستظهر أنشطة المعلمات هنا.")} />
       ) : (
         <div className="space-y-3">
           {list.map((a) => (
@@ -66,21 +68,21 @@ function AdminActivitiesPage() {
               {a.photos.length > 0 && (
                 <div className={a.photos.length === 1 ? "" : "grid grid-cols-2 gap-0.5"}>
                   {a.photos.slice(0, 4).map((src) => (
-                    <img key={src} src={src} alt={`صورة من نشاط ${a.title}`} loading="lazy" className="h-32 w-full object-cover" />
+                    <img key={src} src={src} alt={t("صورة من نشاط {title}", { title: a.title })} loading="lazy" className="h-32 w-full object-cover" />
                   ))}
                 </div>
               )}
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
-                  <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? "منشور" : "مسودة"}</ToneBadge>
+                  <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? t("منشور") : t("مسودة")}</ToneBadge>
                 </div>
                 {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   {a.className && <ToneBadge tone="blue">{a.className}</ToneBadge>}
-                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">مرتبط بقيمة {a.valueName}</ToneBadge>}
+                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: a.valueName })}</ToneBadge>}
                   <span className="text-[11px] font-bold text-muted-foreground">
-                    {new Date(a.activityDate).toLocaleDateString("ar-SA")}
+                    {d(a.activityDate)}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
@@ -91,18 +93,18 @@ function AdminActivitiesPage() {
                   >
                     {a.published ? (
                       <>
-                        <Eye className="h-3.5 w-3.5 text-brand-green-deep" /> إيقاف النشر
+                        <Eye className="h-3.5 w-3.5 text-brand-green-deep" /> {t("إيقاف النشر")}
                       </>
                     ) : (
                       <>
-                        <EyeOff className="h-3.5 w-3.5" /> نشر لأولياء الأمور
+                        <EyeOff className="h-3.5 w-3.5" /> {t("نشر لأولياء الأمور")}
                       </>
                     )}
                   </button>
                   <button
                     type="button"
                     onClick={() => del.mutate(a.id)}
-                    aria-label="حذف النشاط"
+                    aria-label={t("حذف النشاط")}
                     className="grid h-9 w-9 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />

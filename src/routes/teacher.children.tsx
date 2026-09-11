@@ -6,6 +6,7 @@ import { Baby, Search, TriangleAlert, ChevronLeft } from "lucide-react";
 import { PageContainer, Avatar, ToneBadge, EmptyState } from "@/components/ghiras";
 import { myClassChildren } from "@/lib/kg.functions";
 import { childAge, stageLabels } from "@/lib/kg-labels";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/children")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/teacher/children")({
 });
 
 function TeacherChildrenPage() {
+  const { t, n } = useI18n();
   const fetchChildren = useServerFn(myClassChildren);
   const children = useQuery({ queryKey: ["teacher-children"], queryFn: () => fetchChildren({}) });
   const [q, setQ] = useState("");
@@ -35,8 +37,8 @@ function TeacherChildrenPage() {
           <Baby className="h-5.5 w-5.5 text-brand-blue-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">أطفال فصلي</h1>
-          <p className="text-xs text-muted-foreground">{(children.data ?? []).length} طفلًا في فصولي</p>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("أطفال فصلي")}</h1>
+          <p className="text-xs text-muted-foreground">{t("{count} طفلًا في فصولي", { count: (children.data ?? []).length })}</p>
         </div>
       </header>
 
@@ -45,16 +47,16 @@ function TeacherChildrenPage() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="بحث باسم الطفل"
-          aria-label="بحث باسم الطفل"
+          placeholder={t("بحث باسم الطفل")}
+          aria-label={t("بحث باسم الطفل")}
           className="h-11 flex-1 bg-transparent text-sm outline-none"
         />
       </div>
 
       {children.isLoading ? (
-        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+        <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
       ) : list.length === 0 ? (
-        <EmptyState title="لا يوجد أطفال" message="لم يُسجَّل أطفال في فصولك بعد." />
+        <EmptyState title={t("لا يوجد أطفال")} message={t("لم يُسجَّل أطفال في فصولك بعد.")} />
       ) : (
         <div className="space-y-3">
           {list.map((c) => (
@@ -66,15 +68,15 @@ function TeacherChildrenPage() {
             >
               <Avatar name={c.name} tone="blue" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-extrabold text-foreground">{c.name}</p>
+                <p className="truncate text-sm font-extrabold text-foreground">{n(c.name)}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {c.className ?? "بدون فصل"} • {stageLabels[c.stage] ?? c.stage}
+                  {c.className ? n(c.className) : t("بدون فصل")} • {t(stageLabels[c.stage] ?? c.stage)}
                   {childAge(c.birthDate) ? ` • ${childAge(c.birthDate)}` : ""}
                 </p>
                 {c.allergies && (
                   <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-extrabold text-destructive">
                     <TriangleAlert className="h-3 w-3" />
-                    حساسية: {c.allergies}
+                    {t("حساسية: {value}", { value: c.allergies })}
                   </p>
                 )}
               </div>
@@ -85,7 +87,7 @@ function TeacherChildrenPage() {
       )}
 
       <p className="mt-6 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-        تواصل أولياء الأمور يكون مع الإدارة — أي ملاحظة تحتاج متابعة سجّليها في صفحة الطفل.
+        {t("تواصل أولياء الأمور يكون مع الإدارة — أي ملاحظة تحتاج متابعة سجّليها في صفحة الطفل.")}
       </p>
     </PageContainer>
   );

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tone } from "@/lib/data";
+import { useI18n } from "@/lib/i18n";
 import ghirasLogoFull from "@/assets/ghiras-logo-full.png.asset.json";
 
 /* ---------- خريطة درجات الألوان ---------- */
@@ -257,21 +258,22 @@ export function EmptyState({
 }
 
 export function ErrorState({ onRetry }: { onRetry?: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col items-center rounded-3xl border border-destructive/20 bg-destructive/5 px-6 py-10 text-center">
       <span className="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-destructive/10">
         <CircleAlert className="h-7 w-7 text-destructive" strokeWidth={1.8} />
       </span>
-      <p className="font-display text-base font-bold text-foreground">حدث خطأ غير متوقع</p>
+      <p className="font-display text-base font-bold text-foreground">{t("حدث خطأ غير متوقع")}</p>
       <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        تعذر تحميل البيانات. تحقق من الاتصال وحاول مرة أخرى.
+        {t("تعذر تحميل البيانات. تحقق من الاتصال وحاول مرة أخرى.")}
       </p>
       {onRetry && (
         <button
           onClick={onRetry}
           className="mt-4 rounded-xl bg-primary px-5 py-2 text-sm font-bold text-primary-foreground transition-transform active:scale-95"
         >
-          إعادة المحاولة
+          {t("إعادة المحاولة")}
         </button>
       )}
     </div>
@@ -279,11 +281,12 @@ export function ErrorState({ onRetry }: { onRetry?: () => void }) {
 }
 
 export function OfflineNote() {
+  const { t } = useI18n();
   return (
     <div className="flex items-center gap-2.5 rounded-2xl border border-brand-yellow/40 bg-brand-yellow-soft px-4 py-3">
       <CloudOff className="h-4.5 w-4.5 shrink-0 text-brand-yellow-deep" />
       <p className="text-xs font-medium text-brand-yellow-deep">
-        أنت غير متصل حاليًا — سنعرض آخر البيانات المحفوظة ونحدّثها عند عودة الاتصال.
+        {t("أنت غير متصل حاليًا — سنعرض آخر البيانات المحفوظة ونحدّثها عند عودة الاتصال.")}
       </p>
     </div>
   );
@@ -301,8 +304,9 @@ export function SuccessNote({ children }: { children: ReactNode }) {
 /* ---------- هيكل تحميل ---------- */
 
 export function LoadingCards({ count = 3 }: { count?: number }) {
+  const { t } = useI18n();
   return (
-    <div className="space-y-3" aria-label="جارٍ التحميل">
+    <div className="space-y-3" aria-label={t("جارٍ التحميل")}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="animate-pulse rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center gap-3">

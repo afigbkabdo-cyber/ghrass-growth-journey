@@ -3,12 +3,12 @@ import { CalendarClock } from "lucide-react";
 import { PageContainer, SectionHeader, ToneBadge, StatCard } from "@/components/ghiras";
 import { TeacherShiftCard } from "@/components/teacher-shift-card";
 import {
-  formatArabicTime,
   shiftStatusLabels,
   shiftStatusTone,
   teacherShiftHistory,
 } from "@/lib/teacher-shift";
 import { CheckCircle2, Clock } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/my-attendance")({
   head: () => ({
@@ -28,6 +28,7 @@ export const Route = createFileRoute("/teacher/my-attendance")({
 });
 
 function MyAttendancePage() {
+  const { t, d, time } = useI18n();
   const sorted = [...teacherShiftHistory].sort((a, b) => (a.date < b.date ? 1 : -1));
   const completed = sorted.filter((r) => r.status === "completed").length;
   const absent = sorted.filter((r) => r.status === "absent").length;
@@ -39,19 +40,19 @@ function MyAttendancePage() {
           <CalendarClock className="h-5.5 w-5.5 text-brand-blue-deep" strokeWidth={2.2} />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-foreground">سجل دوامي</h1>
-          <p className="text-xs text-muted-foreground">حضور وانصراف المعلمة — بيانات تجريبية</p>
+          <h1 className="font-display text-2xl font-extrabold text-foreground">{t("سجل دوامي")}</h1>
+          <p className="text-xs text-muted-foreground">{t("حضور وانصراف المعلمة — بيانات تجريبية")}</p>
         </div>
       </header>
 
       <TeacherShiftCard />
 
       <div className="mb-5 grid grid-cols-2 gap-3">
-        <StatCard icon={CheckCircle2} value={completed} label="أيام مكتملة" tone="green" />
-        <StatCard icon={Clock} value={absent} label="أيام بدون تسجيل" tone="pink" />
+        <StatCard icon={CheckCircle2} value={completed} label={t("أيام مكتملة")} tone="green" />
+        <StatCard icon={Clock} value={absent} label={t("أيام بدون تسجيل")} tone="pink" />
       </div>
 
-      <SectionHeader title="آخر الأيام" icon={CalendarClock} tone="blue" />
+      <SectionHeader title={t("آخر الأيام")} icon={CalendarClock} tone="blue" />
       <div className="space-y-3">
         {sorted.map((r) => (
           <article
@@ -60,24 +61,24 @@ function MyAttendancePage() {
           >
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-bold text-foreground">{r.dayLabel}</p>
+                <p className="text-sm font-bold text-foreground">{t(r.dayLabel)}</p>
                 <p className="text-[11px] text-muted-foreground" dir="ltr">
-                  {r.date}
+                  {d(r.date)}
                 </p>
               </div>
-              <ToneBadge tone={shiftStatusTone[r.status]}>{shiftStatusLabels[r.status]}</ToneBadge>
+              <ToneBadge tone={shiftStatusTone[r.status]}>{t(shiftStatusLabels[r.status])}</ToneBadge>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-brand-green-soft/60 p-2.5">
-                <p className="text-[11px] font-bold text-brand-green-deep">الحضور</p>
+                <p className="text-[11px] font-bold text-brand-green-deep">{t("الحضور")}</p>
                 <p className="font-display text-sm font-extrabold text-foreground" dir="ltr">
-                  {formatArabicTime(r.checkIn)}
+                  {r.checkIn ? time(r.checkIn) : "—"}
                 </p>
               </div>
               <div className="rounded-xl bg-brand-pink-soft/60 p-2.5">
-                <p className="text-[11px] font-bold text-brand-pink-deep">الانصراف</p>
+                <p className="text-[11px] font-bold text-brand-pink-deep">{t("الانصراف")}</p>
                 <p className="font-display text-sm font-extrabold text-foreground" dir="ltr">
-                  {formatArabicTime(r.checkOut)}
+                  {r.checkOut ? time(r.checkOut) : "—"}
                 </p>
               </div>
             </div>

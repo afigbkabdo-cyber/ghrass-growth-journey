@@ -66,7 +66,7 @@ function TopBar({ roleLabel, tone }: { roleLabel: string; tone: Tone }) {
             {tr(roleLabel)}
           </span>
           <button
-            aria-label="الإشعارات"
+            aria-label={tr("الإشعارات")}
             className="relative grid h-10 w-10 place-items-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
           >
             <Bell className="h-4.5 w-4.5 text-muted-foreground" />
@@ -84,7 +84,7 @@ function BottomNav({ items }: { items: NavItem[] }) {
   const { t: tr } = useI18n();
   return (
     <nav
-      aria-label="التنقل الرئيسي"
+      aria-label={tr("التنقل الرئيسي")}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-card/95 backdrop-blur-md pb-safe"
     >
       <div className="mx-auto flex w-full max-w-2xl items-stretch justify-between px-1">
@@ -159,7 +159,7 @@ export function AdminShell({
   sidebarItems: NavItem[];
   bottomItems: NavItem[];
 }) {
-  const { t: tr } = useI18n();
+  const { t: tr, n } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current =
     [...sidebarItems]
@@ -174,7 +174,7 @@ export function AdminShell({
         <div className="flex h-16 items-center border-b border-border px-5">
           <GhirasLogo />
         </div>
-        <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="قائمة الإدارة">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label={tr("قائمة الإدارة")}>
           {sidebarItems.map((item) => {
             const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (
@@ -198,11 +198,11 @@ export function AdminShell({
         <div className="space-y-3 border-t border-border p-4">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-orange-soft font-display text-sm font-extrabold text-brand-orange-deep">
-              ج
+              {tr("ج")}
             </span>
             <div className="min-w-0 leading-tight">
-              <p className="truncate text-sm font-bold text-foreground">أ. الجوهرة السبيعي</p>
-              <p className="text-[11px] text-muted-foreground">مديرة الروضة</p>
+              <p className="truncate text-sm font-bold text-foreground">{n("أ. الجوهرة السبيعي")}</p>
+              <p className="text-[11px] text-muted-foreground">{tr("مديرة الروضة")}</p>
             </div>
           </div>
           <AdminLogoutButton />
@@ -216,18 +216,18 @@ export function AdminShell({
           <div className="flex h-16 items-center justify-between px-4">
             <GhirasLogo />
             <span className="rounded-full bg-brand-blue-soft px-3 py-1 text-[11px] font-bold text-brand-blue-deep">
-              لوحة الإدارة
+              {tr("لوحة الإدارة")}
             </span>
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-28 md:px-8 md:pb-10">
           <div className="mb-5 hidden items-center justify-between md:flex">
             <div>
-              <h1 className="font-display text-2xl font-extrabold text-foreground">{current?.label ?? "لوحة الإدارة"}</h1>
-              <p className="text-sm text-muted-foreground">لوحة تحكم روضة غراس — العام الأول ١٤٤٨هـ</p>
+              <h1 className="font-display text-2xl font-extrabold text-foreground">{tr(current?.label ?? "لوحة الإدارة")}</h1>
+              <p className="text-sm text-muted-foreground">{tr("لوحة تحكم روضة غراس — العام الأول ١٤٤٨هـ")}</p>
             </div>
             <button
-              aria-label="الإشعارات"
+              aria-label={tr("الإشعارات")}
               className="relative grid h-10 w-10 place-items-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
             >
               <Bell className="h-4.5 w-4.5 text-muted-foreground" />

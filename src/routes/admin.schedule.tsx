@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { SectionHeader, EmptyState } from "@/components/ghiras";
 import { listClasses } from "@/lib/directory.functions";
 import { deleteScheduleItem, listSchedule, saveScheduleItem } from "@/lib/kg.functions";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/schedule")({
   head: () => ({
@@ -26,6 +27,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function AdminSchedulePage() {
+  const { t, time } = useI18n();
   const qc = useQueryClient();
   const fetchClasses = useServerFn(listClasses);
   const fetchSchedule = useServerFn(listSchedule);
@@ -58,26 +60,26 @@ function AdminSchedulePage() {
     onSuccess: () => {
       setTitle("");
       setAtTime("");
-      toast.success("تمت إضافة الفقرة");
+      toast.success(t("تمت إضافة الفقرة"));
       qc.invalidateQueries({ queryKey: ["schedule", active] });
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر الحفظ"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر الحفظ")),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
     onSuccess: () => {
-      toast.success("تم حذف الفقرة");
+      toast.success(t("تم حذف الفقرة"));
       qc.invalidateQueries({ queryKey: ["schedule", active] });
     },
-    onError: (e: Error) => toast.error(e.message || "تعذر الحذف"),
+    onError: (e: Error) => toast.error(e.message || t("تعذر الحذف")),
   });
 
   return (
     <div className="space-y-5">
       <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
-        <h2 className="font-display text-lg font-extrabold text-foreground">الجدول اليومي</h2>
-        <p className="text-xs text-muted-foreground">فقرات يوم الفصل — تراها المعلمة وولي الأمر</p>
+        <h2 className="font-display text-lg font-extrabold text-foreground">{t("الجدول اليومي")}</h2>
+        <p className="text-xs text-muted-foreground">{t("فقرات يوم الفصل — تراها المعلمة وولي الأمر")}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -100,11 +102,11 @@ function AdminSchedulePage() {
 
       <section className="flex flex-wrap items-end gap-2 rounded-3xl border border-border bg-card p-4 shadow-soft">
         <label className="min-w-40 flex-1 text-[11px] font-bold text-muted-foreground">
-          عنوان الفقرة
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثال: الحلقة الصباحية" className={field} />
+          {t("عنوان الفقرة")}
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("مثال: الحلقة الصباحية")} className={field} />
         </label>
         <label className="text-[11px] font-bold text-muted-foreground">
-          الوقت
+          {t("الوقت")}
           <input type="time" value={atTime} onChange={(e) => setAtTime(e.target.value)} className={field} />
         </label>
         <button
@@ -114,15 +116,15 @@ function AdminSchedulePage() {
           className="inline-flex items-center gap-1.5 rounded-2xl bg-primary px-4 py-3 text-sm font-extrabold text-primary-foreground disabled:opacity-50"
         >
           <Plus className="h-4 w-4" />
-          إضافة
+          {t("إضافة")}
         </button>
       </section>
 
-      <SectionHeader title="فقرات اليوم" icon={ListChecks} tone="green" />
+      <SectionHeader title={t("فقرات اليوم")} icon={ListChecks} tone="green" />
       {schedule.isLoading ? (
-        <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+        <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
       ) : (schedule.data ?? []).length === 0 ? (
-        <EmptyState title="لا توجد فقرات" message="أضف فقرات الجدول لهذا الفصل." />
+        <EmptyState title={t("لا توجد فقرات")} message={t("أضف فقرات الجدول لهذا الفصل.")} />
       ) : (
         <div className="space-y-2.5">
           {(schedule.data ?? []).map((s) => (
@@ -135,13 +137,13 @@ function AdminSchedulePage() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-foreground">{s.title}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {s.atTime ? s.atTime.slice(0, 5) : "بدون وقت"} • {s.done ? "أُنجزت اليوم" : "لم تُنجز بعد"}
+                  {s.atTime ? time(s.atTime.slice(0, 5)) : t("بدون وقت")} • {s.done ? t("أُنجزت اليوم") : t("لم تُنجز بعد")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => del.mutate(s.id)}
-                aria-label="حذف الفقرة"
+                aria-label={t("حذف الفقرة")}
                 className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="h-4 w-4" />

@@ -7,6 +7,7 @@ import { Avatar, ErrorState, LoadingCards, SectionHeader, ToneBadge } from "@/co
 import { createAccount, resetAccountPassword } from "@/lib/admin.functions";
 import { listParents, listStaff } from "@/lib/directory.functions";
 import { displayPhone } from "@/lib/phone";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/staff")({
   head: () => ({
@@ -28,6 +29,7 @@ const roleText: Record<string, string> = {
 };
 
 function AdminStaff() {
+  const { t, n } = useI18n();
   const qc = useQueryClient();
   const fetchStaff = useServerFn(listStaff);
   const fetchParents = useServerFn(listParents);
@@ -55,7 +57,10 @@ function AdminStaff() {
     onSuccess: (result) => {
       setError(null);
       setNotice(
-        `تم إنشاء الحساب — الجوال: ${displayPhone(result.phone)} · كلمة المرور المؤقتة: ${result.password}`,
+        t("تم إنشاء الحساب — الجوال: {phone} · كلمة المرور المؤقتة: {password}", {
+          phone: displayPhone(result.phone),
+          password: result.password,
+        }),
       );
       setForm({ fullName: "", phone: "", role: form.role, title: "" });
       setOpen(false);
@@ -69,7 +74,7 @@ function AdminStaff() {
     mutationFn: (userId: string) => resetPassword({ data: { userId } }),
     onSuccess: (result) => {
       setError(null);
-      setNotice(`كلمة مرور مؤقتة جديدة: ${result.password}`);
+      setNotice(t("كلمة مرور مؤقتة جديدة: {password}", { password: result.password }));
     },
     onError: (e: Error) => setError(e.message),
   });
@@ -89,18 +94,18 @@ function AdminStaff() {
     <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-soft">
       <Avatar name={p.name} tone={p.role === "teacher" ? "blue" : p.role === "parent" ? "green" : "orange"} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-foreground">{p.name}</p>
+        <p className="truncate text-sm font-bold text-foreground">{n(p.name)}</p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {p.title ?? roleText[p.role]} · {displayPhone(p.phone)}
-          {p.classes.length ? ` — ${p.classes.join("، ")}` : ""}
+          {p.title ? n(p.title) : t(roleText[p.role] ?? p.role)} · {displayPhone(p.phone)}
+          {p.classes.length ? ` — ${p.classes.map((c) => n(c)).join(t("، "))}` : ""}
         </p>
       </div>
       <ToneBadge tone={p.role === "teacher" ? "blue" : p.role === "parent" ? "green" : "orange"}>
-        {roleText[p.role] ?? p.role}
+        {t(roleText[p.role] ?? p.role)}
       </ToneBadge>
       <button
         onClick={() => reset.mutate(p.id)}
-        aria-label={`إعادة تعيين كلمة مرور ${p.name}`}
+        aria-label={t("إعادة تعيين كلمة مرور {name}", { name: n(p.name) })}
         className="rounded-xl border border-border bg-muted p-2 text-muted-foreground"
       >
         <KeyRound className="h-4 w-4" />
@@ -120,8 +125,8 @@ function AdminStaff() {
       )}
 
       <SectionHeader
-        title="الكادر التعليمي"
-        subtitle={`${teachers.length} معلمات`}
+        title={t("الكادر التعليمي")}
+        subtitle={t("{count} معلمات", { count: teachers.length })}
         icon={Users}
         tone="blue"
       />
@@ -133,23 +138,23 @@ function AdminStaff() {
         <div className="space-y-3">{teachers.map(personRow)}</div>
       )}
 
-      <SectionHeader title="الإدارة" subtitle="أعلى مستوى صلاحيات" icon={ShieldCheck} tone="orange" />
+      <SectionHeader title={t("الإدارة")} subtitle={t("أعلى مستوى صلاحيات")} icon={ShieldCheck} tone="orange" />
       <div className="space-y-3">{managers.map(personRow)}</div>
 
       <SectionHeader
-        title="أولياء الأمور"
-        subtitle={`${(parentsQuery.data ?? []).length} حسابًا`}
+        title={t("أولياء الأمور")}
+        subtitle={t("{count} حسابًا", { count: (parentsQuery.data ?? []).length })}
         icon={Users}
         tone="green"
       />
       <div className="space-y-3">{(parentsQuery.data ?? []).map(personRow)}</div>
 
       <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
-        <p className="text-sm font-bold text-foreground">الصلاحيات حسب الدور</p>
+        <p className="text-sm font-bold text-foreground">{t("الصلاحيات حسب الدور")}</p>
         <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
-          <li>• الإدارة: اعتماد خطة القيم، إدارة الأطفال والكادر، الإعلانات والتقارير.</li>
-          <li>• المعلمة: الحضور، الأنشطة، الملاحظات، والتواصل مع أولياء الأمور.</li>
-          <li>• ولي الأمر: متابعة طفله فقط — بيانات الأطفال الآخرين محجوبة.</li>
+          <li>• {t("الإدارة: اعتماد خطة القيم، إدارة الأطفال والكادر، الإعلانات والتقارير.")}</li>
+          <li>• {t("المعلمة: الحضور، الأنشطة، الملاحظات، والتواصل مع أولياء الأمور.")}</li>
+          <li>• {t("ولي الأمر: متابعة طفله فقط — بيانات الأطفال الآخرين محجوبة.")}</li>
         </ul>
       </div>
 
@@ -163,12 +168,12 @@ function AdminStaff() {
           }}
           className="space-y-3 rounded-3xl border border-border bg-card p-4 shadow-soft"
         >
-          <p className="text-sm font-bold text-foreground">إنشاء حساب جديد</p>
+          <p className="text-sm font-bold text-foreground">{t("إنشاء حساب جديد")}</p>
           <input
             required
             value={form.fullName}
             onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-            placeholder="الاسم الكامل"
+            placeholder={t("الاسم الكامل")}
             className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
           />
           <input
@@ -177,7 +182,7 @@ function AdminStaff() {
             inputMode="tel"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder="05XXXXXXXX"
+            placeholder={t("05XXXXXXXX")}
             className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
           />
           <select
@@ -185,13 +190,13 @@ function AdminStaff() {
             onChange={(e) => setForm({ ...form, role: e.target.value as "teacher" | "parent" })}
             className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
           >
-            <option value="teacher">معلمة</option>
-            <option value="parent">ولي أمر</option>
+            <option value="teacher">{t("معلمة")}</option>
+            <option value="parent">{t("ولي أمر")}</option>
           </select>
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="الوصف (اختياري) — مثال: معلمة اللغة العربية"
+            placeholder={t("الوصف (اختياري) — مثال: معلمة اللغة العربية")}
             className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
           />
           <div className="flex gap-2">
@@ -200,14 +205,14 @@ function AdminStaff() {
               disabled={create.isPending}
               className="flex-1 rounded-2xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
             >
-              {create.isPending ? "جارٍ الإنشاء…" : "إنشاء الحساب"}
+              {create.isPending ? t("جارٍ الإنشاء…") : t("إنشاء الحساب")}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="rounded-2xl border border-border bg-card px-4 py-3 text-sm font-bold text-muted-foreground"
             >
-              إلغاء
+              {t("إلغاء")}
             </button>
           </div>
         </form>
@@ -221,7 +226,7 @@ function AdminStaff() {
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-soft transition-transform active:scale-95"
         >
           <UserPlus className="h-4.5 w-4.5" />
-          إضافة حساب (معلمة / ولي أمر)
+          {t("إضافة حساب (معلمة / ولي أمر)")}
         </button>
       )}
     </div>

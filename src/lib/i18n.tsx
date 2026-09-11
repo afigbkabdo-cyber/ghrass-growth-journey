@@ -1,7 +1,8 @@
 /*
  * نظام اللغة: العربية (افتراضية، RTL) والإنجليزية (LTR).
  * التفضيل محفوظ لكل مستخدم في ملفه الشخصي (قاعدة البيانات) وأيضًا محليًا للاستجابة الفورية.
- * الترجمة تعمل بمفتاح النص العربي — البيانات التي يدخلها المستخدم لا تُترجم أبدًا.
+ * الترجمة تعمل بمفتاح النص العربي — البيانات التي يدخلها المستخدم لا تُترجم أبدًا،
+ * بل تُعرض بالاسم الإنجليزي المحفوظ إن وُجد، وإلا بالتحويل الصوتي.
  */
 import {
   createContext,
@@ -13,138 +14,84 @@ import {
   type ReactNode,
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { dictionaryEn } from "@/lib/i18n-dict";
+import { transliterate } from "@/lib/translit";
 
 export type Lang = "ar" | "en";
 
 const STORAGE_KEY = "ghiras.lang";
 
-/** قاموس واجهة المستخدم: المفتاح هو النص العربي. */
-const en: Record<string, string> = {
-  // التنقل
-  "الرئيسية": "Home",
-  "طفلي": "My child",
-  "رحلة غراس": "Ghiras journey",
-  "الأنشطة": "Activities",
-  "الرسائل": "Messages",
-  "المزيد": "More",
-  "الأطفال": "Children",
-  "الحضور": "Attendance",
-  "الجدول": "Schedule",
-  "الجدول اليومي": "Daily schedule",
-  "الموظفون": "Staff",
-  "الموظفون والكادر": "Staff & team",
-  "الفصول": "Classes",
-  "القيم": "Values",
-  "الإعلانات": "Announcements",
-  "التقارير": "Reports",
-  "الإعدادات": "Settings",
-  "القائمة": "Menu",
-  "الحضور العام": "Overall attendance",
-  // الأدوار
-  "ولي أمر": "Parent",
-  "معلمة": "Teacher",
-  "الإدارة": "Administration",
-  "مسؤول النظام": "Super admin",
-  // عام
-  "حفظ": "Save",
-  "إلغاء": "Cancel",
-  "حذف": "Delete",
-  "إضافة": "Add",
-  "تعديل": "Edit",
-  "بحث": "Search",
-  "الكل": "All",
-  "جارٍ التحميل…": "Loading…",
-  "جارٍ الحفظ…": "Saving…",
-  "تسجيل الخروج": "Sign out",
-  "اللغة": "Language",
-  "العربية": "العربية",
-  "English": "English",
-  "تم الحفظ": "Saved",
-  "تعذر الحفظ": "Could not save",
-  "إغلاق": "Close",
-  "لا توجد بيانات": "No data",
-  // قيمة الأسبوع
-  "قيمة الأسبوع": "Value of the week",
-  "خطة القيم": "Values plan",
-  "أرشيف قيم الأسابيع": "Weekly values archive",
-  "حديث الأسبوع": "Hadith of the week",
-  "المصدر": "Source",
-  "ماذا سيتعلم طفلك؟": "What will your child learn?",
-  "ماذا نفعل في الروضة؟": "What we do at the nursery",
-  "كيف تشارك من البيت؟": "How to take part at home",
-  "اسم القيمة": "Value name",
-  "نص الحديث": "Hadith text",
-  "مصدر الحديث": "Hadith source",
-  "عبارة تعريفية قصيرة": "Short tagline",
-  "بداية الأسبوع": "Week start",
-  "معتمدة": "Published",
-  "مسودة": "Draft",
-  "اعتماد": "Publish",
-  "إلغاء الاعتماد": "Unpublish",
-  "اعتماد ونشر كقيمة الأسبوع": "Publish as value of the week",
-  "لا توجد قيمة معتمدة": "No published value yet",
-  "دليل قيمة الأسبوع": "Value of the week guide",
-  "معتمدة من الإدارة": "Published by the administration",
-  "كيف نغرسها": "How we nurture it",
-  // الأطفال
-  "سجل الأطفال": "Children register",
-  "تسجيل طفل جديد": "Register a new child",
-  "اسم الطفل": "Child name",
-  "تاريخ الميلاد": "Date of birth",
-  "الفئة العمرية": "Age group",
-  "الفصل": "Class",
-  "بدون فصل": "No class",
-  "ولي الأمر": "Guardian",
-  "رقم ولي الأمر": "Guardian phone",
-  "بدون ولي أمر": "No guardian",
-  "الحساسية": "Allergies",
-  "الفترة": "Session",
-  "فترة التسجيل": "Enrollment term",
-  "تفاصيل الطفل": "Child details",
-  "بيانات التسجيل": "Registration data",
-  "نقل إلى فصل آخر": "Move to another class",
-  "نقل": "Move",
-  "حذف الطفل": "Delete child",
-  "تاريخ الإضافة": "Added on",
-  "غير محدد": "Not set",
-  "غير مرتبط": "Not linked",
-  "بيانات التسجيل للعرض فقط ولا يمكن تعديلها.": "Registration data is view-only and cannot be edited.",
-  "هل تريد حذف الطفل نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.":
-    "Delete this child permanently? This cannot be undone.",
-  "تأكيد الحذف": "Confirm delete",
-  // الفصول
-  "إدارة الفصول": "Class management",
-  "إضافة فصل": "Add class",
-  "اسم الفصل": "Class name",
-  "المرحلة": "Stage",
-  "المعلمات": "Teachers",
-  "عدد الأطفال": "Children count",
-  "ربط معلمة": "Assign teacher",
-  "حذف الفصل": "Delete class",
-  // بيانات الروضة
-  "بيانات الروضة": "Nursery details",
-  "اسم الروضة": "Nursery name",
-  "الشعار": "Tagline",
-  "المدينة": "City",
-  "رقم التواصل": "Contact number",
-  "البريد الإلكتروني": "Email",
-  "إنستقرام": "Instagram",
-  "تعديل بيانات الروضة": "Edit nursery details",
-};
+export type TVars = Record<string, string | number>;
+
+/** ترجمة نص واجهة مع دعم المتغيرات: t("حذف {name}", { name }). */
+export function translate(lang: Lang, text: string, vars?: TVars): string {
+  let out = lang === "en" ? (dictionaryEn[text] ?? text) : text;
+  if (vars) {
+    for (const [key, value] of Object.entries(vars)) {
+      out = out.split(`{${key}}`).join(String(value));
+    }
+  }
+  return out;
+}
+
+/** اسم شخص/فصل: يُعرض الاسم الإنجليزي المحفوظ عند اختيار English، وإلا التحويل الصوتي. */
+export function localizedName(
+  lang: Lang,
+  arabicName: string | null | undefined,
+  englishName?: string | null,
+): string {
+  const ar = arabicName ?? "";
+  if (lang !== "en") return ar;
+  const en = (englishName ?? "").trim();
+  if (en) return en;
+  return transliterate(ar);
+}
 
 interface I18nValue {
   lang: Lang;
   dir: "rtl" | "ltr";
+  locale: string;
   setLang: (lang: Lang) => void;
-  t: (text: string) => string;
+  /** نص واجهة */
+  t: (text: string, vars?: TVars) => string;
+  /** اسم مُدخل من المستخدم (طفل/ولي أمر/معلمة/فصل) */
+  n: (arabicName: string | null | undefined, englishName?: string | null) => string;
+  /** تاريخ */
+  d: (iso: string | Date | null | undefined) => string;
+  /** تاريخ ووقت */
+  dt: (iso: string | Date | null | undefined) => string;
+  /** وقت HH:MM */
+  time: (hhmm: string | null | undefined) => string;
+  /** رقم */
+  num: (value: number) => string;
 }
 
-const I18nContext = createContext<I18nValue>({
+const fallback: I18nValue = {
   lang: "ar",
   dir: "rtl",
+  locale: "ar-SA",
   setLang: () => {},
   t: (text) => text,
-});
+  n: (ar) => ar ?? "",
+  d: () => "",
+  dt: () => "",
+  time: (v) => v ?? "",
+  num: (v) => String(v),
+};
+
+const I18nContext = createContext<I18nValue>(fallback);
+
+/** تنسيق الوقت "HH:MM" حسب اللغة. */
+export function formatTime(lang: Lang, hhmm: string | null | undefined): string {
+  if (!hhmm) return "";
+  const [hRaw, mRaw] = hhmm.split(":");
+  const h = Number(hRaw);
+  const m = (mRaw ?? "00").slice(0, 2);
+  if (Number.isNaN(h)) return hhmm;
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  if (lang === "en") return `${hour12}:${m} ${h < 12 ? "AM" : "PM"}`;
+  return `${hour12}:${m} ${h < 12 ? "ص" : "م"}`;
+}
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("ar");
@@ -192,15 +139,34 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const value = useMemo<I18nValue>(
-    () => ({
+  const value = useMemo<I18nValue>(() => {
+    const locale = lang === "en" ? "en-GB" : "ar-SA";
+    const toDate = (input: string | Date | null | undefined) => {
+      if (!input) return null;
+      const date = input instanceof Date ? input : new Date(input);
+      return Number.isNaN(date.getTime()) ? null : date;
+    };
+    return {
       lang,
       dir: lang === "ar" ? "rtl" : "ltr",
+      locale,
       setLang,
-      t: (text: string) => (lang === "en" ? (en[text] ?? text) : text),
-    }),
-    [lang, setLang],
-  );
+      t: (text: string, vars?: TVars) => translate(lang, text, vars),
+      n: (ar, en) => localizedName(lang, ar, en),
+      d: (input) => {
+        const date = toDate(input);
+        return date ? date.toLocaleDateString(locale, { dateStyle: "medium" }) : "";
+      },
+      dt: (input) => {
+        const date = toDate(input);
+        return date
+          ? date.toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })
+          : "";
+      },
+      time: (hhmm) => formatTime(lang, hhmm ? hhmm.slice(0, 5) : hhmm),
+      num: (v) => v.toLocaleString(lang === "en" ? "en-US" : "ar-EG"),
+    };
+  }, [lang, setLang]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

@@ -181,6 +181,7 @@ export type Database = {
           gender: string | null
           id: string
           name: string
+          name_en: string | null
           notes: string | null
           session_period: string | null
           stage: string
@@ -194,6 +195,7 @@ export type Database = {
           gender?: string | null
           id?: string
           name: string
+          name_en?: string | null
           notes?: string | null
           session_period?: string | null
           stage?: string
@@ -207,6 +209,7 @@ export type Database = {
           gender?: string | null
           id?: string
           name?: string
+          name_en?: string | null
           notes?: string | null
           session_period?: string | null
           stage?: string
@@ -226,18 +229,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          name_en: string | null
           stage: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          name_en?: string | null
           stage: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          name_en?: string | null
           stage?: string
         }
         Relationships: []
@@ -393,38 +399,53 @@ export type Database = {
       nursery_settings: {
         Row: {
           city: string
+          city_en: string
           created_at: string
+          day_end: string
+          day_start: string
           email: string
           id: string
           instagram: string
           name: string
+          name_en: string
           phone: string
           singleton: boolean
           tagline: string
+          tagline_en: string
           updated_at: string
         }
         Insert: {
           city?: string
+          city_en?: string
           created_at?: string
+          day_end?: string
+          day_start?: string
           email?: string
           id?: string
           instagram?: string
           name?: string
+          name_en?: string
           phone?: string
           singleton?: boolean
           tagline?: string
+          tagline_en?: string
           updated_at?: string
         }
         Update: {
           city?: string
+          city_en?: string
           created_at?: string
+          day_end?: string
+          day_start?: string
           email?: string
           id?: string
           instagram?: string
           name?: string
+          name_en?: string
           phone?: string
           singleton?: boolean
           tagline?: string
+          tagline_en?: string
           updated_at?: string
         }
         Relationships: []
@@ -433,6 +454,7 @@ export type Database = {
         Row: {
           created_at: string
           full_name: string
+          full_name_en: string | null
           id: string
           language: string
           must_change_password: boolean
@@ -442,6 +464,7 @@ export type Database = {
         Insert: {
           created_at?: string
           full_name: string
+          full_name_en?: string | null
           id: string
           language?: string
           must_change_password?: boolean
@@ -451,6 +474,7 @@ export type Database = {
         Update: {
           created_at?: string
           full_name?: string
+          full_name_en?: string | null
           id?: string
           language?: string
           must_change_password?: boolean

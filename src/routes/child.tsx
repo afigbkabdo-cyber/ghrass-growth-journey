@@ -21,6 +21,7 @@ import { RoleGuard } from "@/components/role-guard";
 import { sectionRoles } from "@/lib/session";
 import { childAge, mealStatusLabels, stageLabels } from "@/lib/kg-labels";
 import { getDailyLog, listChildNotes, listSchedule, myChildren } from "@/lib/kg.functions";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/child")({
   head: () => ({
@@ -78,6 +79,7 @@ function InfoRow({
 }
 
 function ChildPage() {
+  const { t, n, d, time, num } = useI18n();
   const fetchChildren = useServerFn(myChildren);
   const fetchLog = useServerFn(getDailyLog);
   const fetchNotes = useServerFn(listChildNotes);
@@ -105,23 +107,23 @@ function ChildPage() {
   });
 
   return (
-    <AppShell navItems={parentNav} roleLabel="ولي أمر" tone="orange">
+    <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
       <PageContainer>
         {children.isLoading ? (
-          <p className="text-sm text-muted-foreground">جارٍ التحميل…</p>
+          <p className="text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>
         ) : !child ? (
           <EmptyState
-            title="لا يوجد طفل مرتبط بحسابك"
-            message="تواصل مع إدارة الروضة لربط طفلك بحسابك."
+            title={t("لا يوجد طفل مرتبط بحسابك")}
+            message={t("تواصل مع إدارة الروضة لربط طفلك بحسابك.")}
           />
         ) : (
           <>
             <header className="mb-4 flex items-center gap-3">
-              <Avatar name={child.name} tone="pink" size="lg" />
+              <Avatar name={n(child.name, child.nameEn)} tone="pink" size="lg" />
               <div className="min-w-0 flex-1">
-                <h1 className="font-display text-xl font-extrabold text-foreground">{child.name}</h1>
+                <h1 className="font-display text-xl font-extrabold text-foreground">{n(child.name, child.nameEn)}</h1>
                 <p className="text-xs text-muted-foreground">
-                  {child.className ?? "بدون فصل"} • {stageLabels[child.stage] ?? child.stage}
+                  {child.className ? n(child.className, child.classNameEn) : t("بدون فصل")} • {t(stageLabels[child.stage] ?? child.stage)}
                   {childAge(child.birthDate) ? ` • ${childAge(child.birthDate)}` : ""}
                 </p>
               </div>
@@ -142,7 +144,7 @@ function ChildPage() {
                         : "border-border text-muted-foreground"
                     }`}
                   >
-                    {c.name}
+                    {n(c.name, c.nameEn)}
                   </button>
                 ))}
               </div>
@@ -151,56 +153,60 @@ function ChildPage() {
             {child.allergies && (
               <p className="mb-4 flex items-start gap-2 rounded-2xl border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-xs font-bold leading-relaxed text-destructive">
                 <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                حساسية مسجلة: {child.allergies}
+                {t("حساسية مسجلة: {allergies}", { allergies: child.allergies })}
               </p>
             )}
 
-            <SectionHeader title="متابعة اليوم" subtitle="تسجيل المعلمة لهذا اليوم" icon={ListChecks} tone="green" />
+            <SectionHeader title={t("متابعة اليوم")} subtitle={t("تسجيل المعلمة لهذا اليوم")} icon={ListChecks} tone="green" />
             <div className="mb-6 space-y-3">
               <InfoRow
                 icon={Utensils}
                 tone="orange"
-                title="الوجبة"
+                title={t("الوجبة")}
                 value={
                   log.data?.mealStatus
-                    ? `${mealStatusLabels[log.data.mealStatus] ?? log.data.mealStatus}${
-                        log.data.mealTime ? ` • ${log.data.mealTime.slice(0, 5)}` : ""
+                    ? `${t(mealStatusLabels[log.data.mealStatus] ?? log.data.mealStatus)}${
+                        log.data.mealTime ? ` • ${time(log.data.mealTime.slice(0, 5))}` : ""
                       }`
-                    : "لم تُسجّل بعد"
+                    : t("لم تُسجّل بعد")
                 }
                 note={log.data?.mealNotes ?? null}
               />
               <InfoRow
                 icon={Droplets}
                 tone="blue"
-                title="دورة المياه / الحفاض"
-                value={`دورة المياه: ${log.data?.bathroomCount ?? 0} • تغيير الحفاض: ${log.data?.diaperCount ?? 0}`}
+                title={t("دورة المياه / الحفاض")}
+                value={t("دورة المياه: {bathroom} • تغيير الحفاض: {diaper}", {
+                  bathroom: num(log.data?.bathroomCount ?? 0),
+                  diaper: num(log.data?.diaperCount ?? 0),
+                })}
                 note={log.data?.bathroomNotes ?? null}
               />
               <InfoRow
                 icon={Moon}
                 tone="pink"
-                title="النوم"
+                title={t("النوم")}
                 value={
                   log.data?.slept
-                    ? `نام${log.data.sleepStart ? ` من ${log.data.sleepStart.slice(0, 5)}` : ""}${
-                        log.data.sleepEnd ? ` إلى ${log.data.sleepEnd.slice(0, 5)}` : ""
-                      }`
-                    : "لم ينم اليوم"
+                    ? t("نام{from}{to}", {
+                        from: log.data.sleepStart ? t(" من {time}", { time: time(log.data.sleepStart.slice(0, 5)) }) : "",
+                        to: log.data.sleepEnd ? t(" إلى {time}", { time: time(log.data.sleepEnd.slice(0, 5)) }) : "",
+                      })
+                    : t("لم ينم اليوم")
                 }
               />
               <InfoRow
                 icon={HandHeart}
                 tone="green"
-                title="الصلاة"
-                value={log.data?.prayerDone ? "صلّى مع المجموعة" : "لم تُسجّل بعد"}
+                title={t("الصلاة")}
+                value={log.data?.prayerDone ? t("صلّى مع المجموعة") : t("لم تُسجّل بعد")}
               />
             </div>
 
-            <SectionHeader title="الجدول اليومي" subtitle="ما تم إنجازه اليوم" icon={ListChecks} tone="blue" />
+            <SectionHeader title={t("الجدول اليومي")} subtitle={t("ما تم إنجازه اليوم")} icon={ListChecks} tone="blue" />
             <div className="mb-6 space-y-2">
               {(schedule.data ?? []).length === 0 ? (
-                <p className="text-xs text-muted-foreground">لا يوجد جدول لهذا الفصل بعد.</p>
+                <p className="text-xs text-muted-foreground">{t("لا يوجد جدول لهذا الفصل بعد.")}</p>
               ) : (
                 (schedule.data ?? []).map((s) => (
                   <div
@@ -220,7 +226,7 @@ function ChildPage() {
                     </div>
                     {s.atTime && (
                       <span className="shrink-0 text-[11px] font-bold text-muted-foreground">
-                        {s.atTime.slice(0, 5)}
+                        {time(s.atTime.slice(0, 5))}
                       </span>
                     )}
                   </div>
@@ -228,23 +234,23 @@ function ChildPage() {
               )}
             </div>
 
-            <SectionHeader title="ملاحظات المعلمة" icon={StickyNote} tone="yellow" />
+            <SectionHeader title={t("ملاحظات المعلمة")} icon={StickyNote} tone="yellow" />
             <div className="mb-6 space-y-3">
               {(notes.data ?? []).length === 0 ? (
-                <p className="text-xs text-muted-foreground">لا توجد ملاحظات حتى الآن.</p>
+                <p className="text-xs text-muted-foreground">{t("لا توجد ملاحظات حتى الآن.")}</p>
               ) : (
-                (notes.data ?? []).map((n) => (
-                  <article key={n.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
+                (notes.data ?? []).map((note) => (
+                  <article key={note.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-extrabold text-foreground">{n.authorName ?? "المعلمة"}</p>
+                      <p className="text-xs font-extrabold text-foreground">{note.authorName ? n(note.authorName, note.authorNameEn) : t("المعلمة")}</p>
                       <span className="text-[11px] text-muted-foreground">
-                        {new Date(n.createdAt).toLocaleDateString("ar-SA")}
+                        {d(note.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{n.body}</p>
-                    {n.domain && (
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{note.body}</p>
+                    {note.domain && (
                       <div className="mt-2">
-                        <ToneBadge tone="blue">{n.domain}</ToneBadge>
+                        <ToneBadge tone="blue">{note.domain}</ToneBadge>
                       </div>
                     )}
                   </article>
@@ -257,7 +263,7 @@ function ChildPage() {
               className="flex items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-soft"
             >
               <MessagesSquare className="h-4.5 w-4.5" />
-              استفسار للإدارة عن {child.name.split(" ")[0]}
+              {t("استفسار للإدارة عن {name}", { name: n(child.name, child.nameEn).split(" ")[0] ?? n(child.name, child.nameEn) })}
             </Link>
           </>
         )}
