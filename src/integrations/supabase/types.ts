@@ -177,10 +177,12 @@ export type Database = {
           birth_date: string | null
           class_id: string | null
           created_at: string
+          enrollment_term: string | null
           gender: string | null
           id: string
           name: string
           notes: string | null
+          session_period: string | null
           stage: string
         }
         Insert: {
@@ -188,10 +190,12 @@ export type Database = {
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
+          enrollment_term?: string | null
           gender?: string | null
           id?: string
           name: string
           notes?: string | null
+          session_period?: string | null
           stage?: string
         }
         Update: {
@@ -199,10 +203,12 @@ export type Database = {
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
+          enrollment_term?: string | null
           gender?: string | null
           id?: string
           name?: string
           notes?: string | null
+          session_period?: string | null
           stage?: string
         }
         Relationships: [
@@ -384,11 +390,51 @@ export type Database = {
           },
         ]
       }
+      nursery_settings: {
+        Row: {
+          city: string
+          created_at: string
+          email: string
+          id: string
+          instagram: string
+          name: string
+          phone: string
+          singleton: boolean
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          email?: string
+          id?: string
+          instagram?: string
+          name?: string
+          phone?: string
+          singleton?: boolean
+          tagline?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          email?: string
+          id?: string
+          instagram?: string
+          name?: string
+          phone?: string
+          singleton?: boolean
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           full_name: string
           id: string
+          language: string
           must_change_password: boolean
           phone: string | null
           title: string | null
@@ -397,6 +443,7 @@ export type Database = {
           created_at?: string
           full_name: string
           id: string
+          language?: string
           must_change_password?: boolean
           phone?: string | null
           title?: string | null
@@ -405,6 +452,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          language?: string
           must_change_password?: boolean
           phone?: string | null
           title?: string | null
@@ -538,11 +586,14 @@ export type Database = {
       values_week: {
         Row: {
           approved: boolean
+          at_home: string[]
+          at_school: string[]
           created_at: string
           description: string | null
           hadith: string | null
           id: string
           is_current: boolean
+          learnings: string[]
           name: string
           source: string | null
           tagline: string | null
@@ -551,11 +602,14 @@ export type Database = {
         }
         Insert: {
           approved?: boolean
+          at_home?: string[]
+          at_school?: string[]
           created_at?: string
           description?: string | null
           hadith?: string | null
           id?: string
           is_current?: boolean
+          learnings?: string[]
           name: string
           source?: string | null
           tagline?: string | null
@@ -564,11 +618,14 @@ export type Database = {
         }
         Update: {
           approved?: boolean
+          at_home?: string[]
+          at_school?: string[]
           created_at?: string
           description?: string | null
           hadith?: string | null
           id?: string
           is_current?: boolean
+          learnings?: string[]
           name?: string
           source?: string | null
           tagline?: string | null

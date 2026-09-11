@@ -3,6 +3,7 @@ import { Bell, CircleHelp, Languages, LogOut, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, parentNav } from "@/components/shells";
+import { LanguageSwitcher } from "@/lib/i18n";
 import { Avatar, PageContainer, SectionHeader, ToneBadge } from "@/components/ghiras";
 import { Switch } from "@/components/ui/switch";
 import { RoleGuard } from "@/components/role-guard";
@@ -34,6 +35,7 @@ function MorePage() {
   return (
     <AppShell navItems={parentNav} roleLabel="ولي أمر" tone="orange">
       <PageContainer>
+        <div className="mb-4"><LanguageSwitcher /></div>
         <section className="mb-6 flex items-center gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
           <Avatar name={session?.name ?? "ولي الأمر"} tone="orange" size="lg" />
           <div className="min-w-0 flex-1">

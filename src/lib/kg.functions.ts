@@ -19,6 +19,9 @@ export interface ValueRow {
   weekStart: string | null;
   approved: boolean;
   isCurrent: boolean;
+  learnings: string[];
+  atSchool: string[];
+  atHome: string[];
 }
 
 export interface ActivityRow {
@@ -138,6 +141,9 @@ export const listValues = createServerFn({ method: "GET" })
       weekStart: v.week_start,
       approved: v.approved,
       isCurrent: v.is_current,
+      learnings: v.learnings ?? [],
+      atSchool: v.at_school ?? [],
+      atHome: v.at_home ?? [],
     }));
   });
 
@@ -162,6 +168,9 @@ export const getCurrentValue = createServerFn({ method: "GET" })
       weekStart: data.week_start,
       approved: data.approved,
       isCurrent: data.is_current,
+      learnings: data.learnings ?? [],
+      atSchool: data.at_school ?? [],
+      atHome: data.at_home ?? [],
     };
   });
 
@@ -173,6 +182,9 @@ const valueInput = z.object({
   source: z.string().trim().optional().nullable(),
   description: z.string().trim().optional().nullable(),
   weekStart: z.string().trim().optional().nullable(),
+  learnings: z.array(z.string().trim().min(1)).max(30).optional(),
+  atSchool: z.array(z.string().trim().min(1)).max(30).optional(),
+  atHome: z.array(z.string().trim().min(1)).max(30).optional(),
 });
 
 export const saveValue = createServerFn({ method: "POST" })
@@ -186,6 +198,9 @@ export const saveValue = createServerFn({ method: "POST" })
       source: data.source ?? null,
       description: data.description ?? null,
       week_start: data.weekStart || null,
+      learnings: data.learnings ?? [],
+      at_school: data.atSchool ?? [],
+      at_home: data.atHome ?? [],
     };
     if (data.id) {
       const { error } = await context.supabase.from("values_week").update(payload).eq("id", data.id);

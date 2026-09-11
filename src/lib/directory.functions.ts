@@ -138,6 +138,8 @@ const childSchema = z.object({
   guardianId: z.string().uuid().nullable().optional(),
   birthDate: z.string().trim().nullable().optional(),
   allergies: z.string().trim().nullable().optional(),
+  sessionPeriod: z.string().trim().nullable().optional(),
+  enrollmentTerm: z.string().trim().nullable().optional(),
 });
 
 /** تسجيل طفل جديد وربطه بولي أمر إن وُجد. */
@@ -153,6 +155,8 @@ export const createChild = createServerFn({ method: "POST" })
         class_id: data.classId ?? null,
         birth_date: data.birthDate || null,
         allergies: data.allergies || null,
+        session_period: data.sessionPeriod || null,
+        enrollment_term: data.enrollmentTerm || null,
       })
       .select("id")
       .single();
@@ -172,6 +176,92 @@ export const deleteChild = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await context.supabase.from("child_guardians").delete().eq("child_id", data.id);
     const { error } = await context.supabase.from("children").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ================= تفاصيل الطفل والإجراءات الإدارية ================= */
+
+export interface ChildDetailRow {
+  id: string;
+  name: string;
+  stage: string;
+  classId: string | null;
+  className: string | null;
+  birthDate: string | null;
+  gender: string | null;
+  allergies: string | null;
+  notes: string | null;
+  sessionPeriod: string | null;
+  enrollmentTerm: string | null;
+  createdAt: string;
+  guardians: { id: string; name: string; phone: string | null; relation: string | null }[];
+}
+
+/** بيانات تسجيل الطفل كاملة — للعرض فقط (لا تعديل). */
+export const getChildDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<ChildDetailRow | null> => {
+    const { data: row, error } = await context.supabase
+      .from("children")
+      .select(
+        "id, name, stage, class_id, birth_date, gender, allergies, notes, session_period, enrollment_term, created_at, classes(name), child_guardians(relation, guardian_id, profiles(full_name, phone))",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) return null;
+    const r = row as unknown as {
+      id: string;
+      name: string;
+      stage: string;
+      class_id: string | null;
+      birth_date: string | null;
+      gender: string | null;
+      allergies: string | null;
+      notes: string | null;
+      session_period: string | null;
+      enrollment_term: string | null;
+      created_at: string;
+      classes: { name: string } | null;
+      child_guardians:
+        | { relation: string | null; guardian_id: string; profiles: { full_name: string; phone: string | null } | null }[]
+        | null;
+    };
+    return {
+      id: r.id,
+      name: r.name,
+      stage: r.stage,
+      classId: r.class_id,
+      className: r.classes?.name ?? null,
+      birthDate: r.birth_date,
+      gender: r.gender,
+      allergies: r.allergies,
+      notes: r.notes,
+      sessionPeriod: r.session_period,
+      enrollmentTerm: r.enrollment_term,
+      createdAt: r.created_at,
+      guardians: (r.child_guardians ?? []).map((g) => ({
+        id: g.guardian_id,
+        name: g.profiles?.full_name ?? "—",
+        phone: g.profiles?.phone ?? null,
+        relation: g.relation,
+      })),
+    };
+  });
+
+/** نقل الطفل إلى فصل آخر — لا يغيّر أي بيانات أساسية أخرى. */
+export const moveChildToClass = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), classId: z.string().uuid().nullable() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("children")
+      .update({ class_id: data.classId })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
