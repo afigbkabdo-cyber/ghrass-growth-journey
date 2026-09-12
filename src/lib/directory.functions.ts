@@ -18,6 +18,7 @@ export interface ChildRow {
   classId: string | null;
   birthDate: string | null;
   allergies: string | null;
+  allergiesEn: string | null;
   guardians: string[];
 }
 
@@ -50,7 +51,7 @@ export const listChildren = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("children")
       .select(
-        "id, name, name_en, stage, class_id, birth_date, allergies, classes(name, name_en), child_guardians(profiles(full_name))",
+        "id, name, name_en, stage, class_id, birth_date, allergies, allergies_en, classes(name, name_en), child_guardians(profiles(full_name))",
       )
       .order("name");
     if (error) throw new Error(error.message);
@@ -63,6 +64,7 @@ export const listChildren = createServerFn({ method: "GET" })
         class_id: string | null;
         birth_date: string | null;
         allergies: string | null;
+        allergies_en: string | null;
         classes: { name: string; name_en: string | null } | null;
         child_guardians: { profiles: { full_name: string } | null }[] | null;
       };
@@ -76,6 +78,7 @@ export const listChildren = createServerFn({ method: "GET" })
         classNameEn: r.classes?.name_en ?? null,
         birthDate: r.birth_date,
         allergies: r.allergies,
+        allergiesEn: r.allergies_en ?? null,
         guardians: (r.child_guardians ?? [])
           .map((g) => g.profiles?.full_name)
           .filter((n): n is string => Boolean(n)),
@@ -146,6 +149,7 @@ const childSchema = z.object({
   guardianId: z.string().uuid().nullable().optional(),
   birthDate: z.string().trim().nullable().optional(),
   allergies: z.string().trim().nullable().optional(),
+  allergiesEn: z.string().trim().nullable().optional(),
   sessionPeriod: z.string().trim().nullable().optional(),
   enrollmentTerm: z.string().trim().nullable().optional(),
 });
@@ -164,6 +168,7 @@ export const createChild = createServerFn({ method: "POST" })
         class_id: data.classId ?? null,
         birth_date: data.birthDate || null,
         allergies: data.allergies || null,
+        allergies_en: data.allergiesEn || null,
         session_period: data.sessionPeriod || null,
         enrollment_term: data.enrollmentTerm || null,
       })
@@ -202,6 +207,7 @@ export interface ChildDetailRow {
   birthDate: string | null;
   gender: string | null;
   allergies: string | null;
+  allergiesEn: string | null;
   notes: string | null;
   sessionPeriod: string | null;
   enrollmentTerm: string | null;
@@ -217,7 +223,7 @@ export const getChildDetails = createServerFn({ method: "GET" })
     const { data: row, error } = await context.supabase
       .from("children")
       .select(
-        "id, name, name_en, stage, class_id, birth_date, gender, allergies, notes, session_period, enrollment_term, created_at, classes(name, name_en), child_guardians(relation, guardian_id, profiles(full_name, full_name_en, phone))",
+        "id, name, name_en, stage, class_id, birth_date, gender, allergies, allergies_en, notes, session_period, enrollment_term, created_at, classes(name, name_en), child_guardians(relation, guardian_id, profiles(full_name, full_name_en, phone))",
       )
       .eq("id", data.id)
       .maybeSingle();
@@ -232,6 +238,7 @@ export const getChildDetails = createServerFn({ method: "GET" })
       birth_date: string | null;
       gender: string | null;
       allergies: string | null;
+      allergies_en: string | null;
       notes: string | null;
       session_period: string | null;
       enrollment_term: string | null;
@@ -256,6 +263,7 @@ export const getChildDetails = createServerFn({ method: "GET" })
       birthDate: r.birth_date,
       gender: r.gender,
       allergies: r.allergies,
+      allergiesEn: r.allergies_en ?? null,
       notes: r.notes,
       sessionPeriod: r.session_period,
       enrollmentTerm: r.enrollment_term,
