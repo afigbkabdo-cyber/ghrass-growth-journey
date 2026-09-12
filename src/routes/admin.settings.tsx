@@ -54,7 +54,7 @@ const rolePermissions = [
 ];
 
 function AdminSettingsPage() {
-  const { t: tr, time } = useI18n();
+  const { t: tr, time, num } = useI18n();
   const qc = useQueryClient();
   const fetchSettings = useServerFn(getNurserySettings);
   const saveSettings = useServerFn(saveNurserySettings);
