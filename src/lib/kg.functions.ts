@@ -12,22 +12,32 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface ValueRow {
   id: string;
   name: string;
+  nameEn: string | null;
   tagline: string | null;
+  taglineEn: string | null;
   hadith: string | null;
+  hadithEn: string | null;
   source: string | null;
+  sourceEn: string | null;
   description: string | null;
+  descriptionEn: string | null;
   weekStart: string | null;
   approved: boolean;
   isCurrent: boolean;
   learnings: string[];
+  learningsEn: string[];
   atSchool: string[];
+  atSchoolEn: string[];
   atHome: string[];
+  atHomeEn: string[];
 }
 
 export interface ActivityRow {
   id: string;
   title: string;
+  titleEn: string | null;
   description: string | null;
+  descriptionEn: string | null;
   activityDate: string;
   activityTime: string | null;
   classId: string | null;
@@ -48,6 +58,7 @@ export interface ClassChildRow {
   birthDate: string | null;
   gender: string | null;
   allergies: string | null;
+  allergiesEn: string | null;
   notes: string | null;
   classId: string | null;
   className: string | null;
@@ -83,7 +94,9 @@ export interface ScheduleRow {
   id: string;
   classId: string;
   title: string;
+  titleEn: string | null;
   description: string | null;
+  descriptionEn: string | null;
   atTime: string | null;
   orderIndex: number;
   done: boolean;
