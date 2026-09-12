@@ -230,7 +230,7 @@ function AdminSettingsPage() {
           {[
             { label: tr("بداية الدوام"), value: form?.dayStart ? time(form.dayStart) : tr("غير محدد") },
             { label: tr("نهاية الدوام"), value: form?.dayEnd ? time(form.dayEnd) : tr("غير محدد") },
-            { label: tr("حد التأخير"), value: `١٥ ${tr("دقيقة")}` },
+            { label: tr("حد التأخير"), value: `${num(15)} ${tr("دقيقة")}` },
             { label: tr("أيام العمل"), value: tr("الأحد — الخميس") },
           ].map((s) => (
             <div key={s.label} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
