@@ -97,7 +97,7 @@ export const teacherExtra: Record<string, string> = {
 
   // دليل قيمة الأسبوع — تذييل
   "القيمة والحديث ومصدرهما تُدار من الإدارة فقط، ولا يمكن تعديلها من واجهة المعلمة.":
-    "The value, the hadith, and its source are managed by the administration only, and cannot be edited from the teacher's interface.",,
+    "The value, the hadith, and its source are managed by the administration only, and cannot be edited from the teacher's interface.",
   // مفاتيح مكمّلة للفحص البصري
   "دليل القيمة": "Value guide",
   "ملاحظة طفل": "Child note",
