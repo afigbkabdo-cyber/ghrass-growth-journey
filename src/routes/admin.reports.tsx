@@ -46,7 +46,7 @@ function AdminReportsPage() {
             const tone = toneClasses[c.tone];
             return (
               <div key={c.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
-                <p className={cn("font-display text-2xl font-extrabold", tone.deep)}>{c.value}</p>
+                <p className={cn("font-display text-2xl font-extrabold", tone.deep)}>{t(c.value)}</p>
                 <p className="mt-1 text-xs font-bold text-foreground">{t(c.title)}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">{t(c.note)}</p>
               </div>

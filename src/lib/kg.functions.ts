@@ -153,16 +153,24 @@ export const listValues = createServerFn({ method: "GET" })
     return (data ?? []).map((v) => ({
       id: v.id,
       name: v.name,
+      nameEn: v.name_en ?? null,
       tagline: v.tagline,
+      taglineEn: v.tagline_en ?? null,
       hadith: v.hadith,
+      hadithEn: v.hadith_en ?? null,
       source: v.source,
+      sourceEn: v.source_en ?? null,
       description: v.description,
+      descriptionEn: v.description_en ?? null,
       weekStart: v.week_start,
       approved: v.approved,
       isCurrent: v.is_current,
       learnings: v.learnings ?? [],
+      learningsEn: v.learnings_en ?? [],
       atSchool: v.at_school ?? [],
+      atSchoolEn: v.at_school_en ?? [],
       atHome: v.at_home ?? [],
+      atHomeEn: v.at_home_en ?? [],
     }));
   });
 
@@ -180,30 +188,46 @@ export const getCurrentValue = createServerFn({ method: "GET" })
     return {
       id: data.id,
       name: data.name,
+      nameEn: data.name_en ?? null,
       tagline: data.tagline,
+      taglineEn: data.tagline_en ?? null,
       hadith: data.hadith,
+      hadithEn: data.hadith_en ?? null,
       source: data.source,
+      sourceEn: data.source_en ?? null,
       description: data.description,
+      descriptionEn: data.description_en ?? null,
       weekStart: data.week_start,
       approved: data.approved,
       isCurrent: data.is_current,
       learnings: data.learnings ?? [],
+      learningsEn: data.learnings_en ?? [],
       atSchool: data.at_school ?? [],
+      atSchoolEn: data.at_school_en ?? [],
       atHome: data.at_home ?? [],
+      atHomeEn: data.at_home_en ?? [],
     };
   });
 
 const valueInput = z.object({
   id: z.string().uuid().optional(),
   name: z.string().trim().min(2),
+  nameEn: z.string().trim().optional().nullable(),
   tagline: z.string().trim().optional().nullable(),
+  taglineEn: z.string().trim().optional().nullable(),
   hadith: z.string().trim().optional().nullable(),
+  hadithEn: z.string().trim().optional().nullable(),
   source: z.string().trim().optional().nullable(),
+  sourceEn: z.string().trim().optional().nullable(),
   description: z.string().trim().optional().nullable(),
+  descriptionEn: z.string().trim().optional().nullable(),
   weekStart: z.string().trim().optional().nullable(),
   learnings: z.array(z.string().trim().min(1)).max(30).optional(),
+  learningsEn: z.array(z.string().trim().min(1)).max(30).optional(),
   atSchool: z.array(z.string().trim().min(1)).max(30).optional(),
+  atSchoolEn: z.array(z.string().trim().min(1)).max(30).optional(),
   atHome: z.array(z.string().trim().min(1)).max(30).optional(),
+  atHomeEn: z.array(z.string().trim().min(1)).max(30).optional(),
 });
 
 export const saveValue = createServerFn({ method: "POST" })
@@ -212,14 +236,22 @@ export const saveValue = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const payload = {
       name: data.name,
+      name_en: data.nameEn ?? null,
       tagline: data.tagline ?? null,
+      tagline_en: data.taglineEn ?? null,
       hadith: data.hadith ?? null,
+      hadith_en: data.hadithEn ?? null,
       source: data.source ?? null,
+      source_en: data.sourceEn ?? null,
       description: data.description ?? null,
+      description_en: data.descriptionEn ?? null,
       week_start: data.weekStart || null,
       learnings: data.learnings ?? [],
+      learnings_en: data.learningsEn ?? [],
       at_school: data.atSchool ?? [],
+      at_school_en: data.atSchoolEn ?? [],
       at_home: data.atHome ?? [],
+      at_home_en: data.atHomeEn ?? [],
     };
     if (data.id) {
       const { error } = await context.supabase.from("values_week").update(payload).eq("id", data.id);
