@@ -12,22 +12,32 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface ValueRow {
   id: string;
   name: string;
+  nameEn: string | null;
   tagline: string | null;
+  taglineEn: string | null;
   hadith: string | null;
+  hadithEn: string | null;
   source: string | null;
+  sourceEn: string | null;
   description: string | null;
+  descriptionEn: string | null;
   weekStart: string | null;
   approved: boolean;
   isCurrent: boolean;
   learnings: string[];
+  learningsEn: string[];
   atSchool: string[];
+  atSchoolEn: string[];
   atHome: string[];
+  atHomeEn: string[];
 }
 
 export interface ActivityRow {
   id: string;
   title: string;
+  titleEn: string | null;
   description: string | null;
+  descriptionEn: string | null;
   activityDate: string;
   activityTime: string | null;
   classId: string | null;
@@ -48,6 +58,7 @@ export interface ClassChildRow {
   birthDate: string | null;
   gender: string | null;
   allergies: string | null;
+  allergiesEn: string | null;
   notes: string | null;
   classId: string | null;
   className: string | null;
@@ -83,7 +94,9 @@ export interface ScheduleRow {
   id: string;
   classId: string;
   title: string;
+  titleEn: string | null;
   description: string | null;
+  descriptionEn: string | null;
   atTime: string | null;
   orderIndex: number;
   done: boolean;
@@ -140,16 +153,24 @@ export const listValues = createServerFn({ method: "GET" })
     return (data ?? []).map((v) => ({
       id: v.id,
       name: v.name,
+      nameEn: v.name_en ?? null,
       tagline: v.tagline,
+      taglineEn: v.tagline_en ?? null,
       hadith: v.hadith,
+      hadithEn: v.hadith_en ?? null,
       source: v.source,
+      sourceEn: v.source_en ?? null,
       description: v.description,
+      descriptionEn: v.description_en ?? null,
       weekStart: v.week_start,
       approved: v.approved,
       isCurrent: v.is_current,
       learnings: v.learnings ?? [],
+      learningsEn: v.learnings_en ?? [],
       atSchool: v.at_school ?? [],
+      atSchoolEn: v.at_school_en ?? [],
       atHome: v.at_home ?? [],
+      atHomeEn: v.at_home_en ?? [],
     }));
   });
 
@@ -167,30 +188,46 @@ export const getCurrentValue = createServerFn({ method: "GET" })
     return {
       id: data.id,
       name: data.name,
+      nameEn: data.name_en ?? null,
       tagline: data.tagline,
+      taglineEn: data.tagline_en ?? null,
       hadith: data.hadith,
+      hadithEn: data.hadith_en ?? null,
       source: data.source,
+      sourceEn: data.source_en ?? null,
       description: data.description,
+      descriptionEn: data.description_en ?? null,
       weekStart: data.week_start,
       approved: data.approved,
       isCurrent: data.is_current,
       learnings: data.learnings ?? [],
+      learningsEn: data.learnings_en ?? [],
       atSchool: data.at_school ?? [],
+      atSchoolEn: data.at_school_en ?? [],
       atHome: data.at_home ?? [],
+      atHomeEn: data.at_home_en ?? [],
     };
   });
 
 const valueInput = z.object({
   id: z.string().uuid().optional(),
   name: z.string().trim().min(2),
+  nameEn: z.string().trim().optional().nullable(),
   tagline: z.string().trim().optional().nullable(),
+  taglineEn: z.string().trim().optional().nullable(),
   hadith: z.string().trim().optional().nullable(),
+  hadithEn: z.string().trim().optional().nullable(),
   source: z.string().trim().optional().nullable(),
+  sourceEn: z.string().trim().optional().nullable(),
   description: z.string().trim().optional().nullable(),
+  descriptionEn: z.string().trim().optional().nullable(),
   weekStart: z.string().trim().optional().nullable(),
   learnings: z.array(z.string().trim().min(1)).max(30).optional(),
+  learningsEn: z.array(z.string().trim().min(1)).max(30).optional(),
   atSchool: z.array(z.string().trim().min(1)).max(30).optional(),
+  atSchoolEn: z.array(z.string().trim().min(1)).max(30).optional(),
   atHome: z.array(z.string().trim().min(1)).max(30).optional(),
+  atHomeEn: z.array(z.string().trim().min(1)).max(30).optional(),
 });
 
 export const saveValue = createServerFn({ method: "POST" })
@@ -199,14 +236,22 @@ export const saveValue = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const payload = {
       name: data.name,
+      name_en: data.nameEn ?? null,
       tagline: data.tagline ?? null,
+      tagline_en: data.taglineEn ?? null,
       hadith: data.hadith ?? null,
+      hadith_en: data.hadithEn ?? null,
       source: data.source ?? null,
+      source_en: data.sourceEn ?? null,
       description: data.description ?? null,
+      description_en: data.descriptionEn ?? null,
       week_start: data.weekStart || null,
       learnings: data.learnings ?? [],
+      learnings_en: data.learningsEn ?? [],
       at_school: data.atSchool ?? [],
+      at_school_en: data.atSchoolEn ?? [],
       at_home: data.atHome ?? [],
+      at_home_en: data.atHomeEn ?? [],
     };
     if (data.id) {
       const { error } = await context.supabase.from("values_week").update(payload).eq("id", data.id);
@@ -287,6 +332,7 @@ function mapChild(r: {
   birth_date: string | null;
   gender: string | null;
   allergies: string | null;
+  allergies_en: string | null;
   notes: string | null;
   class_id: string | null;
   classes: { name: string; name_en: string | null } | null;
@@ -299,6 +345,7 @@ function mapChild(r: {
     birthDate: r.birth_date,
     gender: r.gender,
     allergies: r.allergies,
+    allergiesEn: r.allergies_en ?? null,
     notes: r.notes,
     classId: r.class_id,
     className: r.classes?.name ?? null,
@@ -306,7 +353,7 @@ function mapChild(r: {
   };
 }
 
-const childSelect = "id, name, name_en, stage, birth_date, gender, allergies, notes, class_id, classes(name, name_en)";
+const childSelect = "id, name, name_en, stage, birth_date, gender, allergies, allergies_en, notes, class_id, classes(name, name_en)";
 
 /** أطفال فصول المعلمة — RLS يمنع رؤية أطفال الفصول الأخرى. */
 export const myClassChildren = createServerFn({ method: "GET" })
@@ -488,7 +535,7 @@ export const listSchedule = createServerFn({ method: "GET" })
     const date = data.date || today();
     const { data: items, error } = await context.supabase
       .from("schedule_items")
-      .select("id, class_id, title, description, at_time, order_index")
+      .select("id, class_id, title, title_en, description, description_en, at_time, order_index")
       .eq("class_id", data.classId)
       .order("order_index");
     if (error) throw new Error(error.message);
@@ -506,7 +553,9 @@ export const listSchedule = createServerFn({ method: "GET" })
       id: i.id,
       classId: i.class_id,
       title: i.title,
+      titleEn: i.title_en ?? null,
       description: i.description,
+      descriptionEn: i.description_en ?? null,
       atTime: i.at_time,
       orderIndex: i.order_index,
       done: done.has(i.id),
@@ -521,7 +570,9 @@ export const saveScheduleItem = createServerFn({ method: "POST" })
         id: z.string().uuid().optional(),
         classId: z.string().uuid(),
         title: z.string().trim().min(2),
+        titleEn: z.string().trim().nullable().optional(),
         description: z.string().trim().nullable().optional(),
+        descriptionEn: z.string().trim().nullable().optional(),
         atTime: z.string().nullable().optional(),
         orderIndex: z.number().int().min(0).max(100).optional(),
       })
@@ -531,7 +582,9 @@ export const saveScheduleItem = createServerFn({ method: "POST" })
     const payload = {
       class_id: data.classId,
       title: data.title,
+      title_en: data.titleEn ?? null,
       description: data.description ?? null,
+      description_en: data.descriptionEn ?? null,
       at_time: data.atTime || null,
       order_index: data.orderIndex ?? 0,
     };
@@ -573,12 +626,14 @@ export const markScheduleDone = createServerFn({ method: "POST" })
 /* ================= الأنشطة ================= */
 
 const activitySelect =
-  "id, title, description, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name), activity_photos(path)";
+  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name), activity_photos(path)";
 
 type ActivityQueryRow = {
   id: string;
   title: string;
+  title_en: string | null;
   description: string | null;
+  description_en: string | null;
   activity_date: string;
   activity_time: string | null;
   class_id: string | null;
@@ -594,7 +649,9 @@ function mapActivity(r: ActivityQueryRow): ActivityRow {
   return {
     id: r.id,
     title: r.title,
+    titleEn: r.title_en ?? null,
     description: r.description,
+    descriptionEn: r.description_en ?? null,
     activityDate: r.activity_date,
     activityTime: r.activity_time,
     classId: r.class_id,
@@ -639,7 +696,9 @@ export const saveActivity = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid().optional(),
         title: z.string().trim().min(2),
+        titleEn: z.string().trim().nullable().optional(),
         description: z.string().trim().nullable().optional(),
+        descriptionEn: z.string().trim().nullable().optional(),
         activityDate: z.string(),
         activityTime: z.string().nullable().optional(),
         classId: z.string().uuid(),
@@ -653,7 +712,9 @@ export const saveActivity = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const payload = {
       title: data.title,
+      title_en: data.titleEn ?? null,
       description: data.description ?? null,
+      description_en: data.descriptionEn ?? null,
       activity_date: data.activityDate,
       activity_time: data.activityTime || null,
       class_id: data.classId,

@@ -28,7 +28,7 @@ export const Route = createFileRoute("/value")({
 });
 
 function ValuePage() {
-  const { t: tr, lang } = useI18n();
+  const { t: tr, n, lang } = useI18n();
   const fetchValue = useServerFn(getCurrentValue);
   const valueQuery = useQuery({ queryKey: ["current-value"], queryFn: () => fetchValue({}) });
   const v = valueQuery.data;
@@ -61,10 +61,10 @@ function ValuePage() {
                     }).format(new Date(v.weekStart))}
                   </ToneBadge>
                 )}
-                <h1 className={`font-display text-4xl font-extrabold ${t.deep}`}>{v.name}</h1>
+                <h1 className={`font-display text-4xl font-extrabold ${t.deep}`}>{n(v.name, v.nameEn)}</h1>
                 {v.tagline && (
                   <p className="mx-auto mt-2 max-w-sm text-sm font-medium leading-relaxed text-foreground/80">
-                    {v.tagline}
+                    {n(v.tagline, v.taglineEn)}
                   </p>
                 )}
               </div>
@@ -79,11 +79,11 @@ function ValuePage() {
                   <h2 className="text-base font-bold text-foreground">{tr("حديث الأسبوع")}</h2>
                 </div>
                 <blockquote className="rounded-2xl bg-muted/60 p-4 text-sm font-medium leading-loose text-foreground">
-                  {v.hadith}
+                  {n(v.hadith, v.hadithEn)}
                 </blockquote>
                 {v.source && (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <ToneBadge tone="orange">{v.source}</ToneBadge>
+                    <ToneBadge tone="orange">{n(v.source, v.sourceEn)}</ToneBadge>
                   </div>
                 )}
               </section>
@@ -92,7 +92,7 @@ function ValuePage() {
             {v.description && (
               <section className="mb-5 rounded-3xl border border-border bg-card p-5 shadow-soft">
                 <h2 className="mb-2 text-base font-bold text-foreground">{tr("كيف نغرسها")}</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">{v.description}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{n(v.description, v.descriptionEn)}</p>
               </section>
             )}
 
@@ -100,7 +100,7 @@ function ValuePage() {
               <>
                 <SectionHeader title={tr("ماذا سيتعلم طفلك؟")} icon={GraduationCap} tone="blue" />
                 <div className="mb-6 space-y-2.5">
-                  {v.learnings.map((l) => (
+                  {(lang === "en" && v.learningsEn.length > 0 ? v.learningsEn : v.learnings).map((l) => (
                     <div
                       key={l}
                       className="flex items-start gap-2.5 rounded-2xl border border-border bg-card p-3.5 shadow-soft"
@@ -117,7 +117,7 @@ function ValuePage() {
               <>
                 <SectionHeader title={tr("ماذا نفعل في الروضة؟")} icon={School} tone="green" />
                 <div className="mb-6 space-y-2.5">
-                  {v.atSchool.map((s) => (
+                  {(lang === "en" && v.atSchoolEn.length > 0 ? v.atSchoolEn : v.atSchool).map((s) => (
                     <div
                       key={s}
                       className="flex items-start gap-2.5 rounded-2xl border border-border bg-card p-3.5 shadow-soft"
@@ -134,7 +134,7 @@ function ValuePage() {
               <>
                 <SectionHeader title={tr("كيف تشارك من البيت؟")} icon={House} tone="pink" />
                 <div className="mb-6 space-y-2.5">
-                  {v.atHome.map((h) => (
+                  {(lang === "en" && v.atHomeEn.length > 0 ? v.atHomeEn : v.atHome).map((h) => (
                     <div
                       key={h}
                       className="flex items-start gap-2.5 rounded-2xl border border-brand-pink/25 bg-brand-pink-soft/50 p-3.5"

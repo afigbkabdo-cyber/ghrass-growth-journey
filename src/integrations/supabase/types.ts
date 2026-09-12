@@ -22,10 +22,12 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          description_en: string | null
           id: string
           linked_to_value: boolean
           published: boolean
           title: string
+          title_en: string | null
           updated_at: string
           value_id: string | null
         }
@@ -36,10 +38,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           linked_to_value?: boolean
           published?: boolean
           title: string
+          title_en?: string | null
           updated_at?: string
           value_id?: string | null
         }
@@ -50,10 +54,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          description_en?: string | null
           id?: string
           linked_to_value?: boolean
           published?: boolean
           title?: string
+          title_en?: string | null
           updated_at?: string
           value_id?: string | null
         }
@@ -174,6 +180,7 @@ export type Database = {
       children: {
         Row: {
           allergies: string | null
+          allergies_en: string | null
           birth_date: string | null
           class_id: string | null
           created_at: string
@@ -188,6 +195,7 @@ export type Database = {
         }
         Insert: {
           allergies?: string | null
+          allergies_en?: string | null
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
@@ -202,6 +210,7 @@ export type Database = {
         }
         Update: {
           allergies?: string | null
+          allergies_en?: string | null
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
@@ -489,9 +498,11 @@ export type Database = {
           class_id: string
           created_at: string
           description: string | null
+          description_en: string | null
           id: string
           order_index: number
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
@@ -499,9 +510,11 @@ export type Database = {
           class_id: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           id?: string
           order_index?: number
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
@@ -509,9 +522,11 @@ export type Database = {
           class_id?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           id?: string
           order_index?: number
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -611,48 +626,72 @@ export type Database = {
         Row: {
           approved: boolean
           at_home: string[]
+          at_home_en: string[]
           at_school: string[]
+          at_school_en: string[]
           created_at: string
           description: string | null
+          description_en: string | null
           hadith: string | null
+          hadith_en: string | null
           id: string
           is_current: boolean
           learnings: string[]
+          learnings_en: string[]
           name: string
+          name_en: string | null
           source: string | null
+          source_en: string | null
           tagline: string | null
+          tagline_en: string | null
           updated_at: string
           week_start: string | null
         }
         Insert: {
           approved?: boolean
           at_home?: string[]
+          at_home_en?: string[]
           at_school?: string[]
+          at_school_en?: string[]
           created_at?: string
           description?: string | null
+          description_en?: string | null
           hadith?: string | null
+          hadith_en?: string | null
           id?: string
           is_current?: boolean
           learnings?: string[]
+          learnings_en?: string[]
           name: string
+          name_en?: string | null
           source?: string | null
+          source_en?: string | null
           tagline?: string | null
+          tagline_en?: string | null
           updated_at?: string
           week_start?: string | null
         }
         Update: {
           approved?: boolean
           at_home?: string[]
+          at_home_en?: string[]
           at_school?: string[]
+          at_school_en?: string[]
           created_at?: string
           description?: string | null
+          description_en?: string | null
           hadith?: string | null
+          hadith_en?: string | null
           id?: string
           is_current?: boolean
           learnings?: string[]
+          learnings_en?: string[]
           name?: string
+          name_en?: string | null
           source?: string | null
+          source_en?: string | null
           tagline?: string | null
+          tagline_en?: string | null
           updated_at?: string
           week_start?: string | null
         }

@@ -34,7 +34,7 @@ function List({ items, marker }: { items: string[]; marker: string }) {
 }
 
 function TeacherValueGuidePage() {
-  const { t: tr } = useI18n();
+  const { t: tr, n, lang } = useI18n();
   const fetchValue = useServerFn(getCurrentValue);
   const value = useQuery({ queryKey: ["current-value"], queryFn: () => fetchValue({}) });
   const v = value.data;
@@ -58,16 +58,16 @@ function TeacherValueGuidePage() {
       ) : (
         <>
           <div className="mb-5 overflow-hidden rounded-3xl bg-gradient-growth p-5 shadow-soft">
-            <h2 className="font-display text-3xl font-extrabold text-primary-foreground">{v.name}</h2>
-            {v.tagline && <p className="mt-1 text-sm font-medium text-primary-foreground/90">{v.tagline}</p>}
+            <h2 className="font-display text-3xl font-extrabold text-primary-foreground">{n(v.name, v.nameEn)}</h2>
+            {v.tagline && <p className="mt-1 text-sm font-medium text-primary-foreground/90">{n(v.tagline, v.taglineEn)}</p>}
             {v.hadith && (
               <p className="mt-3 rounded-2xl bg-primary-foreground/15 p-3 text-xs leading-relaxed text-primary-foreground">
-                {v.hadith}
+                {n(v.hadith, v.hadithEn)}
               </p>
             )}
             {v.source && (
               <p className="mt-2 text-[11px] font-bold text-primary-foreground/85">
-                {tr("المصدر")}: {v.source}
+                {tr("المصدر")}: {n(v.source, v.sourceEn)}
               </p>
             )}
           </div>
@@ -76,7 +76,7 @@ function TeacherValueGuidePage() {
             <>
               <SectionHeader title={tr("كيف نغرسها")} icon={BookOpenText} tone="blue" />
               <p className="mb-5 rounded-2xl border border-border bg-card p-4 text-xs leading-relaxed text-muted-foreground shadow-soft">
-                {v.description}
+                {n(v.description, v.descriptionEn)}
               </p>
             </>
           )}
@@ -84,21 +84,21 @@ function TeacherValueGuidePage() {
           {v.learnings.length > 0 && (
             <>
               <SectionHeader title={tr("ماذا سيتعلم طفلك؟")} icon={GraduationCap} tone="blue" />
-              <List items={v.learnings} marker="bg-brand-blue" />
+              <List items={lang === "en" && v.learningsEn.length > 0 ? v.learningsEn : v.learnings} marker="bg-brand-blue" />
             </>
           )}
 
           {v.atSchool.length > 0 && (
             <>
               <SectionHeader title={tr("ماذا نفعل في الروضة؟")} icon={School} tone="green" />
-              <List items={v.atSchool} marker="bg-brand-green" />
+              <List items={lang === "en" && v.atSchoolEn.length > 0 ? v.atSchoolEn : v.atSchool} marker="bg-brand-green" />
             </>
           )}
 
           {v.atHome.length > 0 && (
             <>
               <SectionHeader title={tr("كيف تشارك من البيت؟")} icon={House} tone="pink" />
-              <List items={v.atHome} marker="bg-brand-pink" />
+              <List items={lang === "en" && v.atHomeEn.length > 0 ? v.atHomeEn : v.atHome} marker="bg-brand-pink" />
             </>
           )}
         </>
