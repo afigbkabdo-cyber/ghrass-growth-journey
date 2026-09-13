@@ -36,7 +36,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function TeacherChildPage() {
-  const { t, n, d } = useI18n();
+  const { t, n, d, lang } = useI18n();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const fetchChildren = useServerFn(myClassChildren);
@@ -123,7 +123,7 @@ function TeacherChildPage() {
           <h1 className="truncate text-sm font-extrabold text-foreground">{child ? n(child.name) : t("الطفل")}</h1>
           <p className="text-[11px] text-muted-foreground">
             {child?.className ? n(child.className) : ""} {child ? `• ${t(stageLabels[child.stage] ?? child.stage)}` : ""}
-            {child && childAge(child.birthDate) ? ` • ${childAge(child.birthDate)}` : ""}
+            {child && childAge(child.birthDate, lang) ? ` • ${childAge(child.birthDate, lang)}` : ""}
           </p>
         </div>
       </div>

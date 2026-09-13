@@ -79,7 +79,7 @@ function InfoRow({
 }
 
 function ChildPage() {
-  const { t, n, d, time, num } = useI18n();
+  const { t, n, d, time, num, lang } = useI18n();
   const fetchChildren = useServerFn(myChildren);
   const fetchLog = useServerFn(getDailyLog);
   const fetchNotes = useServerFn(listChildNotes);
@@ -124,7 +124,7 @@ function ChildPage() {
                 <h1 className="font-display text-xl font-extrabold text-foreground">{n(child.name, child.nameEn)}</h1>
                 <p className="text-xs text-muted-foreground">
                   {child.className ? n(child.className, child.classNameEn) : t("بدون فصل")} • {t(stageLabels[child.stage] ?? child.stage)}
-                  {childAge(child.birthDate) ? ` • ${childAge(child.birthDate)}` : ""}
+                  {childAge(child.birthDate, lang) ? ` • ${childAge(child.birthDate, lang)}` : ""}
                 </p>
               </div>
               <Baby className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -153,7 +153,7 @@ function ChildPage() {
             {child.allergies && (
               <p className="mb-4 flex items-start gap-2 rounded-2xl border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-xs font-bold leading-relaxed text-destructive">
                 <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                {t("حساسية مسجلة: {allergies}", { allergies: child.allergies })}
+                {t("حساسية مسجلة: {allergies}", { allergies: n(child.allergies, child.allergiesEn) })}
               </p>
             )}
 
@@ -219,9 +219,9 @@ function ChildPage() {
                       <Circle className="h-5 w-5 shrink-0 text-muted-foreground" strokeWidth={2.2} />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-foreground">{s.title}</p>
+                      <p className="truncate text-sm font-bold text-foreground">{n(s.title, s.titleEn)}</p>
                       {s.description && (
-                        <p className="truncate text-[11px] text-muted-foreground">{s.description}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{n(s.description, s.descriptionEn)}</p>
                       )}
                     </div>
                     {s.atTime && (
@@ -250,7 +250,7 @@ function ChildPage() {
                     <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{note.body}</p>
                     {note.domain && (
                       <div className="mt-2">
-                        <ToneBadge tone="blue">{note.domain}</ToneBadge>
+                        <ToneBadge tone="blue">{t(note.domain)}</ToneBadge>
                       </div>
                     )}
                   </article>

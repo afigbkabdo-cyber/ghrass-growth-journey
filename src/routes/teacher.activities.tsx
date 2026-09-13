@@ -34,7 +34,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function TeacherActivitiesPage() {
-  const { t } = useI18n();
+  const { t, n } = useI18n();
   const qc = useQueryClient();
   const fetchActivities = useServerFn(listActivities);
   const fetchClasses = useServerFn(myClasses);
@@ -124,7 +124,7 @@ function TeacherActivitiesPage() {
           <div>
             <h1 className="font-display text-2xl font-extrabold text-foreground">{t("أنشطة فصلي")}</h1>
             <p className="text-xs text-muted-foreground">
-              {value.data ? t("قيمة الأسبوع: {name}", { name: value.data.name }) : t("لا توجد قيمة معتمدة حاليًا")}
+              {value.data ? t("قيمة الأسبوع: {name}", { name: n(value.data.name, value.data.nameEn) }) : t("لا توجد قيمة معتمدة حاليًا")}
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ function TeacherActivitiesPage() {
           <label className="flex items-center justify-between rounded-2xl border border-border bg-background p-3.5">
             <span className="flex items-center gap-2 text-xs font-bold text-foreground">
               <Sparkles className="h-4 w-4 text-brand-green-deep" />
-              {t("مرتبط بقيمة الأسبوع")} {value.data ? `(${value.data.name})` : ""}
+              {t("مرتبط بقيمة الأسبوع")} {value.data ? `(${n(value.data.name, value.data.nameEn)})` : ""}
             </span>
             <input
               type="checkbox"
@@ -223,19 +223,19 @@ function TeacherActivitiesPage() {
               {a.photos.length > 0 && (
                 <div className={a.photos.length === 1 ? "" : "grid grid-cols-2 gap-0.5"}>
                   {a.photos.slice(0, 4).map((src) => (
-                    <img key={src} src={src} alt={t("صورة من نشاط {title}", { title: a.title })} loading="lazy" className="h-32 w-full object-cover" />
+                    <img key={src} src={src} alt={t("صورة من نشاط {title}", { title: n(a.title, a.titleEn) })} loading="lazy" className="h-32 w-full object-cover" />
                   ))}
                 </div>
               )}
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
+                  <h3 className="truncate text-sm font-extrabold text-foreground">{n(a.title, a.titleEn)}</h3>
                   <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? t("منشور") : t("مسودة")}</ToneBadge>
                 </div>
-                {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>}
+                {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{n(a.description, a.descriptionEn)}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  {a.className && <ToneBadge tone="blue">{a.className}</ToneBadge>}
-                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: a.valueName })}</ToneBadge>}
+                  {a.className && <ToneBadge tone="blue">{n(a.className, a.classNameEn)}</ToneBadge>}
+                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: n(a.valueName, a.valueNameEn) })}</ToneBadge>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <button

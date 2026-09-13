@@ -27,7 +27,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function AdminSchedulePage() {
-  const { t, time } = useI18n();
+  const { t, n, time } = useI18n();
   const qc = useQueryClient();
   const fetchClasses = useServerFn(listClasses);
   const fetchSchedule = useServerFn(listSchedule);
@@ -95,7 +95,7 @@ function AdminSchedulePage() {
                 : "border-border text-muted-foreground"
             }`}
           >
-            {c.name}
+            {n(c.name, c.nameEn)}
           </button>
         ))}
       </div>
@@ -135,7 +135,7 @@ function AdminSchedulePage() {
                 <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-foreground">{s.title}</p>
+                <p className="truncate text-sm font-bold text-foreground">{n(s.title, s.titleEn)}</p>
                 <p className="text-[11px] text-muted-foreground">
                   {s.atTime ? time(s.atTime.slice(0, 5)) : t("بدون وقت")} • {s.done ? t("أُنجزت اليوم") : t("لم تُنجز بعد")}
                 </p>
