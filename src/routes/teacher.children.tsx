@@ -23,7 +23,7 @@ export const Route = createFileRoute("/teacher/children")({
 });
 
 function TeacherChildrenPage() {
-  const { t, n } = useI18n();
+  const { t, n, lang } = useI18n();
   const fetchChildren = useServerFn(myClassChildren);
   const children = useQuery({ queryKey: ["teacher-children"], queryFn: () => fetchChildren({}) });
   const [q, setQ] = useState("");
@@ -71,7 +71,7 @@ function TeacherChildrenPage() {
                 <p className="truncate text-sm font-extrabold text-foreground">{n(c.name, c.nameEn)}</p>
                 <p className="text-[11px] text-muted-foreground">
                   {c.className ? n(c.className, c.classNameEn) : t("بدون فصل")} • {t(stageLabels[c.stage] ?? c.stage)}
-                  {childAge(c.birthDate) ? ` • ${childAge(c.birthDate)}` : ""}
+                  {childAge(c.birthDate, lang) ? ` • ${childAge(c.birthDate, lang)}` : ""}
                 </p>
                 {c.allergies && (
                   <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-extrabold text-destructive">

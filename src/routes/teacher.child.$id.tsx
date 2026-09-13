@@ -123,7 +123,7 @@ function TeacherChildPage() {
           <h1 className="truncate text-sm font-extrabold text-foreground">{child ? n(child.name) : t("الطفل")}</h1>
           <p className="text-[11px] text-muted-foreground">
             {child?.className ? n(child.className) : ""} {child ? `• ${t(stageLabels[child.stage] ?? child.stage)}` : ""}
-            {child && childAge(child.birthDate) ? ` • ${childAge(child.birthDate)}` : ""}
+            {child && childAge(child.birthDate, lang) ? ` • ${childAge(child.birthDate, lang)}` : ""}
           </p>
         </div>
       </div>

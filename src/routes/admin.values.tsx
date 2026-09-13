@@ -36,7 +36,7 @@ function ListEditor({
   setItems: (v: string[]) => void;
   placeholder: string;
 }) {
-  const { t: tr } = useI18n();
+  const { t: tr, n } = useI18n();
   const [draft, setDraft] = useState("");
   const addItem = () => {
     const v = draft.trim();
@@ -90,7 +90,7 @@ function ListEditor({
 }
 
 function AdminValuesPage() {
-  const { t: tr } = useI18n();
+  const { t: tr, n } = useI18n();
   const qc = useQueryClient();
   const fetchValues = useServerFn(listValues);
   const save = useServerFn(saveValue);

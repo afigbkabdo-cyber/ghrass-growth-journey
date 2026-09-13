@@ -79,7 +79,7 @@ function InfoRow({
 }
 
 function ChildPage() {
-  const { t, n, d, time, num } = useI18n();
+  const { t, n, d, time, num, lang } = useI18n();
   const fetchChildren = useServerFn(myChildren);
   const fetchLog = useServerFn(getDailyLog);
   const fetchNotes = useServerFn(listChildNotes);
@@ -124,7 +124,7 @@ function ChildPage() {
                 <h1 className="font-display text-xl font-extrabold text-foreground">{n(child.name, child.nameEn)}</h1>
                 <p className="text-xs text-muted-foreground">
                   {child.className ? n(child.className, child.classNameEn) : t("بدون فصل")} • {t(stageLabels[child.stage] ?? child.stage)}
-                  {childAge(child.birthDate) ? ` • ${childAge(child.birthDate)}` : ""}
+                  {childAge(child.birthDate, lang) ? ` • ${childAge(child.birthDate, lang)}` : ""}
                 </p>
               </div>
               <Baby className="h-5 w-5 shrink-0 text-muted-foreground" />
