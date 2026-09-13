@@ -45,6 +45,7 @@ export interface ActivityRow {
   classNameEn: string | null;
   valueId: string | null;
   valueName: string | null;
+  valueNameEn: string | null;
   linkedToValue: boolean;
   published: boolean;
   photos: string[];
@@ -626,7 +627,7 @@ export const markScheduleDone = createServerFn({ method: "POST" })
 /* ================= الأنشطة ================= */
 
 const activitySelect =
-  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name), activity_photos(path)";
+  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name, name_en), activity_photos(path)";
 
 type ActivityQueryRow = {
   id: string;
@@ -641,7 +642,7 @@ type ActivityQueryRow = {
   linked_to_value: boolean;
   published: boolean;
   classes: { name: string; name_en: string | null } | null;
-  values_week: { name: string } | null;
+  values_week: { name: string; name_en: string | null } | null;
   activity_photos: { path: string }[] | null;
 };
 
@@ -659,6 +660,7 @@ function mapActivity(r: ActivityQueryRow): ActivityRow {
     classNameEn: r.classes?.name_en ?? null,
     valueId: r.value_id,
     valueName: r.values_week?.name ?? null,
+    valueNameEn: r.values_week?.name_en ?? null,
     linkedToValue: r.linked_to_value,
     published: r.published,
     photos: (r.activity_photos ?? []).map((p) => p.path),
