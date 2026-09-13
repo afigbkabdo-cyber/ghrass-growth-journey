@@ -36,7 +36,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function TeacherChildPage() {
-  const { t, n, d } = useI18n();
+  const { t, n, d, lang } = useI18n();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const fetchChildren = useServerFn(myClassChildren);
