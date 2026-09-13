@@ -60,7 +60,7 @@ function TeacherMorePage() {
       </header>
 
       <section className="mb-5 flex items-center gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
-        <Avatar name={currentTeacher.name} tone={currentTeacher.tone} size="xl" />
+        <Avatar name={n(currentTeacher.name)} tone={currentTeacher.tone} size="xl" />
         <div className="min-w-0">
           <h2 className="truncate font-display text-lg font-extrabold text-foreground">
             {n(currentTeacher.name)}

@@ -39,9 +39,9 @@ function MorePage() {
       <PageContainer>
         <div className="mb-4"><LanguageSwitcher /></div>
         <section className="mb-6 flex items-center gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
-          <Avatar name={session?.name ?? t("ولي الأمر")} tone="orange" size="lg" />
+          <Avatar name={n(session?.name) || t("ولي الأمر")} tone="orange" size="lg" />
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-lg font-extrabold text-foreground">{session?.name ?? t("ولي الأمر")}</h1>
+            <h1 className="font-display text-lg font-extrabold text-foreground">{n(session?.name) || t("ولي الأمر")}</h1>
             <p className="text-xs text-muted-foreground">{session?.phone ?? t("حساب ولي أمر")}</p>
           </div>
           <ToneBadge tone="green">{t("حساب موثق")}</ToneBadge>
