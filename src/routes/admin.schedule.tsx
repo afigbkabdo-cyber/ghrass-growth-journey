@@ -27,7 +27,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function AdminSchedulePage() {
-  const { t, time } = useI18n();
+  const { t, n, time } = useI18n();
   const qc = useQueryClient();
   const fetchClasses = useServerFn(listClasses);
   const fetchSchedule = useServerFn(listSchedule);

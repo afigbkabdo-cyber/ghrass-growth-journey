@@ -34,7 +34,7 @@ const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
 function TeacherActivitiesPage() {
-  const { t } = useI18n();
+  const { t, n } = useI18n();
   const qc = useQueryClient();
   const fetchActivities = useServerFn(listActivities);
   const fetchClasses = useServerFn(myClasses);

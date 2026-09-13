@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin/activities")({
 });
 
 function AdminActivitiesPage() {
-  const { t, d } = useI18n();
+  const { t, d, n } = useI18n();
   const qc = useQueryClient();
   const fetchActivities = useServerFn(listActivities);
   const publish = useServerFn(setActivityPublished);
