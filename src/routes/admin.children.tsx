@@ -221,7 +221,7 @@ function AdminChildren() {
                 </p>
                 {c.allergies && (
                   <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-extrabold text-destructive">
-                    {tr("الحساسية")}: {c.allergies}
+                    {tr("الحساسية")}: {n(c.allergies, c.allergiesEn)}
                   </p>
                 )}
               </div>

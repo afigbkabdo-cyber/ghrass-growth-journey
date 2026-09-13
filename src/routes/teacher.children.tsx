@@ -68,15 +68,15 @@ function TeacherChildrenPage() {
             >
               <Avatar name={c.name} tone="blue" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-extrabold text-foreground">{n(c.name)}</p>
+                <p className="truncate text-sm font-extrabold text-foreground">{n(c.name, c.nameEn)}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {c.className ? n(c.className) : t("بدون فصل")} • {t(stageLabels[c.stage] ?? c.stage)}
+                  {c.className ? n(c.className, c.classNameEn) : t("بدون فصل")} • {t(stageLabels[c.stage] ?? c.stage)}
                   {childAge(c.birthDate) ? ` • ${childAge(c.birthDate)}` : ""}
                 </p>
                 {c.allergies && (
                   <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-extrabold text-destructive">
                     <TriangleAlert className="h-3 w-3" />
-                    {t("حساسية: {value}", { value: c.allergies })}
+                    {t("حساسية: {value}", { value: n(c.allergies, c.allergiesEn) })}
                   </p>
                 )}
               </div>

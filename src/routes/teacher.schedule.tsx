@@ -23,7 +23,7 @@ export const Route = createFileRoute("/teacher/schedule")({
 });
 
 function TeacherSchedulePage() {
-  const { t } = useI18n();
+  const { t, n } = useI18n();
   const qc = useQueryClient();
   const fetchClasses = useServerFn(myClasses);
   const fetchSchedule = useServerFn(listSchedule);
@@ -71,7 +71,7 @@ function TeacherSchedulePage() {
                   : "border-border text-muted-foreground"
               }`}
             >
-              {c.name}
+              {n(c.name, c.nameEn)}
             </button>
           ))}
         </div>
@@ -96,8 +96,8 @@ function TeacherSchedulePage() {
                 <Circle className="h-5.5 w-5.5 shrink-0 text-muted-foreground" strokeWidth={2.2} />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-foreground">{s.title}</p>
-                {s.description && <p className="truncate text-[11px] text-muted-foreground">{s.description}</p>}
+                <p className="truncate text-sm font-bold text-foreground">{n(s.title, s.titleEn)}</p>
+                {s.description && <p className="truncate text-[11px] text-muted-foreground">{n(s.description, s.descriptionEn)}</p>}
               </div>
               {s.atTime && (
                 <span className="shrink-0 text-[11px] font-bold text-muted-foreground">{s.atTime.slice(0, 5)}</span>

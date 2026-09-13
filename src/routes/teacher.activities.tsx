@@ -223,19 +223,19 @@ function TeacherActivitiesPage() {
               {a.photos.length > 0 && (
                 <div className={a.photos.length === 1 ? "" : "grid grid-cols-2 gap-0.5"}>
                   {a.photos.slice(0, 4).map((src) => (
-                    <img key={src} src={src} alt={t("صورة من نشاط {title}", { title: a.title })} loading="lazy" className="h-32 w-full object-cover" />
+                    <img key={src} src={src} alt={t("صورة من نشاط {title}", { title: n(a.title, a.titleEn) })} loading="lazy" className="h-32 w-full object-cover" />
                   ))}
                 </div>
               )}
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
+                  <h3 className="truncate text-sm font-extrabold text-foreground">{n(a.title, a.titleEn)}</h3>
                   <ToneBadge tone={a.published ? "green" : "yellow"}>{a.published ? t("منشور") : t("مسودة")}</ToneBadge>
                 </div>
-                {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.description}</p>}
+                {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{n(a.description, a.descriptionEn)}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  {a.className && <ToneBadge tone="blue">{a.className}</ToneBadge>}
-                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: a.valueName })}</ToneBadge>}
+                  {a.className && <ToneBadge tone="blue">{n(a.className, a.classNameEn)}</ToneBadge>}
+                  {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: n(a.valueName, a.valueNameEn) })}</ToneBadge>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <button

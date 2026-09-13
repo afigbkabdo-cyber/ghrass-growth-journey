@@ -135,7 +135,7 @@ function AdminSchedulePage() {
                 <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-foreground">{s.title}</p>
+                <p className="truncate text-sm font-bold text-foreground">{n(s.title, s.titleEn)}</p>
                 <p className="text-[11px] text-muted-foreground">
                   {s.atTime ? time(s.atTime.slice(0, 5)) : t("بدون وقت")} • {s.done ? t("أُنجزت اليوم") : t("لم تُنجز بعد")}
                 </p>

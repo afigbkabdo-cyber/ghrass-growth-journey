@@ -29,24 +29,32 @@ export const Route = createFileRoute("/activities")({
 
 export function ActivityCard({
   title,
+  titleEn,
   description,
+  descriptionEn,
   className,
+  classNameEn,
   activityDate,
   activityTime,
   linkedToValue,
   valueName,
+  valueNameEn,
   photos,
 }: {
   title: string;
+  titleEn?: string | null;
   description: string | null;
+  descriptionEn?: string | null;
   className: string | null;
+  classNameEn?: string | null;
   activityDate: string;
   activityTime: string | null;
   linkedToValue: boolean;
   valueName: string | null;
+  valueNameEn?: string | null;
   photos: string[];
 }) {
-  const { t, d } = useI18n();
+  const { t, d, n } = useI18n();
   return (
     <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
       {photos.length > 0 && (
@@ -55,7 +63,7 @@ export function ActivityCard({
             <img
               key={src}
               src={src}
-              alt={t("صورة من نشاط {title}", { title })}
+              alt={t("صورة من نشاط {title}", { title: n(title, titleEn) })}
               loading="lazy"
               className="h-40 w-full object-cover"
             />
@@ -64,19 +72,19 @@ export function ActivityCard({
       )}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-extrabold leading-snug text-foreground">{title}</h3>
+          <h3 className="text-sm font-extrabold leading-snug text-foreground">{n(title, titleEn)}</h3>
           <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-muted-foreground">
             <Clock className="h-3.5 w-3.5" />
             {activityTime ? activityTime.slice(0, 5) : d(activityDate)}
           </span>
         </div>
-        {description && <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{description}</p>}
+        {description && <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{n(description, descriptionEn)}</p>}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {className && <ToneBadge tone="blue">{className}</ToneBadge>}
+          {className && <ToneBadge tone="blue">{n(className, classNameEn)}</ToneBadge>}
           {linkedToValue && valueName && (
             <ToneBadge tone="green">
               <Sparkles className="h-3 w-3" />
-              {t("مرتبط بقيمة {value}", { value: valueName })}
+              {t("مرتبط بقيمة {value}", { value: n(valueName, valueNameEn) })}
             </ToneBadge>
           )}
         </div>
