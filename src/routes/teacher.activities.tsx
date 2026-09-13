@@ -124,7 +124,7 @@ function TeacherActivitiesPage() {
           <div>
             <h1 className="font-display text-2xl font-extrabold text-foreground">{t("أنشطة فصلي")}</h1>
             <p className="text-xs text-muted-foreground">
-              {value.data ? t("قيمة الأسبوع: {name}", { name: value.data.name }) : t("لا توجد قيمة معتمدة حاليًا")}
+              {value.data ? t("قيمة الأسبوع: {name}", { name: n(value.data.name, value.data.nameEn) }) : t("لا توجد قيمة معتمدة حاليًا")}
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ function TeacherActivitiesPage() {
           <label className="flex items-center justify-between rounded-2xl border border-border bg-background p-3.5">
             <span className="flex items-center gap-2 text-xs font-bold text-foreground">
               <Sparkles className="h-4 w-4 text-brand-green-deep" />
-              {t("مرتبط بقيمة الأسبوع")} {value.data ? `(${value.data.name})` : ""}
+              {t("مرتبط بقيمة الأسبوع")} {value.data ? `(${n(value.data.name, value.data.nameEn)})` : ""}
             </span>
             <input
               type="checkbox"

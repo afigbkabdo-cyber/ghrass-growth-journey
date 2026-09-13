@@ -217,7 +217,7 @@ function AdminChildren() {
                 <p className="truncate text-sm font-bold text-foreground">{n(c.name, c.nameEn)}</p>
                 <p className="truncate text-[11px] text-muted-foreground">
                   {c.className ? n(c.className, c.classNameEn) : tr("بدون فصل")} · {tr("ولي الأمر")}:{" "}
-                  {c.guardians.length ? c.guardians.join("، ") : tr("غير مرتبط")}
+                  {c.guardians.length ? c.guardians.map((g, i) => n(g, c.guardiansEn[i])).join("، ") : tr("غير مرتبط")}
                 </p>
                 {c.allergies && (
                   <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-extrabold text-destructive">

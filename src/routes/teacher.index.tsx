@@ -125,17 +125,17 @@ function TeacherHome() {
       <section className="mb-6 rounded-3xl border border-brand-orange-soft bg-brand-orange-soft/50 p-5">
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-display text-2xl font-extrabold text-brand-orange-deep">
-            {value?.name ?? teacherValueGuide.name}
+            {value ? n(value.name, value.nameEn) : t(teacherValueGuide.name)}
           </h3>
           {value?.weekStart && <ToneBadge tone="orange">{value.weekStart}</ToneBadge>}
         </div>
         <p className="mt-2 text-sm leading-relaxed text-foreground/80">
-          {value?.tagline ?? teacherValueGuide.tagline}
+          {value ? n(value.tagline, value.taglineEn) : t(teacherValueGuide.tagline)}
         </p>
         <p className="mt-3 rounded-2xl bg-card p-3 text-xs leading-relaxed text-muted-foreground">
-          {value?.hadith ?? teacherValueGuide.hadith}
+          {value ? n(value.hadith, value.hadithEn) : t(teacherValueGuide.hadith)}
           <span className="mt-1 block text-[11px] font-bold text-brand-orange-deep">
-            {value?.source ?? teacherValueGuide.source}
+            {value ? n(value.source, value.sourceEn) : t(teacherValueGuide.source)}
           </span>
         </p>
       </section>
@@ -161,13 +161,13 @@ function TeacherHome() {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="truncate text-sm font-extrabold text-foreground">{a.title}</h3>
+                  <h3 className="truncate text-sm font-extrabold text-foreground">{t(a.title)}</h3>
                   <ToneBadge tone={a.state === "published" ? "green" : "yellow"}>
                     {t(activityStateLabels[a.state])}
                   </ToneBadge>
                 </div>
                 <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                  {a.description}
+                  {t(a.description)}
                 </p>
               </div>
             </article>

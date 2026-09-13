@@ -18,7 +18,7 @@ export const stageLabels: Record<string, string> = {
 };
 
 /** حساب عمر الطفل بالسنوات والأشهر من تاريخ الميلاد. */
-export function childAge(birthDate: string | null): string | null {
+export function childAge(birthDate: string | null, lang: "ar" | "en" = "ar"): string | null {
   if (!birthDate) return null;
   const b = new Date(birthDate);
   if (Number.isNaN(b.getTime())) return null;
@@ -28,6 +28,11 @@ export function childAge(birthDate: string | null): string | null {
   if (months < 0) return null;
   const years = Math.floor(months / 12);
   const rest = months % 12;
+  if (lang === "en") {
+    if (years === 0) return `${rest} months`;
+    if (rest === 0) return `${years} years`;
+    return `${years} years ${rest} months`;
+  }
   if (years === 0) return `${rest} شهرًا`;
   if (rest === 0) return `${years} سنوات`;
   return `${years} سنوات و${rest} أشهر`;

@@ -20,6 +20,7 @@ export interface ChildRow {
   allergies: string | null;
   allergiesEn: string | null;
   guardians: string[];
+  guardiansEn: string[];
 }
 
 export interface StaffRow {
@@ -51,7 +52,7 @@ export const listChildren = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("children")
       .select(
-        "id, name, name_en, stage, class_id, birth_date, allergies, allergies_en, classes(name, name_en), child_guardians(profiles(full_name))",
+        "id, name, name_en, stage, class_id, birth_date, allergies, allergies_en, classes(name, name_en), child_guardians(profiles(full_name, full_name_en))",
       )
       .order("name");
     if (error) throw new Error(error.message);
@@ -66,7 +67,7 @@ export const listChildren = createServerFn({ method: "GET" })
         allergies: string | null;
         allergies_en: string | null;
         classes: { name: string; name_en: string | null } | null;
-        child_guardians: { profiles: { full_name: string } | null }[] | null;
+        child_guardians: { profiles: { full_name: string; full_name_en: string | null } | null }[] | null;
       };
       return {
         id: r.id,
@@ -81,6 +82,9 @@ export const listChildren = createServerFn({ method: "GET" })
         allergiesEn: r.allergies_en ?? null,
         guardians: (r.child_guardians ?? [])
           .map((g) => g.profiles?.full_name)
+          .filter((n): n is string => Boolean(n)),
+        guardiansEn: (r.child_guardians ?? [])
+          .map((g) => g.profiles?.full_name_en ?? g.profiles?.full_name)
           .filter((n): n is string => Boolean(n)),
       };
     });

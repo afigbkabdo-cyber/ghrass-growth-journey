@@ -194,8 +194,8 @@ function AdminValuesPage() {
     <article key={v.id} className="rounded-3xl border border-border bg-card p-4 shadow-soft">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-sm font-extrabold text-foreground">{v.name}</h3>
-          {v.tagline && <p className="mt-0.5 text-xs text-muted-foreground">{v.tagline}</p>}
+          <h3 className="text-sm font-extrabold text-foreground">{n(v.name, v.nameEn)}</h3>
+          {v.tagline && <p className="mt-0.5 text-xs text-muted-foreground">{n(v.tagline, v.taglineEn)}</p>}
           {v.weekStart && <p className="mt-0.5 text-[11px] text-muted-foreground">{v.weekStart}</p>}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -204,11 +204,11 @@ function AdminValuesPage() {
         </div>
       </div>
       {v.hadith && (
-        <p className="mt-2 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-foreground/80">{v.hadith}</p>
+        <p className="mt-2 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-foreground/80">{n(v.hadith, v.hadithEn)}</p>
       )}
       {v.source && (
         <p className="mt-1.5 text-[11px] font-bold text-muted-foreground">
-          {tr("المصدر")}: {v.source}
+          {tr("المصدر")}: {n(v.source, v.sourceEn)}
         </p>
       )}
       {[

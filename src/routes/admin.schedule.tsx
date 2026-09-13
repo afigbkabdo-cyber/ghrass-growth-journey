@@ -95,7 +95,7 @@ function AdminSchedulePage() {
                 : "border-border text-muted-foreground"
             }`}
           >
-            {c.name}
+            {n(c.name, c.nameEn)}
           </button>
         ))}
       </div>
