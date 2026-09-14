@@ -32,7 +32,7 @@ function MorePage() {
   const navigate = useNavigate();
   const { session } = useAppSession();
   const [notifications, setNotifications] = useState(true);
-  const { t } = useI18n();
+  const { t, n } = useI18n();
 
   return (
     <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">

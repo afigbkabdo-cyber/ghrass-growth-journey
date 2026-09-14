@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface ClassRow {
   id: string;
   name: string;
+  nameEn: string | null;
   stage: string;
 }
 
@@ -39,10 +40,15 @@ export const listClasses = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<ClassRow[]> => {
     const { data, error } = await context.supabase
       .from("classes")
-      .select("id, name, stage")
+      .select("id, name, name_en, stage")
       .order("name");
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      name: r.name,
+      nameEn: r.name_en ?? null,
+      stage: r.stage,
+    }));
   });
 
 /** سجل الأطفال مع الفصل وأولياء الأمور. */
