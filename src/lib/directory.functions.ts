@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface ClassRow {
   id: string;
   name: string;
+  nameEn: string | null;
   stage: string;
 }
 
