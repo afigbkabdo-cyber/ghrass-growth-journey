@@ -18,7 +18,7 @@ function AdminThreadNotFound() {
   return <EmptyState title={t("لم نجد المحادثة")} message={t("ربما حُذفت.")} />;
 }
 
-export const Route = createFileRoute("/admin/messages/$id")({
+export const Route = createFileRoute("/admin/messages_/$id")({
   head: () => ({
     meta: [
       { title: "الرد على ولي الأمر — لوحة إدارة غراس" },

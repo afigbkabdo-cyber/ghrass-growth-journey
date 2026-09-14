@@ -29,7 +29,7 @@ function ThreadNotFoundState() {
   );
 }
 
-export const Route = createFileRoute("/messages/$id")({
+export const Route = createFileRoute("/messages_/$id")({
   head: () => ({
     meta: [
       { title: "محادثة مع الإدارة — غراس" },
