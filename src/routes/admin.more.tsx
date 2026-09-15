@@ -71,6 +71,9 @@ function AdminMorePage() {
           <h2 className="truncate font-display text-lg font-extrabold text-foreground">
             {session?.name ? n(session.name) : t("حساب الإدارة")}
           </h2>
+          {session?.title && (
+            <p className="truncate text-xs font-bold text-foreground">{t(session.title)}</p>
+          )}
           <p className="truncate text-xs text-muted-foreground" dir="ltr">
             {session?.phone ? `0${session.phone.slice(3)}` : t("—")}
 
