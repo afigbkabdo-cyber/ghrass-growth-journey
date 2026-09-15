@@ -126,6 +126,11 @@ function AdminSettingsPage() {
       </section>
 
       <section>
+        <SectionHeader title={tr("كلمة المرور")} icon={KeyRound} tone="green" />
+        <ChangePasswordCard />
+      </section>
+
+      <section>
         <div className="mb-2 flex items-center justify-between gap-3">
           <SectionHeader title={tr("بيانات الروضة")} icon={School} tone="green" />
           <button
