@@ -458,12 +458,20 @@ const logInput = z.object({
   mealStatus: z.string().nullable().optional(),
   mealTime: z.string().nullable().optional(),
   mealNotes: z.string().nullable().optional(),
+  meal2Enabled: z.boolean().optional(),
+  meal2Status: z.string().nullable().optional(),
+  meal2Time: z.string().nullable().optional(),
+  meal2Notes: z.string().nullable().optional(),
   bathroomCount: z.number().int().min(0).max(50).optional(),
   diaperCount: z.number().int().min(0).max(50).optional(),
   bathroomNotes: z.string().nullable().optional(),
   slept: z.boolean().optional(),
   sleepStart: z.string().nullable().optional(),
   sleepEnd: z.string().nullable().optional(),
+  sleeps: z
+    .array(z.object({ start: z.string().nullable(), end: z.string().nullable() }))
+    .max(12)
+    .optional(),
   prayerDone: z.boolean().optional(),
 });
 
@@ -473,18 +481,25 @@ export const saveDailyLog = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => logInput.parse(d))
   .handler(async ({ data, context }): Promise<DailyLogRow> => {
     const date = data.date || today();
+    const sleeps = (data.sleeps ?? []).filter((s) => s.start || s.end);
     const payload = {
       child_id: data.childId,
       log_date: date,
       meal_status: data.mealStatus ?? null,
       meal_time: data.mealTime || null,
       meal_notes: data.mealNotes ?? null,
+      meal2_enabled: data.meal2Enabled ?? false,
+      meal2_status: data.meal2Status ?? null,
+      meal2_time: data.meal2Time || null,
+      meal2_notes: data.meal2Notes ?? null,
       bathroom_count: data.bathroomCount ?? 0,
       diaper_count: data.diaperCount ?? 0,
       bathroom_notes: data.bathroomNotes ?? null,
-      slept: data.slept ?? false,
-      sleep_start: data.sleepStart || null,
-      sleep_end: data.sleepEnd || null,
+      // التوافق مع الحقول القديمة — أول نومة اليوم.
+      slept: sleeps.length > 0 ? true : (data.slept ?? false),
+      sleep_start: sleeps[0]?.start || data.sleepStart || null,
+      sleep_end: sleeps[0]?.end || data.sleepEnd || null,
+      sleeps,
       prayer_done: data.prayerDone ?? false,
       recorded_by: context.userId,
     };
