@@ -2,7 +2,18 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronRight, Utensils, Droplets, Moon, HandHeart, StickyNote, TriangleAlert, Save } from "lucide-react";
+import {
+  ChevronRight,
+  Utensils,
+  Droplets,
+  Moon,
+  HandHeart,
+  StickyNote,
+  TriangleAlert,
+  Save,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer, Avatar, SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { Switch } from "@/components/ui/switch";
@@ -35,6 +46,17 @@ export const Route = createFileRoute("/teacher/child/$id")({
 const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
+/** مدة نومة بالدقائق من وقتين HH:MM. */
+export function sleepMinutes(start: string | null, end: string | null): number {
+  if (!start || !end) return 0;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  if ([sh, sm, eh, em].some((v) => Number.isNaN(v))) return 0;
+  let mins = eh * 60 + em - (sh * 60 + sm);
+  if (mins < 0) mins += 24 * 60;
+  return mins;
+}
+
 function TeacherChildPage() {
   const { t, n, d, lang } = useI18n();
   const { id } = Route.useParams();
@@ -54,12 +76,14 @@ function TeacherChildPage() {
   const [mealStatus, setMealStatus] = useState("");
   const [mealTime, setMealTime] = useState("");
   const [mealNotes, setMealNotes] = useState("");
+  const [meal2Enabled, setMeal2Enabled] = useState(false);
+  const [meal2Status, setMeal2Status] = useState("");
+  const [meal2Time, setMeal2Time] = useState("");
+  const [meal2Notes, setMeal2Notes] = useState("");
   const [bathroomCount, setBathroomCount] = useState(0);
   const [diaperCount, setDiaperCount] = useState(0);
   const [bathroomNotes, setBathroomNotes] = useState("");
-  const [slept, setSlept] = useState(false);
-  const [sleepStart, setSleepStart] = useState("");
-  const [sleepEnd, setSleepEnd] = useState("");
+  const [sleeps, setSleeps] = useState<{ start: string; end: string }[]>([]);
   const [prayerDone, setPrayerDone] = useState(false);
   const [noteBody, setNoteBody] = useState("");
 
@@ -69,14 +93,23 @@ function TeacherChildPage() {
     setMealStatus(d.mealStatus ?? "");
     setMealTime(d.mealTime ? d.mealTime.slice(0, 5) : "");
     setMealNotes(d.mealNotes ?? "");
+    setMeal2Enabled(d.meal2Enabled);
+    setMeal2Status(d.meal2Status ?? "");
+    setMeal2Time(d.meal2Time ? d.meal2Time.slice(0, 5) : "");
+    setMeal2Notes(d.meal2Notes ?? "");
     setBathroomCount(d.bathroomCount);
     setDiaperCount(d.diaperCount);
     setBathroomNotes(d.bathroomNotes ?? "");
-    setSlept(d.slept);
-    setSleepStart(d.sleepStart ? d.sleepStart.slice(0, 5) : "");
-    setSleepEnd(d.sleepEnd ? d.sleepEnd.slice(0, 5) : "");
+    const list = d.sleeps.length
+      ? d.sleeps.map((s) => ({ start: s.start ?? "", end: s.end ?? "" }))
+      : d.slept
+        ? [{ start: d.sleepStart?.slice(0, 5) ?? "", end: d.sleepEnd?.slice(0, 5) ?? "" }]
+        : [];
+    setSleeps(list);
     setPrayerDone(d.prayerDone);
   }, [log.data]);
+
+  const totalSleep = sleeps.reduce((sum, s) => sum + sleepMinutes(s.start || null, s.end || null), 0);
 
   const save = useMutation({
     mutationFn: () =>
@@ -86,12 +119,14 @@ function TeacherChildPage() {
           mealStatus: mealStatus || null,
           mealTime: mealTime || null,
           mealNotes: mealNotes || null,
+          meal2Enabled,
+          meal2Status: meal2Enabled ? meal2Status || null : null,
+          meal2Time: meal2Enabled ? meal2Time || null : null,
+          meal2Notes: meal2Enabled ? meal2Notes || null : null,
           bathroomCount,
           diaperCount,
           bathroomNotes: bathroomNotes || null,
-          slept,
-          sleepStart: sleepStart || null,
-          sleepEnd: sleepEnd || null,
+          sleeps: sleeps.map((s) => ({ start: s.start || null, end: s.end || null })),
           prayerDone,
         },
       }),
@@ -139,9 +174,9 @@ function TeacherChildPage() {
       <section className="mb-6 space-y-4 rounded-3xl border border-border bg-card p-4 shadow-soft">
         <div className="space-y-2.5">
           <p className="flex items-center gap-2 text-xs font-extrabold text-foreground">
-            <Utensils className="h-4 w-4 text-brand-orange-deep" /> {t("الوجبة")}
+            <Utensils className="h-4 w-4 text-brand-orange-deep" /> {t("الوجبة الأولى")}
           </p>
-          <select value={mealStatus} onChange={(e) => setMealStatus(e.target.value)} aria-label={t("حالة الوجبة")} className={field}>
+          <select value={mealStatus} onChange={(e) => setMealStatus(e.target.value)} aria-label={t("حالة الوجبة الأولى")} className={field}>
             <option value="">{t("لم تُسجّل")}</option>
             {mealStatusOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -157,6 +192,63 @@ function TeacherChildPage() {
             aria-label={t("ملاحظة الوجبة")}
             className={field}
           />
+
+          {meal2Enabled ? (
+            <div className="space-y-2.5 rounded-2xl border border-border bg-background/40 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-extrabold text-foreground">{t("الوجبة الثانية")}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMeal2Enabled(false);
+                    setMeal2Status("");
+                    setMeal2Time("");
+                    setMeal2Notes("");
+                  }}
+                  aria-label={t("حذف الوجبة الثانية")}
+                  className="grid h-8 w-8 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              <select
+                value={meal2Status}
+                onChange={(e) => setMeal2Status(e.target.value)}
+                aria-label={t("حالة الوجبة الثانية")}
+                className={field}
+              >
+                <option value="">{t("لم تُسجّل")}</option>
+                {mealStatusOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {t(o.label)}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="time"
+                value={meal2Time}
+                onChange={(e) => setMeal2Time(e.target.value)}
+                aria-label={t("وقت الوجبة الثانية")}
+                className={field}
+              />
+              <input
+                value={meal2Notes}
+                onChange={(e) => setMeal2Notes(e.target.value)}
+                placeholder={t("ملاحظة عن الوجبة (اختياري)")}
+                aria-label={t("ملاحظة الوجبة الثانية")}
+                className={field}
+              />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setMeal2Enabled(true)}
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-border px-4 py-2.5 text-xs font-extrabold text-foreground hover:bg-muted"
+            >
+              <Plus className="h-4 w-4" />
+              {t("إضافة وجبة ثانية")}
+            </button>
+          )}
         </div>
 
         <div className="space-y-2.5 border-t border-border pt-4">
@@ -195,24 +287,56 @@ function TeacherChildPage() {
         </div>
 
         <div className="space-y-2.5 border-t border-border pt-4">
-          <div className="flex items-center justify-between">
-            <p className="flex items-center gap-2 text-xs font-extrabold text-foreground">
-              <Moon className="h-4 w-4 text-brand-pink-deep" /> {t("نام اليوم")}
-            </p>
-            <Switch checked={slept} onCheckedChange={setSlept} aria-label={t("نام اليوم")} />
-          </div>
-          {slept && (
-            <div className="flex gap-2">
+          <p className="flex items-center gap-2 text-xs font-extrabold text-foreground">
+            <Moon className="h-4 w-4 text-brand-pink-deep" /> {t("النوم")}
+          </p>
+          {sleeps.map((s, i) => (
+            <div key={i} className="flex items-end gap-2">
               <label className="flex-1 text-[11px] font-bold text-muted-foreground">
                 {t("من")}
-                <input type="time" value={sleepStart} onChange={(e) => setSleepStart(e.target.value)} className={field} />
+                <input
+                  type="time"
+                  value={s.start}
+                  onChange={(e) =>
+                    setSleeps((prev) => prev.map((p, j) => (j === i ? { ...p, start: e.target.value } : p)))
+                  }
+                  className={field}
+                />
               </label>
               <label className="flex-1 text-[11px] font-bold text-muted-foreground">
                 {t("إلى")}
-                <input type="time" value={sleepEnd} onChange={(e) => setSleepEnd(e.target.value)} className={field} />
+                <input
+                  type="time"
+                  value={s.end}
+                  onChange={(e) =>
+                    setSleeps((prev) => prev.map((p, j) => (j === i ? { ...p, end: e.target.value } : p)))
+                  }
+                  className={field}
+                />
               </label>
+              <button
+                type="button"
+                onClick={() => setSleeps((prev) => prev.filter((_, j) => j !== i))}
+                aria-label={t("حذف النومة")}
+                className="mb-1 grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
-          )}
+          ))}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setSleeps((prev) => [...prev, { start: "", end: "" }])}
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-border px-4 py-2.5 text-xs font-extrabold text-foreground hover:bg-muted"
+            >
+              <Plus className="h-4 w-4" />
+              {t("إضافة نومة")}
+            </button>
+            <p className="text-[11px] font-bold text-muted-foreground">
+              {t("إجمالي النوم: {value}", { value: sleepDurationLabel(totalSleep, t) })}
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-4">

@@ -66,18 +66,29 @@ export interface ClassChildRow {
   classNameEn: string | null;
 }
 
+/** نومة واحدة داخل اليوم — HH:MM. */
+export interface SleepEntry {
+  start: string | null;
+  end: string | null;
+}
+
 export interface DailyLogRow {
   childId: string;
   logDate: string;
   mealStatus: string | null;
   mealTime: string | null;
   mealNotes: string | null;
+  meal2Enabled: boolean;
+  meal2Status: string | null;
+  meal2Time: string | null;
+  meal2Notes: string | null;
   bathroomCount: number;
   diaperCount: number;
   bathroomNotes: string | null;
   slept: boolean;
   sleepStart: string | null;
   sleepEnd: string | null;
+  sleeps: SleepEntry[];
   prayerDone: boolean;
 }
 
@@ -130,12 +141,17 @@ const emptyLog = (childId: string, logDate: string): DailyLogRow => ({
   mealStatus: null,
   mealTime: null,
   mealNotes: null,
+  meal2Enabled: false,
+  meal2Status: null,
+  meal2Time: null,
+  meal2Notes: null,
   bathroomCount: 0,
   diaperCount: 0,
   bathroomNotes: null,
   slept: false,
   sleepStart: null,
   sleepEnd: null,
+  sleeps: [],
   prayerDone: false,
 });
 
@@ -387,6 +403,16 @@ export const myChildren = createServerFn({ method: "GET" })
 
 /* ================= المتابعة اليومية ================= */
 
+function mapSleeps(v: unknown): SleepEntry[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
+    .map((s) => ({
+      start: typeof s["start"] === "string" ? (s["start"] as string).slice(0, 5) : null,
+      end: typeof s["end"] === "string" ? (s["end"] as string).slice(0, 5) : null,
+    }));
+}
+
 function mapLog(r: Record<string, unknown>): DailyLogRow {
   return {
     childId: r["child_id"] as string,
@@ -394,12 +420,17 @@ function mapLog(r: Record<string, unknown>): DailyLogRow {
     mealStatus: (r["meal_status"] as string) ?? null,
     mealTime: (r["meal_time"] as string) ?? null,
     mealNotes: (r["meal_notes"] as string) ?? null,
+    meal2Enabled: Boolean(r["meal2_enabled"]),
+    meal2Status: (r["meal2_status"] as string) ?? null,
+    meal2Time: (r["meal2_time"] as string) ?? null,
+    meal2Notes: (r["meal2_notes"] as string) ?? null,
     bathroomCount: (r["bathroom_count"] as number) ?? 0,
     diaperCount: (r["diaper_count"] as number) ?? 0,
     bathroomNotes: (r["bathroom_notes"] as string) ?? null,
     slept: Boolean(r["slept"]),
     sleepStart: (r["sleep_start"] as string) ?? null,
     sleepEnd: (r["sleep_end"] as string) ?? null,
+    sleeps: mapSleeps(r["sleeps"]),
     prayerDone: Boolean(r["prayer_done"]),
   };
 }
@@ -427,12 +458,20 @@ const logInput = z.object({
   mealStatus: z.string().nullable().optional(),
   mealTime: z.string().nullable().optional(),
   mealNotes: z.string().nullable().optional(),
+  meal2Enabled: z.boolean().optional(),
+  meal2Status: z.string().nullable().optional(),
+  meal2Time: z.string().nullable().optional(),
+  meal2Notes: z.string().nullable().optional(),
   bathroomCount: z.number().int().min(0).max(50).optional(),
   diaperCount: z.number().int().min(0).max(50).optional(),
   bathroomNotes: z.string().nullable().optional(),
   slept: z.boolean().optional(),
   sleepStart: z.string().nullable().optional(),
   sleepEnd: z.string().nullable().optional(),
+  sleeps: z
+    .array(z.object({ start: z.string().nullable(), end: z.string().nullable() }))
+    .max(12)
+    .optional(),
   prayerDone: z.boolean().optional(),
 });
 
@@ -442,18 +481,25 @@ export const saveDailyLog = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => logInput.parse(d))
   .handler(async ({ data, context }): Promise<DailyLogRow> => {
     const date = data.date || today();
+    const sleeps = (data.sleeps ?? []).filter((s) => s.start || s.end);
     const payload = {
       child_id: data.childId,
       log_date: date,
       meal_status: data.mealStatus ?? null,
       meal_time: data.mealTime || null,
       meal_notes: data.mealNotes ?? null,
+      meal2_enabled: data.meal2Enabled ?? false,
+      meal2_status: data.meal2Status ?? null,
+      meal2_time: data.meal2Time || null,
+      meal2_notes: data.meal2Notes ?? null,
       bathroom_count: data.bathroomCount ?? 0,
       diaper_count: data.diaperCount ?? 0,
       bathroom_notes: data.bathroomNotes ?? null,
-      slept: data.slept ?? false,
-      sleep_start: data.sleepStart || null,
-      sleep_end: data.sleepEnd || null,
+      // التوافق مع الحقول القديمة — أول نومة اليوم.
+      slept: sleeps.length > 0 ? true : (data.slept ?? false),
+      sleep_start: sleeps[0]?.start || data.sleepStart || null,
+      sleep_end: sleeps[0]?.end || data.sleepEnd || null,
+      sleeps,
       prayer_done: data.prayerDone ?? false,
       recorded_by: context.userId,
     };

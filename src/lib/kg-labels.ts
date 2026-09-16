@@ -1,14 +1,15 @@
 /** مسميات المتابعة اليومية — مشتركة بين واجهة المعلمة وولي الأمر. */
 export const mealStatusOptions = [
-  { value: "all", label: "أكل الوجبة كاملة" },
-  { value: "most", label: "أكل معظم الوجبة" },
-  { value: "some", label: "أكل قليلًا" },
-  { value: "none", label: "لم يأكل" },
+  { value: "all", label: "تناول جيدًا" },
+  { value: "some", label: "تناول جزءًا" },
+  { value: "none", label: "لم يتناول" },
 ] as const;
 
-export const mealStatusLabels: Record<string, string> = Object.fromEntries(
-  mealStatusOptions.map((o) => [o.value, o.label]),
-);
+export const mealStatusLabels: Record<string, string> = {
+  ...Object.fromEntries(mealStatusOptions.map((o) => [o.value, o.label])),
+  // سجلات قديمة
+  most: "تناول جزءًا",
+};
 
 export const stageLabels: Record<string, string> = {
   nursery: "حضانة",
