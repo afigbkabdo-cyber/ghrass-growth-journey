@@ -269,10 +269,15 @@ export type Database = {
           meal_notes: string | null
           meal_status: string | null
           meal_time: string | null
+          meal2_enabled: boolean
+          meal2_notes: string | null
+          meal2_status: string | null
+          meal2_time: string | null
           prayer_done: boolean
           recorded_by: string | null
           sleep_end: string | null
           sleep_start: string | null
+          sleeps: Json
           slept: boolean
           updated_at: string
         }
@@ -287,10 +292,15 @@ export type Database = {
           meal_notes?: string | null
           meal_status?: string | null
           meal_time?: string | null
+          meal2_enabled?: boolean
+          meal2_notes?: string | null
+          meal2_status?: string | null
+          meal2_time?: string | null
           prayer_done?: boolean
           recorded_by?: string | null
           sleep_end?: string | null
           sleep_start?: string | null
+          sleeps?: Json
           slept?: boolean
           updated_at?: string
         }
@@ -305,10 +315,15 @@ export type Database = {
           meal_notes?: string | null
           meal_status?: string | null
           meal_time?: string | null
+          meal2_enabled?: boolean
+          meal2_notes?: string | null
+          meal2_status?: string | null
+          meal2_time?: string | null
           prayer_done?: boolean
           recorded_by?: string | null
           sleep_end?: string | null
           sleep_start?: string | null
+          sleeps?: Json
           slept?: boolean
           updated_at?: string
         }
