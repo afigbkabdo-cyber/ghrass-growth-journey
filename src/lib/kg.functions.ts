@@ -403,6 +403,16 @@ export const myChildren = createServerFn({ method: "GET" })
 
 /* ================= المتابعة اليومية ================= */
 
+function mapSleeps(v: unknown): SleepEntry[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
+    .map((s) => ({
+      start: typeof s["start"] === "string" ? (s["start"] as string).slice(0, 5) : null,
+      end: typeof s["end"] === "string" ? (s["end"] as string).slice(0, 5) : null,
+    }));
+}
+
 function mapLog(r: Record<string, unknown>): DailyLogRow {
   return {
     childId: r["child_id"] as string,
@@ -410,12 +420,17 @@ function mapLog(r: Record<string, unknown>): DailyLogRow {
     mealStatus: (r["meal_status"] as string) ?? null,
     mealTime: (r["meal_time"] as string) ?? null,
     mealNotes: (r["meal_notes"] as string) ?? null,
+    meal2Enabled: Boolean(r["meal2_enabled"]),
+    meal2Status: (r["meal2_status"] as string) ?? null,
+    meal2Time: (r["meal2_time"] as string) ?? null,
+    meal2Notes: (r["meal2_notes"] as string) ?? null,
     bathroomCount: (r["bathroom_count"] as number) ?? 0,
     diaperCount: (r["diaper_count"] as number) ?? 0,
     bathroomNotes: (r["bathroom_notes"] as string) ?? null,
     slept: Boolean(r["slept"]),
     sleepStart: (r["sleep_start"] as string) ?? null,
     sleepEnd: (r["sleep_end"] as string) ?? null,
+    sleeps: mapSleeps(r["sleeps"]),
     prayerDone: Boolean(r["prayer_done"]),
   };
 }
