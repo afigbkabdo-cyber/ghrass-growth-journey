@@ -66,18 +66,29 @@ export interface ClassChildRow {
   classNameEn: string | null;
 }
 
+/** نومة واحدة داخل اليوم — HH:MM. */
+export interface SleepEntry {
+  start: string | null;
+  end: string | null;
+}
+
 export interface DailyLogRow {
   childId: string;
   logDate: string;
   mealStatus: string | null;
   mealTime: string | null;
   mealNotes: string | null;
+  meal2Enabled: boolean;
+  meal2Status: string | null;
+  meal2Time: string | null;
+  meal2Notes: string | null;
   bathroomCount: number;
   diaperCount: number;
   bathroomNotes: string | null;
   slept: boolean;
   sleepStart: string | null;
   sleepEnd: string | null;
+  sleeps: SleepEntry[];
   prayerDone: boolean;
 }
 
@@ -130,12 +141,17 @@ const emptyLog = (childId: string, logDate: string): DailyLogRow => ({
   mealStatus: null,
   mealTime: null,
   mealNotes: null,
+  meal2Enabled: false,
+  meal2Status: null,
+  meal2Time: null,
+  meal2Notes: null,
   bathroomCount: 0,
   diaperCount: 0,
   bathroomNotes: null,
   slept: false,
   sleepStart: null,
   sleepEnd: null,
+  sleeps: [],
   prayerDone: false,
 });
 
