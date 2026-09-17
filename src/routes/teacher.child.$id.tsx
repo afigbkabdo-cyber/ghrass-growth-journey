@@ -49,8 +49,8 @@ const field =
 /** مدة نومة بالدقائق من وقتين HH:MM. */
 export function sleepMinutes(start: string | null, end: string | null): number {
   if (!start || !end) return 0;
-  const [sh, sm] = start.split(":").map(Number);
-  const [eh, em] = end.split(":").map(Number);
+  const [sh = NaN, sm = NaN] = start.split(":").map(Number);
+  const [eh = NaN, em = NaN] = end.split(":").map(Number);
   if ([sh, sm, eh, em].some((v) => Number.isNaN(v))) return 0;
   let mins = eh * 60 + em - (sh * 60 + sm);
   if (mins < 0) mins += 24 * 60;
