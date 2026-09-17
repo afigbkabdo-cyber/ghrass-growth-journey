@@ -38,3 +38,27 @@ export function childAge(birthDate: string | null, lang: "ar" | "en" = "ar"): st
   if (rest === 0) return `${years} سنوات`;
   return `${years} سنوات و${rest} أشهر`;
 }
+
+/** مدة نومة بالدقائق من وقتين HH:MM. */
+export function sleepMinutes(start: string | null, end: string | null): number {
+  if (!start || !end) return 0;
+  const [sh = NaN, sm = NaN] = start.slice(0, 5).split(":").map(Number);
+  const [eh = NaN, em = NaN] = end.slice(0, 5).split(":").map(Number);
+  if ([sh, sm, eh, em].some((v) => Number.isNaN(v))) return 0;
+  let mins = eh * 60 + em - (sh * 60 + sm);
+  if (mins < 0) mins += 24 * 60;
+  return mins;
+}
+
+/** تنسيق مدة النوم (بالدقائق) كنص مقروء. */
+export function sleepDurationLabel(
+  minutes: number,
+  t: (k: string, p?: Record<string, string | number>) => string,
+): string {
+  if (!minutes || minutes <= 0) return t("لا يوجد");
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return t("{value} دقيقة", { value: m });
+  if (m === 0) return t("{value} ساعة", { value: h });
+  return t("{h} ساعة و{m} دقيقة", { h, m });
+}

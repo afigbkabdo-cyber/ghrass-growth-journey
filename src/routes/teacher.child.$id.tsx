@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { PageContainer, Avatar, SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { Switch } from "@/components/ui/switch";
-import { childAge, mealStatusOptions, stageLabels } from "@/lib/kg-labels";
+import { childAge, mealStatusOptions, stageLabels, sleepMinutes, sleepDurationLabel } from "@/lib/kg-labels";
 import {
   addChildNote,
   getDailyLog,
@@ -46,26 +46,7 @@ export const Route = createFileRoute("/teacher/child/$id")({
 const field =
   "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft";
 
-/** مدة نومة بالدقائق من وقتين HH:MM. */
-export function sleepMinutes(start: string | null, end: string | null): number {
-  if (!start || !end) return 0;
-  const [sh = NaN, sm = NaN] = start.split(":").map(Number);
-  const [eh = NaN, em = NaN] = end.split(":").map(Number);
-  if ([sh, sm, eh, em].some((v) => Number.isNaN(v))) return 0;
-  let mins = eh * 60 + em - (sh * 60 + sm);
-  if (mins < 0) mins += 24 * 60;
-  return mins;
-}
 
-/** تنسيق إجمالي مدة النوم (بالدقائق) كنص مقروء. */
-export function sleepDurationLabel(minutes: number, t: (k: string, p?: Record<string, string | number>) => string): string {
-  if (!minutes || minutes <= 0) return t("لا يوجد");
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return t("{value} دقيقة", { value: m });
-  if (m === 0) return t("{value} ساعة", { value: h });
-  return t("{h} ساعة و{m} دقيقة", { h, m });
-}
 
 function TeacherChildPage() {
   const { t, n, d, lang } = useI18n();

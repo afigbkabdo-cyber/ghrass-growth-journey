@@ -19,7 +19,7 @@ import { AppShell, parentNav } from "@/components/shells";
 import { Avatar, PageContainer, SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { RoleGuard } from "@/components/role-guard";
 import { sectionRoles } from "@/lib/session";
-import { childAge, mealStatusLabels, stageLabels } from "@/lib/kg-labels";
+import { childAge, mealStatusLabels, stageLabels, sleepMinutes, sleepDurationLabel } from "@/lib/kg-labels";
 import { getDailyLog, listChildNotes, listSchedule, myChildren } from "@/lib/kg.functions";
 import { useI18n } from "@/lib/i18n";
 
@@ -106,6 +106,14 @@ function ChildPage() {
     enabled: Boolean(child?.classId),
   });
 
+  const rawNaps = log.data?.sleeps ?? [];
+  const legacyNap =
+    rawNaps.length === 0 && log.data?.slept && (log.data.sleepStart || log.data.sleepEnd)
+      ? [{ start: log.data.sleepStart, end: log.data.sleepEnd }]
+      : [];
+  const naps = [...rawNaps, ...legacyNap].filter((s) => s.start || s.end);
+  const totalSleep = naps.reduce((sum, s) => sum + sleepMinutes(s.start, s.end), 0);
+
   return (
     <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
       <PageContainer>
@@ -162,7 +170,7 @@ function ChildPage() {
               <InfoRow
                 icon={Utensils}
                 tone="orange"
-                title={t("الوجبة")}
+                title={t("الوجبة الأولى")}
                 value={
                   log.data?.mealStatus
                     ? `${t(mealStatusLabels[log.data.mealStatus] ?? log.data.mealStatus)}${
@@ -172,6 +180,21 @@ function ChildPage() {
                 }
                 note={log.data?.mealNotes ?? null}
               />
+              {log.data?.meal2Enabled && (
+                <InfoRow
+                  icon={Utensils}
+                  tone="yellow"
+                  title={t("الوجبة الثانية")}
+                  value={
+                    log.data.meal2Status
+                      ? `${t(mealStatusLabels[log.data.meal2Status] ?? log.data.meal2Status)}${
+                          log.data.meal2Time ? ` • ${time(log.data.meal2Time.slice(0, 5))}` : ""
+                        }`
+                      : t("لم تُسجّل بعد")
+                  }
+                  note={log.data.meal2Notes ?? null}
+                />
+              )}
               <InfoRow
                 icon={Droplets}
                 tone="blue"
@@ -182,19 +205,39 @@ function ChildPage() {
                 })}
                 note={log.data?.bathroomNotes ?? null}
               />
-              <InfoRow
-                icon={Moon}
-                tone="pink"
-                title={t("النوم")}
-                value={
-                  log.data?.slept
-                    ? t("نام{from}{to}", {
-                        from: log.data.sleepStart ? t(" من {time}", { time: time(log.data.sleepStart.slice(0, 5)) }) : "",
-                        to: log.data.sleepEnd ? t(" إلى {time}", { time: time(log.data.sleepEnd.slice(0, 5)) }) : "",
-                      })
-                    : t("لم ينم اليوم")
-                }
-              />
+              {naps.length === 0 ? (
+                <InfoRow icon={Moon} tone="pink" title={t("النوم")} value={t("لم ينم اليوم")} />
+              ) : (
+                <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-pink-soft text-brand-pink-deep">
+                      <Moon className="h-5 w-5" strokeWidth={2.2} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-extrabold text-foreground">{t("النوم")}</p>
+                      <p className="mt-0.5 text-xs font-bold text-muted-foreground">
+                        {t("إجمالي النوم: {value}", { value: sleepDurationLabel(totalSleep, t) })}
+                      </p>
+                    </div>
+                  </div>
+                  <ul className="mt-3 space-y-2">
+                    {naps.map((s, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-2 text-[11px] font-bold text-muted-foreground"
+                      >
+                        <span>{t("نومة {index}", { index: num(i + 1) })}</span>
+                        <span>
+                          {s.start ? time(s.start.slice(0, 5)) : t("لم تُسجّل")}
+                          {" — "}
+                          {s.end ? time(s.end.slice(0, 5)) : t("لم تُسجّل")}
+                        </span>
+                        <span>{sleepDurationLabel(sleepMinutes(s.start, s.end), t)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <InfoRow
                 icon={HandHeart}
                 tone="green"
