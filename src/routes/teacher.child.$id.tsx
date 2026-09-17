@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { PageContainer, Avatar, SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { Switch } from "@/components/ui/switch";
-import { childAge, mealStatusOptions, stageLabels } from "@/lib/kg-labels";
+import { childAge, mealStatusOptions, stageLabels, sleepMinutes, sleepDurationLabel } from "@/lib/kg-labels";
 import {
   addChildNote,
   getDailyLog,
