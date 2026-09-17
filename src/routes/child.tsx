@@ -19,7 +19,7 @@ import { AppShell, parentNav } from "@/components/shells";
 import { Avatar, PageContainer, SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { RoleGuard } from "@/components/role-guard";
 import { sectionRoles } from "@/lib/session";
-import { childAge, mealStatusLabels, stageLabels } from "@/lib/kg-labels";
+import { childAge, mealStatusLabels, stageLabels, sleepMinutes, sleepDurationLabel } from "@/lib/kg-labels";
 import { getDailyLog, listChildNotes, listSchedule, myChildren } from "@/lib/kg.functions";
 import { useI18n } from "@/lib/i18n";
 
