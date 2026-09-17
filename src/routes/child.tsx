@@ -162,7 +162,7 @@ function ChildPage() {
               <InfoRow
                 icon={Utensils}
                 tone="orange"
-                title={t("الوجبة")}
+                title={t("الوجبة الأولى")}
                 value={
                   log.data?.mealStatus
                     ? `${t(mealStatusLabels[log.data.mealStatus] ?? log.data.mealStatus)}${
@@ -172,6 +172,21 @@ function ChildPage() {
                 }
                 note={log.data?.mealNotes ?? null}
               />
+              {log.data?.meal2Enabled && (
+                <InfoRow
+                  icon={Utensils}
+                  tone="yellow"
+                  title={t("الوجبة الثانية")}
+                  value={
+                    log.data.meal2Status
+                      ? `${t(mealStatusLabels[log.data.meal2Status] ?? log.data.meal2Status)}${
+                          log.data.meal2Time ? ` • ${time(log.data.meal2Time.slice(0, 5))}` : ""
+                        }`
+                      : t("لم تُسجّل بعد")
+                  }
+                  note={log.data.meal2Notes ?? null}
+                />
+              )}
               <InfoRow
                 icon={Droplets}
                 tone="blue"
