@@ -106,6 +106,14 @@ function ChildPage() {
     enabled: Boolean(child?.classId),
   });
 
+  const rawNaps = log.data?.sleeps ?? [];
+  const legacyNap =
+    rawNaps.length === 0 && log.data?.slept && (log.data.sleepStart || log.data.sleepEnd)
+      ? [{ start: log.data.sleepStart, end: log.data.sleepEnd }]
+      : [];
+  const naps = [...rawNaps, ...legacyNap].filter((s) => s.start || s.end);
+  const totalSleep = naps.reduce((sum, s) => sum + sleepMinutes(s.start, s.end), 0);
+
   return (
     <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
       <PageContainer>
