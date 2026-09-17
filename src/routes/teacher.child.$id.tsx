@@ -57,6 +57,16 @@ export function sleepMinutes(start: string | null, end: string | null): number {
   return mins;
 }
 
+/** تنسيق إجمالي مدة النوم (بالدقائق) كنص مقروء. */
+export function sleepDurationLabel(minutes: number, t: (k: string, p?: Record<string, string | number>) => string): string {
+  if (!minutes || minutes <= 0) return t("لا يوجد");
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return t("{value} دقيقة", { value: m });
+  if (m === 0) return t("{value} ساعة", { value: h });
+  return t("{h} ساعة و{m} دقيقة", { h, m });
+}
+
 function TeacherChildPage() {
   const { t, n, d, lang } = useI18n();
   const { id } = Route.useParams();
