@@ -49,7 +49,7 @@ const field =
 
 
 function TeacherChildPage() {
-  const { t, n, d, lang } = useI18n();
+  const { t, n, d, num, lang } = useI18n();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const fetchChildren = useServerFn(myClassChildren);
