@@ -54,11 +54,13 @@ export function sleepMinutes(start: string | null, end: string | null): number {
 export function sleepDurationLabel(
   minutes: number,
   t: (k: string, p?: Record<string, string | number>) => string,
+  num?: (v: number) => string,
 ): string {
+  const f = (v: number) => (num ? num(v) : String(v));
   if (!minutes || minutes <= 0) return t("لا يوجد");
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (h === 0) return t("{value} دقيقة", { value: m });
-  if (m === 0) return t("{value} ساعة", { value: h });
-  return t("{h} ساعة و{m} دقيقة", { h, m });
+  if (h === 0) return t("{value} دقيقة", { value: f(m) });
+  if (m === 0) return t("{value} ساعة", { value: f(h) });
+  return t("{h} ساعة و{m} دقيقة", { h: f(h), m: f(m) });
 }
