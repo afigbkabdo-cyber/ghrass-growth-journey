@@ -216,7 +216,7 @@ function ChildPage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-extrabold text-foreground">{t("النوم")}</p>
                       <p className="mt-0.5 text-xs font-bold text-muted-foreground">
-                        {t("إجمالي النوم: {value}", { value: sleepDurationLabel(totalSleep, t) })}
+                        {t("إجمالي النوم: {value}", { value: sleepDurationLabel(totalSleep, t, num) })}
                       </p>
                     </div>
                   </div>
@@ -232,7 +232,7 @@ function ChildPage() {
                           {" — "}
                           {s.end ? time(s.end.slice(0, 5)) : t("لم تُسجّل")}
                         </span>
-                        <span>{sleepDurationLabel(sleepMinutes(s.start, s.end), t)}</span>
+                        <span>{sleepDurationLabel(sleepMinutes(s.start, s.end), t, num)}</span>
                       </li>
                     ))}
                   </ul>

@@ -325,7 +325,7 @@ function TeacherChildPage() {
               {t("إضافة نومة")}
             </button>
             <p className="text-[11px] font-bold text-muted-foreground">
-              {t("إجمالي النوم: {value}", { value: sleepDurationLabel(totalSleep, t) })}
+              {t("إجمالي النوم: {value}", { value: sleepDurationLabel(totalSleep, t, num) })}
             </p>
           </div>
         </div>
