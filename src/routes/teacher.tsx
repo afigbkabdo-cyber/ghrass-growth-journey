@@ -8,7 +8,7 @@ export const Route = createFileRoute("/teacher")({
   head: () => ({
     meta: [
       { title: "واجهة المعلمة — غراس" },
-      { name: "description", content: "أدوات المعلمة اليومية في روضة غراس: الحضور والأنشطة والملاحظات والتواصل." },
+      { name: "description", content: "أدوات المعلمة اليومية في روضة غراس: الحضور والأنشطة والملاحظات." },
       { property: "og:title", content: "واجهة المعلمة — غراس" },
       { property: "og:description", content: "أدوات المعلمة اليومية في روضة غراس." },
     ],

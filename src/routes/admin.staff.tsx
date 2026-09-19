@@ -152,8 +152,8 @@ function AdminStaff() {
       <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
         <p className="text-sm font-bold text-foreground">{t("الصلاحيات حسب الدور")}</p>
         <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
-          <li>• {t("الإدارة: اعتماد خطة القيم، إدارة الأطفال والكادر، الإعلانات والتقارير.")}</li>
-          <li>• {t("المعلمة: الحضور، الأنشطة، الملاحظات، والتواصل مع أولياء الأمور.")}</li>
+          <li>• {t("الإدارة: اعتماد خطة القيم، إدارة الأطفال والكادر، الإعلانات والتقارير، والتواصل مع أولياء الأمور.")}</li>
+          <li>• {t("المعلمة: الحضور، الأنشطة، والملاحظات.")}</li>
           <li>• {t("ولي الأمر: متابعة طفله فقط — بيانات الأطفال الآخرين محجوبة.")}</li>
         </ul>
       </div>
