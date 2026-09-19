@@ -122,6 +122,7 @@ export const teacher: Record<string, string> = {
   "إضافة أو حذف الأطفال والفصول": "Add or delete children and classes",
   "تعديل قيمة الأسبوع أو الحديث ومصدره": "Edit the value of the week or the hadith and its source",
   "رؤية بيانات أطفال فصول أخرى": "View data of children in other classes",
+  "التواصل مع أولياء الأمور": "Communicate with parents",
   "الإدارة المالية وإعدادات النظام": "Financial management and system settings",
 
   // صفحة المزيد
