@@ -72,7 +72,7 @@ function AdminSchedulePage() {
           classId: active!,
           title: title.trim(),
           atTime: atTime || null,
-          orderIndex: items.length,
+          orderIndex: items.reduce((max, i) => Math.max(max, i.orderIndex), 0) + 1,
         },
       }),
     onSuccess: () => {
