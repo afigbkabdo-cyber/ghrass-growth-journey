@@ -89,3 +89,25 @@ export const resetAccountPassword = createServerFn({ method: "POST" })
     await supabaseAdmin.from("profiles").update({ must_change_password: true }).eq("id", data.userId);
     return { password };
   });
+
+/** حذف حساب معلمة أو ولي أمر: يُعطَّل تسجيل الدخول نهائيًا ويُحرَّر رقم الجوال لإعادة الإنشاء لاحقًا. */
+export const deleteAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ userId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", data.userId);
+    const list = (roles ?? []).map((r) => r.role as string);
+    if (list.includes("admin") || list.includes("super_admin")) {
+      throw new Error("لا يمكن حذف حساب الإدارة.");
+    }
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+      email: `deleted-${data.userId}@ghiras.app`,
+      ban_duration: "876000h",
+    });
+    if (error) throw new Error("تعذر حذف الحساب.");
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
+    await supabaseAdmin.from("profiles").update({ phone: null }).eq("id", data.userId);
+    return { ok: true };
+  });

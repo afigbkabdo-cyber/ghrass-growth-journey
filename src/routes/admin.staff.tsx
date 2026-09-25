@@ -2,9 +2,9 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Users, UserPlus, ShieldCheck, KeyRound } from "lucide-react";
+import { Users, UserPlus, ShieldCheck, KeyRound, Trash2 } from "lucide-react";
 import { Avatar, ErrorState, LoadingCards, SectionHeader, ToneBadge } from "@/components/ghiras";
-import { createAccount, resetAccountPassword } from "@/lib/admin.functions";
+import { createAccount, resetAccountPassword, deleteAccount } from "@/lib/admin.functions";
 import { listParents, listStaff } from "@/lib/directory.functions";
 import { displayPhone } from "@/lib/phone";
 import { useI18n } from "@/lib/i18n";
@@ -35,6 +35,7 @@ function AdminStaff() {
   const fetchParents = useServerFn(listParents);
   const addAccount = useServerFn(createAccount);
   const resetPassword = useServerFn(resetAccountPassword);
+  const removeAccount = useServerFn(deleteAccount);
 
   const [form, setForm] = useState({ fullName: "", phone: "", role: "teacher" as "teacher" | "parent", title: "" });
   const [open, setOpen] = useState(false);
@@ -79,6 +80,17 @@ function AdminStaff() {
     onError: (e: Error) => setError(t(e.message)),
   });
 
+  const remove = useMutation({
+    mutationFn: (userId: string) => removeAccount({ data: { userId } }),
+    onSuccess: () => {
+      setError(null);
+      setNotice(t("تم حذف الحساب"));
+      qc.invalidateQueries({ queryKey: ["admin-staff"] });
+      qc.invalidateQueries({ queryKey: ["admin-parents"] });
+    },
+    onError: (e: Error) => setError(t(e.message)),
+  });
+
   const staff = staffQuery.data ?? [];
   const teachers = staff.filter((s) => s.role === "teacher");
   const managers = staff.filter((s) => s.role === "admin" || s.role === "super_admin");
@@ -110,6 +122,19 @@ function AdminStaff() {
       >
         <KeyRound className="h-4 w-4" />
       </button>
+      {(p.role === "teacher" || p.role === "parent") && (
+        <button
+          onClick={() => {
+            if (window.confirm(t("هل تريد حذف حساب {name}؟ لن يتمكن من تسجيل الدخول بعد ذلك.", { name: n(p.name) })))
+              remove.mutate(p.id);
+          }}
+          disabled={remove.isPending}
+          aria-label={t("حذف حساب {name}", { name: n(p.name) })}
+          className="rounded-xl border border-border bg-muted p-2 text-destructive"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 
