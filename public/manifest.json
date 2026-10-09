@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "غراس",
+  "short_name": "غراس",
+  "description": "غراس | ننمو معًا — Growing Together",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/3d8e985a-f9c3-40d6-8a41-a59187372de3/ghiras-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/__l5e/assets-v1/19a3c33b-1c4b-4f0f-85e5-3c67a6b2d75c/ghiras-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/__l5e/assets-v1/e4ad414d-5e7b-4491-a9fe-249949f881ae/ghiras-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
