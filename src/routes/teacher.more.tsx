@@ -39,6 +39,7 @@ const links = [
 
 function TeacherMorePage() {
   const { t, n } = useI18n();
+  const { session } = useAppSession();
   const navigate = useNavigate();
 
   const logout = () => {
