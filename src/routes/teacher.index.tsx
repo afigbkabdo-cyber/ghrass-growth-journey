@@ -34,6 +34,7 @@ import {
 } from "@/lib/teacher-data";
 import { TeacherShiftCard } from "@/components/teacher-shift-card";
 import { useI18n } from "@/lib/i18n";
+import { useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/teacher/")({
   head: () => ({
@@ -61,6 +62,7 @@ function TeacherHome() {
   const fetchChildren = useServerFn(myClassChildren);
   const valueQuery = useQuery({ queryKey: ["current-value"], queryFn: () => fetchValue({}) });
   const childrenQuery = useQuery({ queryKey: ["teacher-children"], queryFn: () => fetchChildren({}) });
+  const { session } = useAppSession();
   const value = valueQuery.data;
   const childCount = childrenQuery.data?.length ?? teacherTodaySummary.children;
 
@@ -69,12 +71,12 @@ function TeacherHome() {
       {/* ترحيب */}
       <section className="mb-5 rounded-3xl border border-border bg-card p-5 shadow-soft">
         <div className="flex items-center gap-3">
-          <Avatar name={currentTeacher.name} tone="blue" size="lg" />
+          <Avatar name={session?.name ? n(session.name) : t("معلمة")} tone="blue" size="lg" />
           <div className="min-w-0">
             <p className="text-xs font-bold text-muted-foreground">{t("صباح الخير")} 🌤️</p>
-            <h1 className="font-display text-xl font-extrabold text-foreground">{n(currentTeacher.name)}</h1>
+            <h1 className="font-display text-xl font-extrabold text-foreground">{session?.name ? n(session.name) : t("معلمة")}</h1>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {t(subjectLabels[currentTeacher.subject])} · {n(teacherClassTitle)}
+              {session?.title ? t(session.title) : t("معلمة")}
             </p>
           </div>
         </div>

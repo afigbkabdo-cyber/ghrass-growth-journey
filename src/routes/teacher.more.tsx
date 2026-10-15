@@ -12,7 +12,7 @@ import {
 import { LanguageSwitcher, useI18n } from "@/lib/i18n";
 import { PageContainer, SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
 import { currentTeacher, teacherClassTitle, subjectLabels, teacherPermissions } from "@/lib/teacher-data";
-import { clearSession } from "@/lib/session";
+import { clearSession, useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/teacher/more")({
   head: () => ({
@@ -60,15 +60,15 @@ function TeacherMorePage() {
       </header>
 
       <section className="mb-5 flex items-center gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
-        <Avatar name={n(currentTeacher.name)} tone={currentTeacher.tone} size="xl" />
+        <Avatar name={session?.name ? n(session.name) : t("معلمة")} tone="orange" size="xl" />
         <div className="min-w-0">
           <h2 className="truncate font-display text-lg font-extrabold text-foreground">
-            {n(currentTeacher.name)}
+            {session?.name ? n(session.name) : t("معلمة")}
           </h2>
-          <p className="text-xs text-muted-foreground">{currentTeacher.email}</p>
+          <p className="text-xs text-muted-foreground" dir="ltr">{session?.phone ? `0${session.phone.slice(3)}` : "—"}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <ToneBadge tone="orange">{t(subjectLabels[currentTeacher.subject])}</ToneBadge>
-            <ToneBadge tone="blue">{n(teacherClassTitle)}</ToneBadge>
+            <ToneBadge tone="orange">{t("معلمة")}</ToneBadge>
+            {session?.title && <ToneBadge tone="blue">{t(session.title)}</ToneBadge>}
           </div>
         </div>
       </section>
