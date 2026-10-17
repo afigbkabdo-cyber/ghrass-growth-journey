@@ -109,6 +109,54 @@ export type Database = {
           },
         ]
       }
+      child_attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          child_id: string
+          class_id: string | null
+          id: string
+          log_date: string
+          recorded_by: string
+          status: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          child_id: string
+          class_id?: string | null
+          id?: string
+          log_date?: string
+          recorded_by: string
+          status: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          child_id?: string
+          class_id?: string | null
+          id?: string
+          log_date?: string
+          recorded_by?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_attendance_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_attendance_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_guardians: {
         Row: {
           child_id: string
@@ -390,6 +438,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          photo_path: string | null
           sender_id: string
           sender_role: string
           thread_id: string
@@ -398,6 +447,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          photo_path?: string | null
           sender_id?: string
           sender_role?: string
           thread_id: string
@@ -406,6 +456,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          photo_path?: string | null
           sender_id?: string
           sender_role?: string
           thread_id?: string
@@ -589,6 +640,38 @@ export type Database = {
           },
         ]
       }
+      teacher_attendance: {
+        Row: {
+          check_in: string
+          check_out: string | null
+          id: string
+          log_date: string
+          teacher_id: string
+        }
+        Insert: {
+          check_in?: string
+          check_out?: string | null
+          id?: string
+          log_date?: string
+          teacher_id: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string | null
+          id?: string
+          log_date?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_attendance_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_classes: {
         Row: {
           class_id: string
@@ -732,6 +815,23 @@ export type Database = {
       is_guardian_of: {
         Args: { _child_id: string; _user_id: string }
         Returns: boolean
+      }
+      record_child_attendance: { Args: { _entries: Json }; Returns: undefined }
+      record_teacher_attendance: {
+        Args: { _action: string }
+        Returns: {
+          check_in: string
+          check_out: string | null
+          id: string
+          log_date: string
+          teacher_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "teacher_attendance"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       teaches_child: {
         Args: { _child_id: string; _user_id: string }
