@@ -150,6 +150,61 @@ function AdminChildren() {
     onError: (e: Error) => setMessage(e.message),
   });
 
+  const update = useMutation({
+    mutationFn: () =>
+      saveChild({
+        data: {
+          id: detailId!,
+          name: editForm.name,
+          nameEn: editForm.nameEn || null,
+          stage: editForm.stage,
+          birthDate: editForm.birthDate || null,
+          gender: editForm.gender || null,
+          allergies: editForm.allergies || null,
+          notes: editForm.notes || null,
+          sessionPeriod: editForm.sessionPeriod || null,
+          enrollmentTerm: editForm.enrollmentTerm || null,
+        },
+      }),
+    onSuccess: () => {
+      setMessage(tr("تم حفظ التعديلات."));
+      setEditing(false);
+      qc.invalidateQueries({ queryKey: ["admin-children"] });
+      qc.invalidateQueries({ queryKey: ["child-details"] });
+    },
+    onError: (e: Error) => setMessage(e.message),
+  });
+
+  const updateGuardian = useMutation({
+    mutationFn: (v: { id: string; fullName: string; phone: string | null }) =>
+      saveContact({ data: v }),
+    onSuccess: () => {
+      setMessage(tr("تم حفظ بيانات ولي الأمر."));
+      qc.invalidateQueries({ queryKey: ["child-details"] });
+      qc.invalidateQueries({ queryKey: ["admin-parents"] });
+    },
+    onError: (e: Error) => setMessage(e.message),
+  });
+
+  const startEditing = () => {
+    if (!detail) return;
+    setEditForm({
+      name: detail.name,
+      nameEn: detail.nameEn ?? "",
+      stage: detail.stage as Stage,
+      birthDate: detail.birthDate ?? "",
+      gender: detail.gender ?? "",
+      allergies: detail.allergies ?? "",
+      notes: detail.notes ?? "",
+      sessionPeriod: detail.sessionPeriod ?? "",
+      enrollmentTerm: detail.enrollmentTerm ?? "",
+    });
+    setGuardianEdits(
+      Object.fromEntries(detail.guardians.map((g) => [g.id, { name: g.name, phone: g.phone ?? "" }])),
+    );
+    setEditing(true);
+  };
+
   const rows = childrenQuery.data ?? [];
   const list = useMemo(() => {
     const term = q.trim();
