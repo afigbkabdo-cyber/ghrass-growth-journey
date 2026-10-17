@@ -941,6 +941,7 @@ export const sendMessage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     // الدور يُستنتج من الخادم ولا يُقبل من العميل.
     const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+    if (data.photoPath && !isAdmin) throw new Error("Forbidden image");
     const { error } = await context.supabase.from("messages").insert({
       thread_id: data.threadId,
       sender_id: context.userId,
