@@ -281,6 +281,7 @@ function AdminChildren() {
                 setDetailId(c.id);
                 setMoveTarget("");
                 setMessage(null);
+                setEditing(false);
               }}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-start shadow-soft transition-colors hover:bg-muted/60"
             >
@@ -314,6 +315,7 @@ function AdminChildren() {
                 onClick={() => {
                   setDetailId(null);
                   setConfirmDeleteId(null);
+                  setEditing(false);
                 }}
                 className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground"
               >
