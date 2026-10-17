@@ -33,7 +33,7 @@ export const attendanceReport = createServerFn({ method:'GET' }).middleware([req
  const ids=(teachers.data ?? []).map(r=>r.user_id);
  const profiles=ids.length ? await context.supabase.from('profiles').select('id,full_name,full_name_en').in('id',ids) : { data:[],error:null };
  if(profiles.error) throw new Error(profiles.error.message);
- const links=await context.supabase.from('teacher_classes').select('*').in('teacher_id',ids);
+ const links=ids.length ? await context.supabase.from('teacher_classes').select('*').in('teacher_id',ids) : {data:[],error:null};
  if(links.error) throw new Error(links.error.message);
  return {children:children.data ?? [],teachers:profiles.data ?? [],classes:classes.data ?? [],childRows:childRows.data ?? [],teacherRows:teacherRows.data ?? [],links:links.data ?? [],today:attendanceDate()};
 });

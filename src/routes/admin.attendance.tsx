@@ -11,7 +11,7 @@ export const Route = createFileRoute('/admin/attendance')({head:()=>({meta:[{tit
 function AdminAttendance(){
  const {t,n,locale}=useI18n(); const [date,setDate]=useState(attendanceDate);const [classId,setClass]=useState('');const [teacherId,setTeacher]=useState('');
  const fetch=useServerFn(attendanceReport);const query=useQuery({queryKey:['attendance-report',date],queryFn:()=>fetch({data:{date}}),refetchInterval:15000});
- const data=query.data; const children=(data?.children ?? []).filter(c=>!classId || c.class_id===classId).filter(c=>!teacherId || data?.links.some(l=>l.teacher_id===teacherId && l.class_id===c.class_id));
+ const data=query.data; const children=(data?.children ?? []).filter(c=>{const recordedClass=data?.childRows.find(r=>r.child_id===c.id)?.class_id ?? c.class_id;return (!classId || recordedClass===classId) && (!teacherId || data?.links.some(l=>l.teacher_id===teacherId && l.class_id===recordedClass));});
  const rows=(data?.childRows ?? []).filter(r=>(!classId || r.class_id===classId) && (!teacherId || data?.links.some(l=>l.teacher_id===teacherId && l.class_id===r.class_id)));
  const counts=attendanceCounts(rows);
  const labels={unrecorded:'لم يُسجل',absent:'غائب',present:'حاضر',completed:'مكتمل'};

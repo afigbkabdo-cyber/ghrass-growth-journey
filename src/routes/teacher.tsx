@@ -11,6 +11,8 @@ export const Route = createFileRoute("/teacher")({
       { name: "description", content: "أدوات المعلمة اليومية في روضة غراس: الحضور والأنشطة والملاحظات." },
       { property: "og:title", content: "واجهة المعلمة — غراس" },
       { property: "og:description", content: "أدوات المعلمة اليومية في روضة غراس." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: TeacherLayout,

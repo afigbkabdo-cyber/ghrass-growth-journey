@@ -14,6 +14,8 @@ export const Route = createFileRoute("/announcements")({
       { name: "description", content: "فعاليات وتنبيهات وأخبار روضة غراس لأولياء الأمور." },
       { property: "og:title", content: "إعلانات الروضة — غراس" },
       { property: "og:description", content: "فعاليات وتنبيهات وأخبار روضة غراس لأولياء الأمور." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AnnouncementsPage,

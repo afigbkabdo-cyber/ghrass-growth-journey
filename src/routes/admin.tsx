@@ -13,6 +13,8 @@ export const Route = createFileRoute("/admin")({
       },
       { property: "og:title", content: "لوحة الإدارة — غراس" },
       { property: "og:description", content: "إدارة كاملة لروضة غراس من مكان واحد." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AdminLayout,
