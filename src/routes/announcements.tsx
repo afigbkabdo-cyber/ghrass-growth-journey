@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, Info, Megaphone } from "lucide-react";
+import { Megaphone } from "lucide-react";
 import { AppShell, parentNav } from "@/components/shells";
-import { PageContainer, ToneBadge, toneClasses } from "@/components/ghiras";
-import { announcements, kindLabels } from "@/lib/data";
+import { PageContainer, toneClasses } from "@/components/ghiras";
+import { usePublishedAnnouncements } from "@/lib/announcements";
 import { useI18n } from "@/lib/i18n";
-
-const kindIcon = { event: CalendarDays, reminder: Info, news: Megaphone };
 
 export const Route = createFileRoute("/announcements")({
   head: () => ({
@@ -22,7 +20,8 @@ export const Route = createFileRoute("/announcements")({
 });
 
 function AnnouncementsPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const list = usePublishedAnnouncements();
   return (
     <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
       <PageContainer>
@@ -32,22 +31,25 @@ function AnnouncementsPage() {
         </header>
 
         <div className="space-y-3">
-          {announcements.map((an) => {
+          {(list.data ?? []).length === 0 && !list.isLoading && (
+            <p className="rounded-3xl border border-border bg-card p-4 text-center text-sm text-muted-foreground">
+              {t("لا توجد إعلانات حاليًا.")}
+            </p>
+          )}
+          {(list.data ?? []).map((an) => {
             const tone = toneClasses[an.tone];
-            const Icon = kindIcon[an.kind];
             return (
               <article key={an.id} className="rounded-3xl border border-border bg-card p-4 shadow-soft">
                 <div className="flex items-start gap-3">
                   <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tone.soft}`}>
-                    <Icon className={`h-5 w-5 ${tone.deep}`} strokeWidth={2.2} />
+                    <Megaphone className={`h-5 w-5 ${tone.deep}`} strokeWidth={2.2} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <h2 className="text-sm font-extrabold text-foreground">{t(an.title)}</h2>
-                      <ToneBadge tone={an.tone}>{t(kindLabels[an.kind])}</ToneBadge>
-                    </div>
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(an.body)}</p>
-                    <p className="mt-2 text-[11px] font-bold text-muted-foreground">{t(an.date)}</p>
+                    <h2 className="text-sm font-extrabold text-foreground">{an.title}</h2>
+                    <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{an.body}</p>
+                    <p className="mt-2 text-[11px] font-bold text-muted-foreground">
+                      {new Date(an.created_at).toLocaleDateString(lang === "en" ? "en-GB" : "ar-SA", { day: "numeric", month: "long" })}
+                    </p>
                   </div>
                 </div>
               </article>

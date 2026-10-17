@@ -22,6 +22,13 @@
       "when": 1792262441627,
       "tag": "0002_admin_only_child_message_photo_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792272000841,
+      "tag": "0003_create_announcements",
+      "breakpoints": true
     }
   ]
 }
