@@ -128,6 +128,7 @@ export interface ThreadRow {
 }
 
 export interface MessageRow {
+  photoUrl: string | null;
   id: string;
   body: string;
   senderRole: string;
@@ -869,17 +870,27 @@ export const listThreadMessages = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<MessageRow[]> => {
     const { data: rows, error } = await context.supabase
       .from("messages")
-      .select("id, body, sender_role, sender_id, created_at")
+      .select("id, body, sender_role, sender_id, created_at, photo_path")
       .eq("thread_id", data.threadId)
       .order("created_at");
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((m) => ({
+    return Promise.all((rows ?? []).map(async (m) => {
+      let photoUrl: string | null = null;
+      if (m.photo_path) {
+        const { data: signed, error: photoError } = await context.supabase.storage.from("message-photos").createSignedUrl(m.photo_path, 900);
+        if (photoError) throw new Error(photoError.message);
+        if (signed?.signedUrl) {
+          const url = new URL(signed.signedUrl);
+          photoUrl = `${import.meta.env.VITE_SUPABASE_URL}${url.pathname}${url.search}`;
+        }
+      }
+      return { photoUrl,
       id: m.id,
       body: m.body,
       senderRole: m.sender_role,
       senderId: m.sender_id,
       createdAt: m.created_at,
-    }));
+    }; }));
   });
 
 /** ولي الأمر يفتح محادثة جديدة مع الإدارة. */
@@ -922,9 +933,9 @@ export const sendMessage = createServerFn({ method: "POST" })
     z
       .object({
         threadId: z.string().uuid(),
-        body: z.string().trim().min(1),
-        
-      })
+        body: z.string().trim().max(10000),
+        photoPath: z.string().max(500).optional(),
+      }).refine(d => Boolean(d.body || d.photoPath), "Message required")
       .parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -935,6 +946,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       sender_id: context.userId,
       sender_role: isAdmin ? "admin" : "parent",
       body: data.body,
+      photo_path: data.photoPath ?? null,
     });
     if (error) throw new Error(error.message);
     // تحديث وقت آخر رسالة — مسموح لصاحب المحادثة أو الإدارة عبر RLS.
