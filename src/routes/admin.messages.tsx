@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MessagesSquare, ShieldCheck, ChevronLeft } from "lucide-react";
+import { MessagesSquare, ShieldCheck, ChevronLeft, Plus, X, Send } from "lucide-react";
 import { SectionHeader, ToneBadge, Avatar, EmptyState } from "@/components/ghiras";
-import { listThreads } from "@/lib/kg.functions";
+import { listThreads, adminCreateThread } from "@/lib/kg.functions";
+import { listParents } from "@/lib/directory.functions";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/messages")({
@@ -24,9 +26,32 @@ export const Route = createFileRoute("/admin/messages")({
 });
 
 function AdminMessagesPage() {
-  const { t, dt } = useI18n();
+  const { t, dt, n } = useI18n();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const fetchThreads = useServerFn(listThreads);
+  const fetchParents = useServerFn(listParents);
+  const startThread = useServerFn(adminCreateThread);
   const threads = useQuery({ queryKey: ["admin-threads"], queryFn: () => fetchThreads({}) });
+  const parents = useQuery({ queryKey: ["admin-parents"], queryFn: () => fetchParents({}) });
+
+  const [open, setOpen] = useState(false);
+  const [parentId, setParentId] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+
+  const create = useMutation({
+    mutationFn: () =>
+      startThread({ data: { parentId, subject: subject.trim(), body: body.trim() } }),
+    onSuccess: (result) => {
+      setOpen(false);
+      setParentId("");
+      setSubject("");
+      setBody("");
+      qc.invalidateQueries({ queryKey: ["admin-threads"] });
+      navigate({ to: "/admin/messages/$id", params: { id: result.id } });
+    },
+  });
 
   return (
     <div className="space-y-6">
