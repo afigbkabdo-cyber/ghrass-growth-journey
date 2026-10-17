@@ -425,7 +425,7 @@ function AdminChildren() {
                           onChange={(e) =>
                             setGuardianEdits({
                               ...guardianEdits,
-                              [g.id]: { ...guardianEdits[g.id], name: e.target.value },
+                              [g.id]: { name: e.target.value, phone: guardianEdits[g.id]?.phone ?? "" },
                             })
                           }
                           placeholder={tr("اسم ولي الأمر")}
@@ -436,7 +436,7 @@ function AdminChildren() {
                           onChange={(e) =>
                             setGuardianEdits({
                               ...guardianEdits,
-                              [g.id]: { ...guardianEdits[g.id], phone: e.target.value },
+                              [g.id]: { name: guardianEdits[g.id]?.name ?? "", phone: e.target.value },
                             })
                           }
                           placeholder={tr("رقم الجوال")}
