@@ -125,4 +125,6 @@ export const teacherExtra: Record<string, string> = {
   "١٩ من ٢٠ دوامًا": "19 of 20 shifts",
   "تجربة": "Experiment",
   "كيف ننمي القيمة؟": "How do we grow the value?",
+  "لم يتم تعيين فصل لكِ بعد. يرجى التواصل مع الإدارة.": "No class has been assigned to you yet. Please contact the administration.",
+  "لا يوجد أطفال مسجلون في فصلك بعد.": "No children are enrolled in your class yet.",
 };
