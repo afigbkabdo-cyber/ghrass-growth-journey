@@ -109,6 +109,42 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          state: string
+          title: string
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          state?: string
+          title: string
+          tone?: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          state?: string
+          title?: string
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       child_attendance: {
         Row: {
           check_in: string | null
