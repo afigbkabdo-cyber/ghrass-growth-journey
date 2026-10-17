@@ -134,7 +134,6 @@ export const admin: Record<string, string> = {
   "لا توجد أنشطة": "No activities",
   "ستظهر أنشطة المعلمات هنا.": "Teachers' activities will appear here.",
   "صورة من نشاط {title}": "Photo from activity {title}",
-  "منشور": "Published",
   "مسودة": "Draft",
   "مرتبط بقيمة {value}": "Linked to value {value}",
   "إيقاف النشر": "Unpublish",
