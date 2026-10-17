@@ -302,3 +302,64 @@ export const moveChildToClass = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** تعديل بيانات الطفل — للإدارة فقط (RLS). */
+export const updateChild = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        name: z.string().trim().min(2),
+        nameEn: z.string().trim().nullable().optional(),
+        stage: z.enum(["nursery", "kg1", "kg2"]),
+        birthDate: z.string().trim().nullable().optional(),
+        gender: z.string().trim().nullable().optional(),
+        allergies: z.string().trim().nullable().optional(),
+        allergiesEn: z.string().trim().nullable().optional(),
+        notes: z.string().trim().nullable().optional(),
+        sessionPeriod: z.string().trim().nullable().optional(),
+        enrollmentTerm: z.string().trim().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("children")
+      .update({
+        name: data.name,
+        name_en: data.nameEn || null,
+        stage: data.stage,
+        birth_date: data.birthDate || null,
+        gender: data.gender || null,
+        allergies: data.allergies || null,
+        allergies_en: data.allergiesEn || null,
+        notes: data.notes || null,
+        session_period: data.sessionPeriod || null,
+        enrollment_term: data.enrollmentTerm || null,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** تعديل بيانات التواصل لولي أمر (الاسم ورقم الجوال) — للإدارة فقط (RLS). */
+export const updateProfileContact = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        fullName: z.string().trim().min(2),
+        phone: z.string().trim().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ full_name: data.fullName, phone: data.phone || null })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

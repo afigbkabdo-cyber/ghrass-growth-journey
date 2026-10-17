@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MessagesSquare, ShieldCheck, ChevronLeft } from "lucide-react";
+import { MessagesSquare, ShieldCheck, ChevronLeft, Plus, X, Send } from "lucide-react";
 import { SectionHeader, ToneBadge, Avatar, EmptyState } from "@/components/ghiras";
-import { listThreads } from "@/lib/kg.functions";
+import { listThreads, adminCreateThread } from "@/lib/kg.functions";
+import { listParents } from "@/lib/directory.functions";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/messages")({
@@ -24,9 +26,32 @@ export const Route = createFileRoute("/admin/messages")({
 });
 
 function AdminMessagesPage() {
-  const { t, dt } = useI18n();
+  const { t, dt, n } = useI18n();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const fetchThreads = useServerFn(listThreads);
+  const fetchParents = useServerFn(listParents);
+  const startThread = useServerFn(adminCreateThread);
   const threads = useQuery({ queryKey: ["admin-threads"], queryFn: () => fetchThreads({}) });
+  const parents = useQuery({ queryKey: ["admin-parents"], queryFn: () => fetchParents({}) });
+
+  const [open, setOpen] = useState(false);
+  const [parentId, setParentId] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+
+  const create = useMutation({
+    mutationFn: () =>
+      startThread({ data: { parentId, subject: subject.trim(), body: body.trim() } }),
+    onSuccess: (result) => {
+      setOpen(false);
+      setParentId("");
+      setSubject("");
+      setBody("");
+      qc.invalidateQueries({ queryKey: ["admin-threads"] });
+      navigate({ to: "/admin/messages/$id", params: { id: result.id } });
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -38,6 +63,62 @@ function AdminMessagesPage() {
           {t("التواصل الرسمي يكون بين ولي الأمر والإدارة فقط — لا توجد مراسلة مباشرة مع المعلمات.")}
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-soft transition-opacity hover:opacity-90"
+      >
+        {open ? <X className="h-4.5 w-4.5" /> : <Plus className="h-4.5 w-4.5" />}
+        {t("محادثة جديدة مع ولي أمر")}
+      </button>
+
+      {open && (
+        <section className="space-y-2.5 rounded-3xl border border-border bg-card p-4 shadow-soft">
+          <select
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
+            aria-label={t("ولي الأمر")}
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none"
+          >
+            <option value="">{t("اختر ولي الأمر…")}</option>
+            {(parents.data ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {n(p.name, p.nameEn)}
+              </option>
+            ))}
+          </select>
+          <input
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder={t("موضوع الرسالة")}
+            aria-label={t("موضوع الرسالة")}
+            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:shadow-soft"
+          />
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={4}
+            placeholder={t("اكتب رسالتك لولي الأمر…")}
+            aria-label={t("نص الرسالة")}
+            className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none focus:shadow-soft"
+          />
+          {create.isError && (
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive">
+              {t("تعذر إنشاء المحادثة. حاول مرة أخرى.")}
+            </p>
+          )}
+          <button
+            type="button"
+            disabled={create.isPending || !parentId || subject.trim().length < 2 || body.trim().length < 2}
+            onClick={() => create.mutate()}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-extrabold text-primary-foreground disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+            {create.isPending ? t("جارٍ الإرسال…") : t("إرسال")}
+          </button>
+        </section>
+      )}
 
       <section>
         <SectionHeader title={t("المحادثات")} icon={MessagesSquare} tone="blue" />

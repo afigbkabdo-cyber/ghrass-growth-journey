@@ -944,3 +944,39 @@ export const sendMessage = createServerFn({ method: "POST" })
       .eq("id", data.threadId);
     return { ok: true };
   });
+
+/** الإدارة تبدأ محادثة جديدة مع ولي أمر محدد. */
+export const adminCreateThread = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        parentId: z.string().uuid(),
+        subject: z.string().trim().min(2),
+        body: z.string().trim().min(2),
+        childId: z.string().uuid().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+    if (!isAdmin) throw new Error("هذه العملية متاحة للإدارة فقط.");
+    const { data: thread, error } = await context.supabase
+      .from("message_threads")
+      .insert({
+        parent_id: data.parentId,
+        child_id: data.childId ?? null,
+        subject: data.subject,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    const { error: msgError } = await context.supabase.from("messages").insert({
+      thread_id: thread.id,
+      sender_id: context.userId,
+      sender_role: "admin",
+      body: data.body,
+    });
+    if (msgError) throw new Error(msgError.message);
+    return { id: thread.id };
+  });

@@ -12,6 +12,8 @@ import {
   listClasses,
   listParents,
   moveChildToClass,
+  updateChild,
+  updateProfileContact,
 } from "@/lib/directory.functions";
 import { stageLabels, type Stage } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,8 @@ function AdminChildren() {
   const removeChild = useServerFn(deleteChild);
   const fetchDetails = useServerFn(getChildDetails);
   const moveChild = useServerFn(moveChildToClass);
+  const saveChild = useServerFn(updateChild);
+  const saveContact = useServerFn(updateProfileContact);
 
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<Stage | "all">("all");
@@ -51,6 +55,19 @@ function AdminChildren() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [moveTarget, setMoveTarget] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    nameEn: "",
+    stage: "kg1" as Stage,
+    birthDate: "",
+    gender: "",
+    allergies: "",
+    notes: "",
+    sessionPeriod: "",
+    enrollmentTerm: "",
+  });
+  const [guardianEdits, setGuardianEdits] = useState<Record<string, { name: string; phone: string }>>({});
   const [form, setForm] = useState({
     name: "",
     stage: "kg1" as Stage,
@@ -133,6 +150,61 @@ function AdminChildren() {
     onError: (e: Error) => setMessage(e.message),
   });
 
+  const update = useMutation({
+    mutationFn: () =>
+      saveChild({
+        data: {
+          id: detailId!,
+          name: editForm.name,
+          nameEn: editForm.nameEn || null,
+          stage: editForm.stage,
+          birthDate: editForm.birthDate || null,
+          gender: editForm.gender || null,
+          allergies: editForm.allergies || null,
+          notes: editForm.notes || null,
+          sessionPeriod: editForm.sessionPeriod || null,
+          enrollmentTerm: editForm.enrollmentTerm || null,
+        },
+      }),
+    onSuccess: () => {
+      setMessage(tr("تم حفظ التعديلات."));
+      setEditing(false);
+      qc.invalidateQueries({ queryKey: ["admin-children"] });
+      qc.invalidateQueries({ queryKey: ["child-details"] });
+    },
+    onError: (e: Error) => setMessage(e.message),
+  });
+
+  const updateGuardian = useMutation({
+    mutationFn: (v: { id: string; fullName: string; phone: string | null }) =>
+      saveContact({ data: v }),
+    onSuccess: () => {
+      setMessage(tr("تم حفظ بيانات ولي الأمر."));
+      qc.invalidateQueries({ queryKey: ["child-details"] });
+      qc.invalidateQueries({ queryKey: ["admin-parents"] });
+    },
+    onError: (e: Error) => setMessage(e.message),
+  });
+
+  const startEditing = () => {
+    if (!detail) return;
+    setEditForm({
+      name: detail.name,
+      nameEn: detail.nameEn ?? "",
+      stage: detail.stage as Stage,
+      birthDate: detail.birthDate ?? "",
+      gender: detail.gender ?? "",
+      allergies: detail.allergies ?? "",
+      notes: detail.notes ?? "",
+      sessionPeriod: detail.sessionPeriod ?? "",
+      enrollmentTerm: detail.enrollmentTerm ?? "",
+    });
+    setGuardianEdits(
+      Object.fromEntries(detail.guardians.map((g) => [g.id, { name: g.name, phone: g.phone ?? "" }])),
+    );
+    setEditing(true);
+  };
+
   const rows = childrenQuery.data ?? [];
   const list = useMemo(() => {
     const term = q.trim();
@@ -209,6 +281,7 @@ function AdminChildren() {
                 setDetailId(c.id);
                 setMoveTarget("");
                 setMessage(null);
+                setEditing(false);
               }}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-start shadow-soft transition-colors hover:bg-muted/60"
             >
@@ -242,6 +315,7 @@ function AdminChildren() {
                 onClick={() => {
                   setDetailId(null);
                   setConfirmDeleteId(null);
+                  setEditing(false);
                 }}
                 className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground"
               >
@@ -283,9 +357,136 @@ function AdminChildren() {
                   ))}
                 </div>
 
-                <p className="mt-3 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-                  {tr("بيانات التسجيل للعرض فقط ولا يمكن تعديلها.")}
-                </p>
+                {editing ? (
+                  <div className="mt-4 space-y-2.5 rounded-2xl border border-border p-3">
+                    <p className="text-xs font-bold text-foreground">{tr("تعديل بيانات الطفل")}</p>
+                    <input
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      placeholder={tr("اسم الطفل")}
+                      className={inputCls}
+                    />
+                    <input
+                      value={editForm.nameEn}
+                      onChange={(e) => setEditForm({ ...editForm, nameEn: e.target.value })}
+                      placeholder={tr("الاسم بالإنجليزية (اختياري)")}
+                      dir="ltr"
+                      className={inputCls}
+                    />
+                    <select
+                      value={editForm.stage}
+                      onChange={(e) => setEditForm({ ...editForm, stage: e.target.value as Stage })}
+                      aria-label={tr("الفئة العمرية")}
+                      className={inputCls}
+                    >
+                      <option value="nursery">{tr(stageLabels.nursery)}</option>
+                      <option value="kg1">{tr(stageLabels.kg1)}</option>
+                      <option value="kg2">{tr(stageLabels.kg2)}</option>
+                    </select>
+                    <label className="block text-[11px] font-bold text-muted-foreground">
+                      {tr("تاريخ الميلاد")}
+                      <input
+                        type="date"
+                        value={editForm.birthDate}
+                        onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
+                        className={inputCls}
+                      />
+                    </label>
+                    <input
+                      value={editForm.sessionPeriod}
+                      onChange={(e) => setEditForm({ ...editForm, sessionPeriod: e.target.value })}
+                      placeholder={tr("الفترة")}
+                      className={inputCls}
+                    />
+                    <input
+                      value={editForm.enrollmentTerm}
+                      onChange={(e) => setEditForm({ ...editForm, enrollmentTerm: e.target.value })}
+                      placeholder={tr("فترة التسجيل")}
+                      className={inputCls}
+                    />
+                    <input
+                      value={editForm.allergies}
+                      onChange={(e) => setEditForm({ ...editForm, allergies: e.target.value })}
+                      placeholder={tr("الحساسية")}
+                      className={inputCls}
+                    />
+                    <textarea
+                      value={editForm.notes}
+                      onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                      placeholder={tr("ملاحظات")}
+                      rows={2}
+                      className={inputCls}
+                    />
+                    {detail.guardians.map((g) => (
+                      <div key={g.id} className="space-y-2 rounded-xl bg-muted p-2.5">
+                        <p className="text-[11px] font-bold text-muted-foreground">{tr("ولي الأمر")}</p>
+                        <input
+                          value={guardianEdits[g.id]?.name ?? ""}
+                          onChange={(e) =>
+                            setGuardianEdits({
+                              ...guardianEdits,
+                              [g.id]: { name: e.target.value, phone: guardianEdits[g.id]?.phone ?? "" },
+                            })
+                          }
+                          placeholder={tr("اسم ولي الأمر")}
+                          className={inputCls}
+                        />
+                        <input
+                          value={guardianEdits[g.id]?.phone ?? ""}
+                          onChange={(e) =>
+                            setGuardianEdits({
+                              ...guardianEdits,
+                              [g.id]: { name: guardianEdits[g.id]?.name ?? "", phone: e.target.value },
+                            })
+                          }
+                          placeholder={tr("رقم الجوال")}
+                          dir="ltr"
+                          inputMode="tel"
+                          className={inputCls}
+                        />
+                        <button
+                          type="button"
+                          disabled={updateGuardian.isPending}
+                          onClick={() =>
+                            updateGuardian.mutate({
+                              id: g.id,
+                              fullName: guardianEdits[g.id]?.name ?? g.name,
+                              phone: guardianEdits[g.id]?.phone || null,
+                            })
+                          }
+                          className="w-full rounded-xl border border-border bg-card py-2 text-xs font-bold text-foreground disabled:opacity-60"
+                        >
+                          {tr("حفظ بيانات ولي الأمر")}
+                        </button>
+                      </div>
+                    ))}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={update.isPending || editForm.name.trim().length < 2}
+                        onClick={() => update.mutate()}
+                        className="flex-1 rounded-2xl bg-primary py-2.5 text-xs font-extrabold text-primary-foreground disabled:opacity-60"
+                      >
+                        {update.isPending ? tr("جارٍ الحفظ…") : tr("حفظ التعديلات")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditing(false)}
+                        className="rounded-2xl border border-border px-4 py-2.5 text-xs font-bold text-muted-foreground"
+                      >
+                        {tr("إلغاء")}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startEditing}
+                    className="mt-4 w-full rounded-2xl border border-border bg-muted py-3 text-sm font-bold text-foreground"
+                  >
+                    {tr("تعديل البيانات")}
+                  </button>
+                )}
 
                 <div className="mt-4 space-y-2">
                   <p className="text-xs font-bold text-foreground">{tr("نقل إلى فصل آخر")}</p>
