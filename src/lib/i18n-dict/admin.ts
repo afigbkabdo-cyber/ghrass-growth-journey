@@ -181,4 +181,17 @@ export const admin: Record<string, string> = {
   "تعذر إنشاء الحساب.": "Could not create the account.",
   "تعذر حفظ بيانات الحساب.": "Could not save the account data.",
   "تعذر إعادة تعيين كلمة المرور.": "Could not reset the password.",
+
+  "تعديل البيانات": "Edit details",
+  "تعديل بيانات الطفل": "Edit child details",
+  "حفظ التعديلات": "Save changes",
+  "تم حفظ التعديلات.": "Changes saved.",
+  "تم حفظ بيانات ولي الأمر.": "Guardian details saved.",
+  "حفظ بيانات ولي الأمر": "Save guardian details",
+  "اسم ولي الأمر": "Guardian name",
+  "الاسم بالإنجليزية (اختياري)": "Name in English (optional)",
+  "محادثة جديدة مع ولي أمر": "New conversation with a parent",
+  "اختر ولي الأمر…": "Choose a parent…",
+  "اكتب رسالتك لولي الأمر…": "Write your message to the parent…",
+  "تعذر إنشاء المحادثة. حاول مرة أخرى.": "Could not create the conversation. Try again.",
 };
