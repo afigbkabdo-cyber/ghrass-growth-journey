@@ -15,6 +15,13 @@
       "when": 1792261273198,
       "tag": "0001_validate_uploaded_message_photos_privately",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792262441627,
+      "tag": "0002_admin_only_child_message_photo_uploads",
+      "breakpoints": true
     }
   ]
 }
