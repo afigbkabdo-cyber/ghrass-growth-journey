@@ -7,6 +7,7 @@ import { LanguageSwitcher } from "@/lib/i18n";
 import { Avatar, PageContainer, SectionHeader, ToneBadge } from "@/components/ghiras";
 import { Switch } from "@/components/ui/switch";
 import { RoleGuard } from "@/components/role-guard";
+import { ChangePasswordCard } from "@/components/change-password-card";
 import { sectionRoles, signOutCompletely, useAppSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 
@@ -80,6 +81,10 @@ function MorePage() {
             </div>
             <ToneBadge tone="green">{t("العربية")}</ToneBadge>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <ChangePasswordCard />
         </div>
 
         <div className="space-y-3">
