@@ -45,6 +45,9 @@ function AdminThreadPage() {
   const fetchThreads = useServerFn(listThreads);
   const send = useServerFn(sendMessage);
   const [draft, setDraft] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const uploaded = useRef<{ file: File; path: string } | null>(null);
 
   const messages = useQuery({
     queryKey: ["thread-messages", id],
@@ -55,9 +58,27 @@ function AdminThreadPage() {
   const thread = (threads.data ?? []).find((t) => t.id === id);
 
   const reply = useMutation({
-    mutationFn: () => send({ data: { threadId: id, body: draft.trim() } }),
+    mutationFn: async () => {
+      let photoPath: string | undefined;
+      if (photo) {
+        if (uploaded.current?.file === photo) photoPath = uploaded.current.path;
+        else {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) throw new Error(t("تعذر الإرسال"));
+          const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+          photoPath = `${id}/${user.id}/${crypto.randomUUID()}.${ext}`;
+          const { error } = await supabase.storage.from("message-photos").upload(photoPath, photo, { contentType: photo.type });
+          if (error) throw new Error(t("تعذر رفع الصورة"));
+          uploaded.current = { file: photo, path: photoPath };
+        }
+      }
+      return send({ data: { threadId: id, body: draft.trim(), photoPath } });
+    },
     onSuccess: () => {
       setDraft("");
+      setPhoto(null);
+      uploaded.current = null;
+      if (fileInput.current) fileInput.current.value = "";
       qc.invalidateQueries({ queryKey: ["thread-messages", id] });
       qc.invalidateQueries({ queryKey: ["admin-threads"] });
       toast.success(t("تم إرسال الرد لولي الأمر"));
@@ -104,18 +125,21 @@ function AdminThreadPage() {
         })}
       </div>
 
+      {photo && <div className="flex items-center gap-2 text-xs"><span className="min-w-0 truncate">{photo.name}</span><Button size="icon" variant="ghost" aria-label={t("إزالة الصورة")} disabled={reply.isPending} onClick={() => { setPhoto(null); if (fileInput.current) fileInput.current.value = ""; }}><X /></Button></div>}
       <form
         className="flex items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-soft"
         onSubmit={(e) => {
           e.preventDefault();
-          if (draft.trim()) reply.mutate();
+          if (draft.trim() || photo) reply.mutate();
         }}
       >
+        <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" aria-label={t("إرفاق صورة")} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (!f) return; if (!["image/jpeg", "image/png", "image/webp"].includes(f.type) || f.size > 10 * 1024 * 1024) { toast.error(t("اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت")); e.target.value = ""; return; } setPhoto(f); }} />
+        <Button type="button" size="icon" variant="outline" className="h-11 w-11 shrink-0 rounded-2xl" aria-label={t("إرفاق صورة")} disabled={reply.isPending} onClick={() => fileInput.current?.click()}><ImagePlus /></Button>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder={t("اكتب الرد لولي الأمر…")}
-          className="h-11 flex-1 rounded-2xl border border-input bg-background px-4 text-sm outline-none"
+          className="h-11 min-w-0 flex-1 rounded-2xl border border-input bg-background px-4 text-sm outline-none"
         />
         <Button
           type="submit"
