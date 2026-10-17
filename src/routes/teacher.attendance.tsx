@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { myClasses, myClassChildren } from "@/lib/kg.functions";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarCheck, Check, Clock, X, Save } from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer, Avatar, SuccessNote, toneClasses } from "@/components/ghiras";
-import { teacherChildren, teacherClassTitle } from "@/lib/teacher-data";
 import type { AttendanceStatus } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
@@ -28,14 +30,32 @@ const options: { key: AttendanceStatus; label: string; icon: typeof Check; tone:
 
 function AttendancePage() {
   const { t, n } = useI18n();
-  const [state, setState] = useState<Record<string, AttendanceStatus>>(
-    () => Object.fromEntries(teacherChildren.map((c) => [c.id, c.attendance])),
-  );
+  const fetchClasses = useServerFn(myClasses);
+  const fetchChildren = useServerFn(myClassChildren);
+  const classesQuery = useQuery({ queryKey: ["teacher-classes"], queryFn: () => fetchClasses({}) });
+  const childrenQuery = useQuery({ queryKey: ["teacher-children"], queryFn: () => fetchChildren({}) });
+  const classes = classesQuery.data ?? [];
+  const classIds = new Set(classes.map((c) => c.id));
+  // أطفال فصول المعلمة المعيّنة فقط (من قاعدة البيانات)
+  const teacherChildren = (childrenQuery.data ?? []).filter((c) => c.classId && classIds.has(c.classId));
+  const classTitle = classes.map((c) => n(c.name, c.nameEn)).join("، ");
+  const loading = classesQuery.isLoading || childrenQuery.isLoading;
+  const noClass = !loading && classesQuery.isSuccess && classes.length === 0;
+  const [state, setState] = useState<Record<string, AttendanceStatus>>({});
+  const childKey = teacherChildren.map((c) => c.id).join(",");
+  useEffect(() => {
+    setState((s) => {
+      const next = { ...s };
+      for (const c of teacherChildren) if (!next[c.id]) next[c.id] = "present";
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childKey]);
   const [saved, setSaved] = useState(false);
 
   const counts = options.map((o) => ({
     ...o,
-    count: Object.values(state).filter((s) => s === o.key).length,
+    count: teacherChildren.filter((c) => state[c.id] === o.key).length,
   }));
 
   return (
@@ -46,7 +66,7 @@ function AttendancePage() {
         </span>
         <div>
           <h1 className="font-display text-2xl font-extrabold text-foreground">{t("تسجيل الحضور")}</h1>
-          <p className="text-xs text-muted-foreground">{n(teacherClassTitle)} — {t("اليوم")}</p>
+          <p className="text-xs text-muted-foreground">{classTitle ? `${classTitle} — ` : ""}{t("اليوم")}</p>
         </div>
       </header>
 
@@ -64,6 +84,18 @@ function AttendancePage() {
 
       {saved && <SuccessNote>{t("تم حفظ حضور اليوم بنجاح وإشعار أولياء الأمور.")}</SuccessNote>}
 
+      {loading && <p className="mt-4 text-center text-sm text-muted-foreground">{t("جارٍ التحميل…")}</p>}
+      {noClass && (
+        <p className="mt-4 rounded-2xl border border-border bg-card p-4 text-center text-sm font-bold text-muted-foreground">
+          {t("لم يتم تعيين فصل لكِ بعد. يرجى التواصل مع الإدارة.")}
+        </p>
+      )}
+      {!loading && !noClass && teacherChildren.length === 0 && (
+        <p className="mt-4 rounded-2xl border border-border bg-card p-4 text-center text-sm font-bold text-muted-foreground">
+          {t("لا يوجد أطفال مسجلون في فصلك بعد.")}
+        </p>
+      )}
+
       <div className="mt-4 space-y-2">
         {teacherChildren.map((child) => (
           <div
@@ -71,12 +103,12 @@ function AttendancePage() {
             className="rounded-2xl border border-border bg-card p-3.5 shadow-soft"
           >
             <div className="flex items-center gap-3">
-              <Avatar name={child.name} tone={child.tone} />
+              <Avatar name={n(child.name, child.nameEn)} tone="blue" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-extrabold text-foreground">{n(child.name)}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {n(child.guardian)} · {t("نسبة الحضور {rate}%", { rate: child.attendanceRate })}
-                </p>
+                <p className="truncate text-sm font-extrabold text-foreground">{n(child.name, child.nameEn)}</p>
+                {child.className && (
+                  <p className="text-[11px] text-muted-foreground">{n(child.className, child.classNameEn)}</p>
+                )}
               </div>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
@@ -109,6 +141,7 @@ function AttendancePage() {
         ))}
       </div>
 
+      {teacherChildren.length > 0 && (
       <button
         type="button"
         onClick={() => {
@@ -120,6 +153,7 @@ function AttendancePage() {
         <Save className="h-4.5 w-4.5" strokeWidth={2.4} />
         {t("حفظ سجل اليوم")}
       </button>
+      )}
     </PageContainer>
   );
 }
