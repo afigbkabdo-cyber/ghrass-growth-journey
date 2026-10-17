@@ -12,6 +12,8 @@ import {
   listClasses,
   listParents,
   moveChildToClass,
+  updateChild,
+  updateProfileContact,
 } from "@/lib/directory.functions";
 import { stageLabels, type Stage } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,8 @@ function AdminChildren() {
   const removeChild = useServerFn(deleteChild);
   const fetchDetails = useServerFn(getChildDetails);
   const moveChild = useServerFn(moveChildToClass);
+  const saveChild = useServerFn(updateChild);
+  const saveContact = useServerFn(updateProfileContact);
 
   const [q, setQ] = useState("");
   const [stage, setStage] = useState<Stage | "all">("all");
