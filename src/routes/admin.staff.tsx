@@ -16,6 +16,8 @@ export const Route = createFileRoute("/admin/staff")({
       { name: "description", content: "إدارة الكادر التعليمي والإداري في روضة غراس وصلاحيات كل دور." },
       { property: "og:title", content: "الموظفون — لوحة إدارة غراس" },
       { property: "og:description", content: "الكادر التعليمي والإداري وصلاحياتهم." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AdminStaff,

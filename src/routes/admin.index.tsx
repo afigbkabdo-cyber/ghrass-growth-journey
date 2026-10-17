@@ -41,6 +41,8 @@ export const Route = createFileRoute("/admin/")({
       },
       { property: "og:title", content: "الرئيسية — لوحة إدارة غراس" },
       { property: "og:description", content: "نظرة عامة يومية على أداء روضة غراس." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AdminHome,

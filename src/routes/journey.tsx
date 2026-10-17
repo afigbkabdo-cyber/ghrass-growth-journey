@@ -16,6 +16,8 @@ export const Route = createFileRoute("/journey")({
       },
       { property: "og:title", content: "رحلة غراس — نمو القيم عبر العام" },
       { property: "og:description", content: "كل قيمة مكتملة تزرع نبتة جديدة في حديقة طفلك." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: JourneyPage,

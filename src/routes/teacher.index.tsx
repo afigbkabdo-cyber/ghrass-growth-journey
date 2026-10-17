@@ -43,6 +43,8 @@ export const Route = createFileRoute("/teacher/")({
       { name: "description", content: "ملخص يوم المعلمة: الحضور، قيمة الأسبوع، الأنشطة، وإعلانات الإدارة." },
       { property: "og:title", content: "لوحة المعلمة — غراس" },
       { property: "og:description", content: "ملخص يوم المعلمة في روضة غراس." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: TeacherHome,
