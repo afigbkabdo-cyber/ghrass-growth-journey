@@ -1,5 +1,18 @@
 /* قاموس الترجمة — messages */
 export const messages: Record<string, string> = {
+  "الحضور والانصراف": "Check-in and check-out",
+  "لم يُسجل": "Not recorded",
+  "تعذر حفظ السجل": "Couldn't save the record",
+  "جميع المعلمات": "All teachers",
+  "حضور الأطفال": "Child attendance",
+  "حضور المعلمات": "Teacher attendance",
+  "لا توجد سجلات": "No records",
+  "إرفاق صورة": "Attach photo",
+  "إزالة الصورة": "Remove photo",
+  "صورة مرفقة": "Attached photo",
+  "تعذر رفع الصورة": "Couldn't upload the photo",
+  "اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت": "Choose a JPG, PNG or WebP image up to 10 MB",
+
   "رسائل الإدارة": "Administration messages",
   "التواصل الرسمي يكون مع الإدارة": "Official communication is with the administration",
   "جميع الاستفسارات — بما فيها ملاحظات المعلمة على طفلك — تُرسل إلى الإدارة وهي من تتابعها معك.":

@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronRight, SendHorizonal } from "lucide-react";
+import { ChevronRight, SendHorizonal, ImagePlus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MessagePhoto } from "@/components/message-photo";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { EmptyState, ToneBadge } from "@/components/ghiras";
 import { listThreadMessages, listThreads, sendMessage } from "@/lib/kg.functions";
@@ -46,6 +49,7 @@ function AdminThreadPage() {
   const messages = useQuery({
     queryKey: ["thread-messages", id],
     queryFn: () => fetchMessages({ data: { threadId: id } }),
+    refetchInterval: 15000,
   });
   const threads = useQuery({ queryKey: ["admin-threads"], queryFn: () => fetchThreads({}) });
   const thread = (threads.data ?? []).find((t) => t.id === id);
@@ -86,6 +90,7 @@ function AdminThreadPage() {
                     : "max-w-[80%] rounded-2xl rounded-tr-sm border border-border bg-card px-4 py-2.5 shadow-soft"
                 }
               >
+                <MessagePhoto url={m.photoUrl} />
                 <p className={`whitespace-pre-line text-sm leading-relaxed ${mine ? "text-primary-foreground" : "text-foreground"}`}>
                   {m.body}
                 </p>
@@ -112,14 +117,14 @@ function AdminThreadPage() {
           placeholder={t("اكتب الرد لولي الأمر…")}
           className="h-11 flex-1 rounded-2xl border border-input bg-background px-4 text-sm outline-none"
         />
-        <button
+        <Button
           type="submit"
           aria-label={t("إرسال")}
           disabled={reply.isPending}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground disabled:opacity-50"
         >
           <SendHorizonal className="h-5 w-5 -scale-x-100" />
-        </button>
+        </Button>
       </form>
     </div>
   );

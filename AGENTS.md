@@ -10,3 +10,6 @@
 <!-- LOVABLE:END -->
 
 - Use manifest-only home-screen support with CDN asset pointers for installation icons and a local favicon; do not add an app-shell service worker unless offline support is requested, to keep previews free of stale caches.
+
+- Attendance is recorded only through authenticated database RPCs with server timestamps and scoped permissions; never infer attendance or migrate browser-local demo shifts.
+- Message photos use private participant-scoped storage and the existing messages table; return temporary signed URLs rather than public images.

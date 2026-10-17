@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { ToneBadge } from "@/components/ghiras";
 import { shiftStatusLabels, shiftStatusTone, useTeacherShift } from "@/lib/teacher-shift";
 import { useI18n } from "@/lib/i18n";
@@ -25,16 +26,20 @@ export function TeacherShiftCard() {
   const { shift, status, hydrated, checkIn, checkOut } = useTeacherShift();
   const [pending, setPending] = useState<"in" | "out" | null>(null);
 
-  const confirm = () => {
+  const [saving, setSaving] = useState(false);
+  const confirm = async () => {
+    setSaving(true);
+    try {
     if (pending === "in") {
-      const checkedInAt = checkIn();
-      toast.success(t("تم تسجيل حضورك بنجاح ✓ — {time}", { time: time(checkedInAt) }));
+      const checkedInAt = await checkIn();
+      toast.success(t("تم تسجيل حضورك بنجاح ✓ — {time}", { time: time(checkedInAt ?? "") }));
     } else if (pending === "out") {
-      const checkedOutAt = checkOut();
+      const checkedOutAt = await checkOut();
       if (!checkedOutAt) toast.error(t("يجب تسجيل الحضور أولًا."));
       else toast.success(t("تم تسجيل انصرافك بنجاح ✓ — {time}", { time: time(checkedOutAt) }));
     }
     setPending(null);
+    } catch { toast.error(t("تعذر حفظ السجل")); } finally { setSaving(false); }
   };
 
   const tryCheckOut = () => {
@@ -65,13 +70,13 @@ export function TeacherShiftCard() {
         <div className="rounded-2xl bg-brand-green-soft/60 p-3">
           <p className="text-[11px] font-bold text-brand-green-deep">{t("الحضور")}</p>
           <p className="mt-0.5 font-display text-lg font-extrabold text-foreground" dir="ltr">
-            {shift.checkIn ? time(shift.checkIn) : "—"}
+            {shift.checkIn ? time(shift.checkIn) : t("لم يُسجل")}
           </p>
         </div>
         <div className="rounded-2xl bg-brand-pink-soft/60 p-3">
           <p className="text-[11px] font-bold text-brand-pink-deep">{t("الانصراف")}</p>
           <p className="mt-0.5 font-display text-lg font-extrabold text-foreground" dir="ltr">
-            {shift.checkOut ? time(shift.checkOut) : "—"}
+            {shift.checkOut ? time(shift.checkOut) : t("لم يُسجل")}
           </p>
         </div>
       </div>
@@ -91,19 +96,19 @@ export function TeacherShiftCard() {
       {hydrated && status !== "completed" && (
         <div className="mt-4 grid gap-2">
           {!shift.checkIn ? (
-            <button
+            <Button
               onClick={() => setPending("in")}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-brand-green py-3.5 text-sm font-extrabold text-white transition-transform active:scale-95"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-brand-green py-3.5 text-sm font-extrabold text-primary-foreground transition-transform active:scale-95"
             >
               <LogIn className="h-4.5 w-4.5" /> 🟢 {t("تسجيل الحضور")}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               onClick={tryCheckOut}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-brand-pink py-3.5 text-sm font-extrabold text-white transition-transform active:scale-95"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-brand-pink py-3.5 text-sm font-extrabold text-primary-foreground transition-transform active:scale-95"
             >
               <LogOut className="h-4.5 w-4.5" /> 🔴 {t("تسجيل الانصراف")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -128,7 +133,7 @@ export function TeacherShiftCard() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:justify-start">
-            <AlertDialogAction onClick={confirm} className="rounded-xl font-bold">
+            <AlertDialogAction disabled={saving} onClick={(e) => { e.preventDefault(); void confirm(); }} className="rounded-xl font-bold">
               {t("تأكيد")}
             </AlertDialogAction>
             <AlertDialogCancel className="rounded-xl font-bold">{t("إلغاء")}</AlertDialogCancel>

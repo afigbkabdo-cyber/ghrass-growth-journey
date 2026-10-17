@@ -5,9 +5,13 @@ import { TeacherShiftCard } from "@/components/teacher-shift-card";
 import {
   shiftStatusLabels,
   shiftStatusTone,
-  teacherShiftHistory,
+
 } from "@/lib/teacher-shift";
 import { CheckCircle2, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { teacherAttendance } from "@/lib/attendance.functions";
+import { attendanceTime } from "@/lib/attendance";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/teacher/my-attendance")({
@@ -28,8 +32,10 @@ export const Route = createFileRoute("/teacher/my-attendance")({
 });
 
 function MyAttendancePage() {
-  const { t, d, time } = useI18n();
-  const sorted = [...teacherShiftHistory].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const { t, d, locale } = useI18n();
+  const fetch=useServerFn(teacherAttendance);
+  const records=useQuery({queryKey:["teacher-attendance"],queryFn:()=>fetch({})});
+  const sorted=(records.data ?? []).map(r=>({date:r.log_date,checkIn:r.check_in,checkOut:r.check_out,status:(r.check_out ? "completed" : "checked_in") as "completed" | "checked_in" | "absent"}));
   const completed = sorted.filter((r) => r.status === "completed").length;
   const absent = sorted.filter((r) => r.status === "absent").length;
 
@@ -41,7 +47,7 @@ function MyAttendancePage() {
         </span>
         <div>
           <h1 className="font-display text-2xl font-extrabold text-foreground">{t("سجل دوامي")}</h1>
-          <p className="text-xs text-muted-foreground">{t("حضور وانصراف المعلمة — بيانات تجريبية")}</p>
+          <p className="text-xs text-muted-foreground">{t("حضور وانصراف المعلمة")}</p>
         </div>
       </header>
 
@@ -61,7 +67,7 @@ function MyAttendancePage() {
           >
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-bold text-foreground">{t(r.dayLabel)}</p>
+                <p className="text-sm font-bold text-foreground">{d(r.date)}</p>
                 <p className="text-[11px] text-muted-foreground" dir="ltr">
                   {d(r.date)}
                 </p>
@@ -72,13 +78,13 @@ function MyAttendancePage() {
               <div className="rounded-xl bg-brand-green-soft/60 p-2.5">
                 <p className="text-[11px] font-bold text-brand-green-deep">{t("الحضور")}</p>
                 <p className="font-display text-sm font-extrabold text-foreground" dir="ltr">
-                  {r.checkIn ? time(r.checkIn) : "—"}
+                  {r.checkIn ? attendanceTime(r.checkIn,locale) : t("لم يُسجل")}
                 </p>
               </div>
               <div className="rounded-xl bg-brand-pink-soft/60 p-2.5">
                 <p className="text-[11px] font-bold text-brand-pink-deep">{t("الانصراف")}</p>
                 <p className="font-display text-sm font-extrabold text-foreground" dir="ltr">
-                  {r.checkOut ? time(r.checkOut) : "—"}
+                  {r.checkOut ? attendanceTime(r.checkOut,locale) : t("لم يُسجل")}
                 </p>
               </div>
             </div>
