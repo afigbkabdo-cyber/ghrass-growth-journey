@@ -55,6 +55,19 @@ function AdminChildren() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [moveTarget, setMoveTarget] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    nameEn: "",
+    stage: "kg1" as Stage,
+    birthDate: "",
+    gender: "",
+    allergies: "",
+    notes: "",
+    sessionPeriod: "",
+    enrollmentTerm: "",
+  });
+  const [guardianEdits, setGuardianEdits] = useState<Record<string, { name: string; phone: string }>>({});
   const [form, setForm] = useState({
     name: "",
     stage: "kg1" as Stage,
