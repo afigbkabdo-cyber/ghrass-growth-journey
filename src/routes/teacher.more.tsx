@@ -13,6 +13,7 @@ import { LanguageSwitcher, useI18n } from "@/lib/i18n";
 import { PageContainer, SectionHeader, Avatar, ToneBadge } from "@/components/ghiras";
 import { currentTeacher, teacherClassTitle, subjectLabels, teacherPermissions } from "@/lib/teacher-data";
 import { clearSession, useAppSession } from "@/lib/session";
+import { ChangePasswordCard } from "@/components/change-password-card";
 
 export const Route = createFileRoute("/teacher/more")({
   head: () => ({
@@ -118,6 +119,10 @@ function TeacherMorePage() {
             </ul>
           </div>
         </div>
+      </section>
+
+      <section className="mb-5">
+        <ChangePasswordCard />
       </section>
 
       <section className="space-y-2">
