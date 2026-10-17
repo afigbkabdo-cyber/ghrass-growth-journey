@@ -881,7 +881,7 @@ export const listThreadMessages = createServerFn({ method: "GET" })
         if (photoError) throw new Error(photoError.message);
         if (signed?.signedUrl) {
           const url = new URL(signed.signedUrl);
-          photoUrl = `${import.meta.env.VITE_SUPABASE_URL}${url.pathname}${url.search}`;
+          photoUrl = `${import.meta.env['VITE_SUPABASE_URL']}${url.pathname}${url.search}`;
         }
       }
       return { photoUrl,

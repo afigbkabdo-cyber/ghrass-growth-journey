@@ -154,7 +154,7 @@ function AttendancePage() {
         type="button"
         disabled={save.isPending || Object.keys(state).length===0}
         onClick={() => {
-          const entries=teacherChildren.flatMap(c=>state[c.id] ? [{childId:c.id,action:state[c.id]}] : []);
+          const entries=teacherChildren.flatMap(c=>{const action=state[c.id];return action ? [{childId:c.id,action}] : [];});
           if(entries.length) save.mutate(entries);
         }}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-soft transition-opacity hover:opacity-90"
