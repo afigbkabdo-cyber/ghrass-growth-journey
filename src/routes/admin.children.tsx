@@ -355,9 +355,136 @@ function AdminChildren() {
                   ))}
                 </div>
 
-                <p className="mt-3 rounded-2xl bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-                  {tr("بيانات التسجيل للعرض فقط ولا يمكن تعديلها.")}
-                </p>
+                {editing ? (
+                  <div className="mt-4 space-y-2.5 rounded-2xl border border-border p-3">
+                    <p className="text-xs font-bold text-foreground">{tr("تعديل بيانات الطفل")}</p>
+                    <input
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      placeholder={tr("اسم الطفل")}
+                      className={inputCls}
+                    />
+                    <input
+                      value={editForm.nameEn}
+                      onChange={(e) => setEditForm({ ...editForm, nameEn: e.target.value })}
+                      placeholder={tr("الاسم بالإنجليزية (اختياري)")}
+                      dir="ltr"
+                      className={inputCls}
+                    />
+                    <select
+                      value={editForm.stage}
+                      onChange={(e) => setEditForm({ ...editForm, stage: e.target.value as Stage })}
+                      aria-label={tr("الفئة العمرية")}
+                      className={inputCls}
+                    >
+                      <option value="nursery">{tr(stageLabels.nursery)}</option>
+                      <option value="kg1">{tr(stageLabels.kg1)}</option>
+                      <option value="kg2">{tr(stageLabels.kg2)}</option>
+                    </select>
+                    <label className="block text-[11px] font-bold text-muted-foreground">
+                      {tr("تاريخ الميلاد")}
+                      <input
+                        type="date"
+                        value={editForm.birthDate}
+                        onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
+                        className={inputCls}
+                      />
+                    </label>
+                    <input
+                      value={editForm.sessionPeriod}
+                      onChange={(e) => setEditForm({ ...editForm, sessionPeriod: e.target.value })}
+                      placeholder={tr("الفترة")}
+                      className={inputCls}
+                    />
+                    <input
+                      value={editForm.enrollmentTerm}
+                      onChange={(e) => setEditForm({ ...editForm, enrollmentTerm: e.target.value })}
+                      placeholder={tr("فترة التسجيل")}
+                      className={inputCls}
+                    />
+                    <input
+                      value={editForm.allergies}
+                      onChange={(e) => setEditForm({ ...editForm, allergies: e.target.value })}
+                      placeholder={tr("الحساسية")}
+                      className={inputCls}
+                    />
+                    <textarea
+                      value={editForm.notes}
+                      onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                      placeholder={tr("ملاحظات")}
+                      rows={2}
+                      className={inputCls}
+                    />
+                    {detail.guardians.map((g) => (
+                      <div key={g.id} className="space-y-2 rounded-xl bg-muted p-2.5">
+                        <p className="text-[11px] font-bold text-muted-foreground">{tr("ولي الأمر")}</p>
+                        <input
+                          value={guardianEdits[g.id]?.name ?? ""}
+                          onChange={(e) =>
+                            setGuardianEdits({
+                              ...guardianEdits,
+                              [g.id]: { ...guardianEdits[g.id], name: e.target.value },
+                            })
+                          }
+                          placeholder={tr("اسم ولي الأمر")}
+                          className={inputCls}
+                        />
+                        <input
+                          value={guardianEdits[g.id]?.phone ?? ""}
+                          onChange={(e) =>
+                            setGuardianEdits({
+                              ...guardianEdits,
+                              [g.id]: { ...guardianEdits[g.id], phone: e.target.value },
+                            })
+                          }
+                          placeholder={tr("رقم الجوال")}
+                          dir="ltr"
+                          inputMode="tel"
+                          className={inputCls}
+                        />
+                        <button
+                          type="button"
+                          disabled={updateGuardian.isPending}
+                          onClick={() =>
+                            updateGuardian.mutate({
+                              id: g.id,
+                              fullName: guardianEdits[g.id]?.name ?? g.name,
+                              phone: guardianEdits[g.id]?.phone || null,
+                            })
+                          }
+                          className="w-full rounded-xl border border-border bg-card py-2 text-xs font-bold text-foreground disabled:opacity-60"
+                        >
+                          {tr("حفظ بيانات ولي الأمر")}
+                        </button>
+                      </div>
+                    ))}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={update.isPending || editForm.name.trim().length < 2}
+                        onClick={() => update.mutate()}
+                        className="flex-1 rounded-2xl bg-primary py-2.5 text-xs font-extrabold text-primary-foreground disabled:opacity-60"
+                      >
+                        {update.isPending ? tr("جارٍ الحفظ…") : tr("حفظ التعديلات")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditing(false)}
+                        className="rounded-2xl border border-border px-4 py-2.5 text-xs font-bold text-muted-foreground"
+                      >
+                        {tr("إلغاء")}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startEditing}
+                    className="mt-4 w-full rounded-2xl border border-border bg-muted py-3 text-sm font-bold text-foreground"
+                  >
+                    {tr("تعديل البيانات")}
+                  </button>
+                )}
 
                 <div className="mt-4 space-y-2">
                   <p className="text-xs font-bold text-foreground">{tr("نقل إلى فصل آخر")}</p>
