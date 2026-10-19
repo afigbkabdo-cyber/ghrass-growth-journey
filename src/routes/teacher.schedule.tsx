@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { PageContainer, EmptyState } from "@/components/ghiras";
 import { useI18n } from "@/lib/i18n";
 import { listSchedule, markScheduleDone, myClasses } from "@/lib/kg.functions";
+import { attendanceDate } from "@/lib/attendance";
 
 export const Route = createFileRoute("/teacher/schedule")({
   head: () => ({
@@ -32,15 +33,19 @@ function TeacherSchedulePage() {
 
   const classes = useQuery({ queryKey: ["my-classes"], queryFn: () => fetchClasses({}) });
   const active = classId ?? (classes.data ?? [])[0]?.id ?? null;
+  const date = attendanceDate();
 
   const schedule = useQuery({
-    queryKey: ["schedule", active],
-    queryFn: () => fetchSchedule({ data: { classId: active! } }),
+    queryKey: ["schedule", active, date],
+    queryFn: () => {
+      if (!active) throw new Error("No class");
+      return fetchSchedule({ data: { classId: active, date } });
+    },
     enabled: Boolean(active),
   });
 
   const toggle = useMutation({
-    mutationFn: (v: { itemId: string; done: boolean }) => mark({ data: v }),
+    mutationFn: (v: { itemId: string; done: boolean }) => mark({ data: { ...v, date } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["schedule", active] }),
     onError: (e: Error) => toast.error(e.message || "تعذر التحديث"),
   });

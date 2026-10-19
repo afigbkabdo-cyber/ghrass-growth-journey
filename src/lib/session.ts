@@ -3,6 +3,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { clearRegisteredCaches } from "./private-cache";
 
 export type Role = "parent" | "teacher" | "admin" | "super_admin";
 
@@ -62,6 +63,7 @@ export function clearLocalState() {
 
 /** إنهاء الجلسة فعليًا. */
 export async function signOutCompletely() {
+  await clearRegisteredCaches();
   try {
     await supabase.auth.signOut();
   } catch {

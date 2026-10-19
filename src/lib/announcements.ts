@@ -13,6 +13,7 @@ export interface PublishedAnnouncement {
 export function usePublishedAnnouncements() {
   return useQuery({
     queryKey: ["published-announcements"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("announcements")

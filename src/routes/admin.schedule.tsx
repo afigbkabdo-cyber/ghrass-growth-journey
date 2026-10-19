@@ -19,6 +19,7 @@ import { SectionHeader, EmptyState } from "@/components/ghiras";
 import { listClasses } from "@/lib/directory.functions";
 import { deleteScheduleItem, listSchedule, saveScheduleItem } from "@/lib/kg.functions";
 import { useI18n } from "@/lib/i18n";
+import { attendanceDate } from "@/lib/attendance";
 
 export const Route = createFileRoute("/admin/schedule")({
   head: () => ({
@@ -48,6 +49,7 @@ function AdminSchedulePage() {
   const classes = useQuery({ queryKey: ["admin-classes"], queryFn: () => fetchClasses({}) });
   const [classId, setClassId] = useState<string | null>(null);
   const active = classId ?? (classes.data ?? [])[0]?.id ?? null;
+  const date = attendanceDate();
 
   const [title, setTitle] = useState("");
   const [atTime, setAtTime] = useState("");
@@ -58,8 +60,11 @@ function AdminSchedulePage() {
   const [editTime, setEditTime] = useState("");
 
   const schedule = useQuery({
-    queryKey: ["schedule", active],
-    queryFn: () => fetchSchedule({ data: { classId: active! } }),
+    queryKey: ["schedule", active, date],
+    queryFn: () => {
+      if (!active) throw new Error("No class");
+      return fetchSchedule({ data: { classId: active, date } });
+    },
     enabled: Boolean(active),
   });
 
