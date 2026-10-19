@@ -22,6 +22,7 @@ import { sectionRoles } from "@/lib/session";
 import { childAge, mealStatusLabels, stageLabels, sleepMinutes, sleepDurationLabel } from "@/lib/kg-labels";
 import { getDailyLog, listChildNotes, listSchedule, myChildren } from "@/lib/kg.functions";
 import { useI18n } from "@/lib/i18n";
+import { attendanceDate } from "@/lib/attendance";
 
 export const Route = createFileRoute("/child")({
   head: () => ({
@@ -85,24 +86,34 @@ function ChildPage() {
   const fetchNotes = useServerFn(listChildNotes);
   const fetchSchedule = useServerFn(listSchedule);
   const [selected, setSelected] = useState<string | null>(null);
+  const date = attendanceDate();
 
   const children = useQuery({ queryKey: ["my-children"], queryFn: () => fetchChildren({}) });
   const list = children.data ?? [];
   const child = list.find((c) => c.id === selected) ?? list[0];
 
   const log = useQuery({
-    queryKey: ["daily-log", child?.id],
-    queryFn: () => fetchLog({ data: { childId: child!.id } }),
+    queryKey: ["daily-log", child?.id, date],
+    queryFn: () => {
+      if (!child) throw new Error("No child");
+      return fetchLog({ data: { childId: child.id, date } });
+    },
     enabled: Boolean(child),
   });
   const notes = useQuery({
     queryKey: ["child-notes", child?.id],
-    queryFn: () => fetchNotes({ data: { childId: child!.id } }),
+    queryFn: () => {
+      if (!child) throw new Error("No child");
+      return fetchNotes({ data: { childId: child.id } });
+    },
     enabled: Boolean(child),
   });
   const schedule = useQuery({
-    queryKey: ["schedule", child?.classId],
-    queryFn: () => fetchSchedule({ data: { classId: child!.classId! } }),
+    queryKey: ["schedule", child?.classId, date],
+    queryFn: () => {
+      if (!child?.classId) throw new Error("No class");
+      return fetchSchedule({ data: { classId: child.classId, date } });
+    },
     enabled: Boolean(child?.classId),
   });
 

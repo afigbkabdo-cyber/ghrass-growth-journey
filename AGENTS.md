@@ -14,3 +14,5 @@
 - Attendance is recorded only through authenticated database RPCs with server timestamps and scoped permissions; never infer attendance or migrate browser-local demo shifts.
 - Message photos use private participant-scoped storage and the existing messages table; return temporary signed URLs rather than public images.
 - Recover stale dynamic route modules through the shared client-only chunk recovery helper with a session-persisted reload guard; this refreshes deployment references without introducing reload loops or changing auth/data.
+- Dashboard and journey facts come only from authenticated RLS-scoped database reads; unavailable measurements stay unavailable rather than using fixtures.
+- Bind query hashing to the browser's current auth identity, cancel and clear caches before identity transitions, and include dates in daily query keys; this isolates legacy keys without breaking prefix invalidations.

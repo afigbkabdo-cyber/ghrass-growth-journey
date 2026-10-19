@@ -26,6 +26,7 @@ import {
   saveDailyLog,
 } from "@/lib/kg.functions";
 import { useI18n } from "@/lib/i18n";
+import { attendanceDate } from "@/lib/attendance";
 
 export const Route = createFileRoute("/teacher/child/$id")({
   head: () => ({
@@ -51,6 +52,7 @@ const field =
 function TeacherChildPage() {
   const { t, n, d, num, lang } = useI18n();
   const { id } = Route.useParams();
+  const date = attendanceDate();
   const qc = useQueryClient();
   const fetchChildren = useServerFn(myClassChildren);
   const fetchLog = useServerFn(getDailyLog);
@@ -61,7 +63,7 @@ function TeacherChildPage() {
   const children = useQuery({ queryKey: ["teacher-children"], queryFn: () => fetchChildren({}) });
   const child = (children.data ?? []).find((c) => c.id === id);
 
-  const log = useQuery({ queryKey: ["daily-log", id], queryFn: () => fetchLog({ data: { childId: id } }) });
+  const log = useQuery({ queryKey: ["daily-log", id, date], queryFn: () => fetchLog({ data: { childId: id, date } }) });
   const notes = useQuery({ queryKey: ["child-notes", id], queryFn: () => fetchNotes({ data: { childId: id } }) });
 
   const [mealStatus, setMealStatus] = useState("");
@@ -107,6 +109,7 @@ function TeacherChildPage() {
       saveLog({
         data: {
           childId: id,
+          date,
           mealStatus: mealStatus || null,
           mealTime: mealTime || null,
           mealNotes: mealNotes || null,

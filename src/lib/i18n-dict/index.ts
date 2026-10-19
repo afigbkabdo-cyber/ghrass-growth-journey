@@ -14,6 +14,7 @@ import { settings } from "./settings";
 import { messages } from "./messages";
 import { activities } from "./activities";
 import { teacherExtra } from "./teacher-extra";
+import { dashboard } from "./dashboard";
 
 export const dictionaryEn: Record<string, string> = {
   ...common,
@@ -28,4 +29,5 @@ export const dictionaryEn: Record<string, string> = {
   ...messages,
   ...activities,
   ...teacherExtra,
+  ...dashboard,
 };

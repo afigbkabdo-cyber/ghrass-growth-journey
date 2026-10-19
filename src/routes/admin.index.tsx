@@ -18,16 +18,14 @@ import {
   ProgressBar,
   toneClasses,
 } from "@/components/ghiras";
-import {
-  adminStats,
-  classes,
-  currentValue,
-  announcements,
-  kindLabels,
-  statusLabels,
-  allValues,
-  stageLabels,
-} from "@/lib/data";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { adminDashboard } from "@/lib/dashboard.functions";
+import { attendanceDate } from "@/lib/attendance";
+import { scopedKey } from "@/lib/dashboard";
+import { useAppSession } from "@/lib/session";
+import { DataStatus } from "@/components/data-status";
+import { stageLabels } from "@/lib/kg-labels";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 
@@ -56,14 +54,24 @@ const quickLinks = [
 ] as const;
 
 function AdminHome() {
-  const { t, n, d } = useI18n();
-  const presentRate = Math.round((adminStats.presentToday / adminStats.totalChildren) * 100);
-  const pending = allValues.filter((v) => v.status === "pending" || v.status === "draft");
+  const { t, n, d, num } = useI18n();
+  const { session } = useAppSession();
+  const date = attendanceDate();
+  const fetch = useServerFn(adminDashboard);
+  const query = useQuery({ queryKey: scopedKey(["admin-dashboard"], session?.userId ?? null, date), queryFn: () => fetch({ data: { date } }), enabled: Boolean(session), refetchInterval: 30000 });
+  if (!query.data) return <DataStatus loading={query.isPending} error={query.isError} />;
+  const data = query.data;
+  const adminStats = { totalChildren: data.totalChildren, presentToday: data.today.present, teachersCount: data.teachersCount, classesCount: data.classes.length };
+  const presentRate = data.today.rate ?? 0;
+  const classes = data.classes;
+  const currentValue = data.values.find(v => v.approved && v.is_current);
+  const pending = data.values.filter(v => !v.approved);
+  const announcements = data.announcements;
 
   return (
     <div className="space-y-6">
       <div className="rounded-3xl bg-gradient-growth p-5 text-primary-foreground shadow-soft">
-        <p className="text-xs font-bold opacity-90">{t("أهلًا أ. الجوهرة 🌱")}</p>
+        <p className="text-xs font-bold opacity-90">{n(session?.name)}</p>
         <h2 className="mt-1 font-display text-xl font-extrabold">{t("روضة غراس تنمو معًا")}</h2>
         <p className="mt-1 text-xs opacity-90">
           {t("حضور اليوم {present} من {total} طفلًا ({rate}%)", { present: adminStats.presentToday, total: adminStats.totalChildren, rate: presentRate })}
@@ -106,17 +114,17 @@ function AdminHome() {
       <section>
         <SectionHeader
           title={t("قيمة الأسبوع")}
-          subtitle={`${t(currentValue.weekStart)} — ${t(currentValue.weekEnd)}`}
+          subtitle={currentValue?.week_start ? d(currentValue.week_start) : ""}
           icon={HeartHandshake}
           tone="orange"
           action={{ label: t("خطة القيم"), to: "/admin/values" }}
         />
         <div className="rounded-3xl border border-border bg-card p-4 shadow-soft">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-lg font-extrabold text-foreground">{t(currentValue.name)}</p>
-            <ToneBadge tone="green">{t(statusLabels[currentValue.status])}</ToneBadge>
+            <p className="font-display text-lg font-extrabold text-foreground">{currentValue ? n(currentValue.name, currentValue.name_en) : t("لا توجد قيمة معتمدة حالية.")}</p>
+            <ToneBadge tone="green">{currentValue ? t("معتمدة") : t("لم يُسجل")}</ToneBadge>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{t(currentValue.tagline)}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{currentValue ? n(currentValue.tagline, currentValue.tagline_en) : ""}</p>
           {pending.length > 0 && (
             <p className="mt-3 rounded-xl bg-brand-yellow-soft px-3 py-2 text-[11px] font-bold text-brand-yellow-deep">
               {t("لديك {count} قيم بانتظار الاعتماد أو الإكمال", { count: pending.length })}
@@ -129,22 +137,21 @@ function AdminHome() {
         <SectionHeader title={t("الفصول")} icon={School} tone="green" action={{ label: t("التفاصيل"), to: "/admin/classes" }} />
         <div className="space-y-3">
           {classes.map((c) => {
-            const tone = toneClasses[c.tone];
-            const rate = Math.round((c.students / c.capacity) * 100);
+            const tone = toneClasses.green;
             return (
               <div key={c.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-foreground">{t(c.name)}</p>
+                    <p className="truncate text-sm font-bold text-foreground">{n(c.name, c.name_en)}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {t(stageLabels[c.stage])} — {n(c.teacher)}
+                      {t(stageLabels[c.stage] ?? c.stage)}
                     </p>
                   </div>
                   <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", tone.soft, tone.deep)}>
-                    {c.students}/{c.capacity}
+                    {num(c.students)}
                   </span>
                 </div>
-                <ProgressBar value={rate} tone={c.tone} className="mt-3" />
+                
               </div>
             );
           })}
@@ -163,26 +170,18 @@ function AdminHome() {
             <div key={a.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
               <div className="flex items-center justify-between gap-2">
                 <p className="truncate text-sm font-bold text-foreground">{t(a.title)}</p>
-                <ToneBadge tone={a.tone}>{t(kindLabels[a.kind])}</ToneBadge>
+                <ToneBadge tone={a.tone as "blue"}>{t("منشور")}</ToneBadge>
               </div>
               <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{t(a.body)}</p>
-              <p className="mt-2 text-[11px] font-bold text-muted-foreground">{t(a.date)}</p>
+              <p className="mt-2 text-[11px] font-bold text-muted-foreground">{d(a.created_at)}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft">
-        <span className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-pink-soft">
-            <MessagesSquare className="h-4.5 w-4.5 text-brand-pink-deep" strokeWidth={2.2} />
-          </span>
-          <span className="text-sm font-bold text-foreground">
-            {t("{count} رسائل غير مقروءة", { count: adminStats.unreadMessages })}
-          </span>
-        </span>
-        <ArrowLeft className="h-4 w-4 text-muted-foreground" />
-      </div>
+      <DataStatus empty={!announcements.length} />
+      <DataStatus empty={!classes.length} />
+      <p className="text-xs text-muted-foreground">{t("لم يُسجل {count}", { count: num(data.today.unrecorded) })}</p>
     </div>
   );
 }

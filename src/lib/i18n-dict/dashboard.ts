@@ -1,0 +1,18 @@
+export const dashboard: Record<string, string> = {
+  'لا تتوفر بيانات مسجلة.': 'No recorded data available.',
+  'تعذر تحميل البيانات. حاول مرة أخرى.': 'Could not load data. Please try again.',
+  'لا تتوفر قياسات مسجلة لتطور المهارات.': 'No recorded skill development measurements are available.',
+  'لم يُسجل': 'Not recorded',
+  'لم يُسجل {count}': 'Not recorded: {count}',
+  'لا يوجد فصل معيّن لحسابك. تواصلي مع الإدارة.': 'No class is assigned to your account. Please contact administration.',
+  'لا توجد قيمة معتمدة حالية.': 'No current approved value.',
+  'رحلة {name}': '{name}’s journey',
+  'سجلات الطفل وملاحظاته المسجلة': 'Recorded child logs and observations',
+  'سجلات المتابعة': 'Daily logs',
+  'ملاحظة مسجلة': 'Recorded observation',
+  'متابعة يومية مسجلة': 'Recorded daily log',
+  'نسبة الحضور من السجلات المتاحة': 'Attendance rate from available records',
+  'حضور مسجل': 'Recorded attendance',
+  'تقارير السجلات الفعلية': 'Actual record reports',
+  'الفترة {start} — {end}': 'Period {start} — {end}',
+};

@@ -8,7 +8,10 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { registerPrivateCache, scopeCache } from "@/lib/private-cache";
+import { clearPrivateCache } from "@/lib/dashboard";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -139,6 +142,28 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [identity, setIdentity] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    const unregister = registerPrivateCache(queryClient);
+    let active = true;
+    let previous: string | null | undefined;
+    let generation = 0;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!["INITIAL_SESSION", "SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
+      const next = session?.user.id ?? null;
+      if (next === previous) return;
+      previous = next;
+      const current = ++generation;
+      setIdentity(undefined);
+      void clearPrivateCache(queryClient).then(() => {
+        if (!active || current !== generation) return;
+        scopeCache(queryClient, next);
+        setIdentity(next);
+      });
+    });
+    return () => { active = false; unregister(); data.subscription.unsubscribe(); };
+  }, [queryClient]);
 
   useEffect(() => {
     const handlePreloadError = (event: Event) => {
@@ -153,7 +178,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        {identity !== undefined && <div key={identity ?? "signed-out"}><Outlet /></div>}
         <Toaster position="top-center" richColors />
       </LanguageProvider>
     </QueryClientProvider>
