@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider, useI18n } from "@/lib/i18n";
 import appleTouchIcon from "@/assets/ghiras-apple-touch-icon.png.asset.json";
+import { isChunkLoadError, recoverChunkLoad } from "@/lib/chunk-recovery";
 
 function NotFoundComponent() {
   const { t } = useI18n();
@@ -44,6 +45,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   const { t } = useI18n();
   useEffect(() => {
+    if (recoverChunkLoad(error, window)) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
@@ -59,6 +61,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
+              if (isChunkLoadError(error)) {
+                window.location.reload();
+                return;
+              }
               router.invalidate();
               reset();
             }}
@@ -133,6 +139,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    const handlePreloadError = (event: Event) => {
+      const payload: unknown = "payload" in event ? event.payload : undefined;
+      if (recoverChunkLoad(payload, window)) event.preventDefault();
+    };
+    window.addEventListener("vite:preloadError", handlePreloadError);
+    return () => window.removeEventListener("vite:preloadError", handlePreloadError);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
