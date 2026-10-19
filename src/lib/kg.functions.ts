@@ -73,6 +73,7 @@ export interface SleepEntry {
 }
 
 export interface DailyLogRow {
+  recorded?: boolean;
   childId: string;
   logDate: string;
   mealStatus: string | null;
@@ -137,6 +138,7 @@ export interface MessageRow {
 }
 
 const emptyLog = (childId: string, logDate: string): DailyLogRow => ({
+  recorded: false,
   childId,
   logDate,
   mealStatus: null,
@@ -416,6 +418,7 @@ function mapSleeps(v: unknown): SleepEntry[] {
 
 function mapLog(r: Record<string, unknown>): DailyLogRow {
   return {
+    recorded: true,
     childId: r["child_id"] as string,
     logDate: r["log_date"] as string,
     mealStatus: (r["meal_status"] as string) ?? null,

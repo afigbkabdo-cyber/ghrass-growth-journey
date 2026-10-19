@@ -23,6 +23,7 @@ import { childAge, mealStatusLabels, stageLabels, sleepMinutes, sleepDurationLab
 import { getDailyLog, listChildNotes, listSchedule, myChildren } from "@/lib/kg.functions";
 import { useI18n } from "@/lib/i18n";
 import { attendanceDate } from "@/lib/attendance";
+import { DataStatus } from "@/components/data-status";
 
 export const Route = createFileRoute("/child")({
   head: () => ({
@@ -178,6 +179,7 @@ function ChildPage() {
 
             <SectionHeader title={t("متابعة اليوم")} subtitle={t("تسجيل المعلمة لهذا اليوم")} icon={ListChecks} tone="green" />
             <div className="mb-6 space-y-3">
+              <DataStatus loading={log.isPending} error={log.isError} empty={log.data?.recorded === false} />
               <InfoRow
                 icon={Utensils}
                 tone="orange"
@@ -210,14 +212,14 @@ function ChildPage() {
                 icon={Droplets}
                 tone="blue"
                 title={t("دورة المياه / الحفاض")}
-                value={t("دورة المياه: {bathroom} • تغيير الحفاض: {diaper}", {
+                value={log.data?.recorded ? t("دورة المياه: {bathroom} • تغيير الحفاض: {diaper}", {
                   bathroom: num(log.data?.bathroomCount ?? 0),
                   diaper: num(log.data?.diaperCount ?? 0),
-                })}
+                }) : t("لم يُسجل")}
                 note={log.data?.bathroomNotes ?? null}
               />
               {naps.length === 0 ? (
-                <InfoRow icon={Moon} tone="pink" title={t("النوم")} value={t("لم ينم اليوم")} />
+                <InfoRow icon={Moon} tone="pink" title={t("النوم")} value={t(log.data?.recorded ? "لم ينم اليوم" : "لم يُسجل")} />
               ) : (
                 <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
                   <div className="flex items-start gap-3">
