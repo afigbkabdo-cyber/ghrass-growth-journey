@@ -15,7 +15,6 @@ import {
   StatCard,
   SectionHeader,
   ToneBadge,
-  ProgressBar,
   toneClasses,
 } from "@/components/ghiras";
 import { useQuery } from "@tanstack/react-query";
@@ -182,6 +181,10 @@ function AdminHome() {
       <DataStatus empty={!announcements.length} />
       <DataStatus empty={!classes.length} />
       <p className="text-xs text-muted-foreground">{t("لم يُسجل {count}", { count: num(data.today.unrecorded) })}</p>
+      <Link to="/admin/messages" className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft">
+        <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-pink-soft"><MessagesSquare className="h-4.5 w-4.5 text-brand-pink-deep" /></span><span className="text-sm font-bold text-foreground">{t("المحادثات")} · {num(data.threadsCount)}</span></span><ArrowLeft className="h-4 w-4 text-muted-foreground" />
+      </Link>
+      <DataStatus error={query.isError} />
     </div>
   );
 }

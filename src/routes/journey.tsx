@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Lock, Sprout } from "lucide-react";
+import { Sprout } from "lucide-react";
 import { AppShell, parentNav } from "@/components/shells";
-import { GrowthIcon, PageContainer, ProgressBar, ToneBadge, toneClasses } from "@/components/ghiras";
-import { cn } from "@/lib/utils";
+import { PageContainer } from "@/components/ghiras";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
