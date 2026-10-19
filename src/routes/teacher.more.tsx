@@ -43,8 +43,8 @@ function TeacherMorePage() {
   const { session } = useAppSession();
   const navigate = useNavigate();
 
-  const logout = () => {
-    clearSession();
+  const logout = async () => {
+    await clearSession();
     navigate({ to: "/login", replace: true });
   };
 

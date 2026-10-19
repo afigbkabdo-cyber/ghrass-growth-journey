@@ -114,7 +114,7 @@ function AdminHome() {
       <section>
         <SectionHeader
           title={t("قيمة الأسبوع")}
-          subtitle={currentValue?.week_start ? d(currentValue.week_start) : undefined}
+          subtitle={currentValue?.week_start ? d(currentValue.week_start) : ""}
           icon={HeartHandshake}
           tone="orange"
           action={{ label: t("خطة القيم"), to: "/admin/values" }}
