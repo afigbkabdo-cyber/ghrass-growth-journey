@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GhirasLogo, toneClasses } from "@/components/ghiras";
-import { clearSession } from "@/lib/session";
+import { clearSession, useAppSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import type { Tone } from "@/lib/data";
 
@@ -160,6 +160,7 @@ export function AdminShell({
   bottomItems: NavItem[];
 }) {
   const { t: tr, n } = useI18n();
+  const { session } = useAppSession();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current =
     [...sidebarItems]
@@ -198,11 +199,11 @@ export function AdminShell({
         <div className="space-y-3 border-t border-border p-4">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-orange-soft font-display text-sm font-extrabold text-brand-orange-deep">
-              {tr("ج")}
+              {n(session?.name).trim().charAt(0)}
             </span>
             <div className="min-w-0 leading-tight">
-              <p className="truncate text-sm font-bold text-foreground">{n("أ. الجوهرة السبيعي")}</p>
-              <p className="text-[11px] text-muted-foreground">{tr("مديرة الروضة")}</p>
+              <p className="truncate text-sm font-bold text-foreground">{session?.name ? n(session.name) : tr("الإدارة")}</p>
+              <p className="text-[11px] text-muted-foreground">{session?.title ? n(session.title) : tr("الإدارة")}</p>
             </div>
           </div>
           <AdminLogoutButton />
