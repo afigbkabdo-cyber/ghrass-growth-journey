@@ -74,13 +74,13 @@ function AdminHome() {
         <p className="text-xs font-bold opacity-90">{n(session?.name)}</p>
         <h2 className="mt-1 font-display text-xl font-extrabold">{t("روضة غراس تنمو معًا")}</h2>
         <p className="mt-1 text-xs opacity-90">
-          {t("حضور اليوم {present} من {total} طفلًا ({rate}%)", { present: adminStats.presentToday, total: adminStats.totalChildren, rate: presentRate })}
+          {data.today.rate === null ? t("لم يُسجل") : t("حضور اليوم {present} من {total} طفلًا ({rate}%)", { present: num(adminStats.presentToday), total: num(adminStats.totalChildren), rate: num(presentRate) })}
         </p>
-        <div className="mt-4 rounded-2xl bg-white/15 p-3">
+        {data.today.rate !== null && <div className="mt-4 rounded-2xl bg-white/15 p-3">
           <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/25">
             <div className="h-full rounded-full bg-white transition-all duration-700" style={{ width: `${presentRate}%` }} />
           </div>
-        </div>
+        </div>}
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
