@@ -21,9 +21,10 @@ export const adminDashboard = createServerFn({ method: 'GET' }).middleware([requ
     context.supabase.from('announcements').select('id,title,body,tone,created_at').eq('state', 'published').order('created_at', { ascending: false }),
     context.supabase.from('activities').select('id').gte('activity_date', weekStart).lte('activity_date', data.date),
     context.supabase.from('daily_logs').select('id').gte('log_date', weekStart).lte('log_date', data.date),
+    context.supabase.from('message_threads').select('id', { count: 'exact', head: true }),
   ]);
   for (const r of results) if (r.error) throw new Error(r.error.message);
-  const [children, classes, teachers, childRows, teacherRows, values, announcements, activities, logs] = results;
+  const [children, classes, teachers, childRows, teacherRows, values, announcements, activities, logs, threads] = results;
   const childList = children.data ?? [];
   const attendance = childRows.data ?? [];
   return {
@@ -33,6 +34,7 @@ export const adminDashboard = createServerFn({ method: 'GET' }).middleware([requ
     values: values.data ?? [], announcements: announcements.data ?? [],
     activitiesCount: activities.data?.length ?? 0, logsCount: logs.data?.length ?? 0,
     childRows: attendance, teacherRows: teacherRows.data ?? [], weekStart,
+    threadsCount: threads.count ?? 0,
   };
 });
 

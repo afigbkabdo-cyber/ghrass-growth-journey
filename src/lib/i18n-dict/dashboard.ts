@@ -1,4 +1,5 @@
 export const dashboard: Record<string, string> = {
+  'المحادثات': 'Conversations',
   'لا تتوفر بيانات مسجلة.': 'No recorded data available.',
   'تعذر تحميل البيانات. حاول مرة أخرى.': 'Could not load data. Please try again.',
   'لا تتوفر قياسات مسجلة لتطور المهارات.': 'No recorded skill development measurements are available.',
