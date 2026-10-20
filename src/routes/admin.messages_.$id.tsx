@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ChevronRight, SendHorizonal, ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessagePhoto } from "@/components/message-photo";
-import { supabase } from "@/integrations/supabase/client";
+import { preparePhoto, uploadMessagePhoto } from "@/lib/message-photo-upload";
 import { toast } from "sonner";
 import { EmptyState, ToneBadge } from "@/components/ghiras";
 import { listThreadMessages, listThreads, sendMessage } from "@/lib/kg.functions";
@@ -63,12 +63,8 @@ function AdminThreadPage() {
       if (photo) {
         if (uploaded.current?.file === photo) photoPath = uploaded.current.path;
         else {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) throw new Error(t("تعذر الإرسال"));
-          const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-          photoPath = `${id}/${user.id}/${crypto.randomUUID()}.${ext}`;
-          const { error } = await supabase.storage.from("message-photos").upload(photoPath, photo, { contentType: photo.type });
-          if (error) throw new Error(t("تعذر رفع الصورة"));
+          const blob = await preparePhoto(photo).catch(() => { throw new Error(t("اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت")); });
+          photoPath = await uploadMessagePhoto(id, blob).catch(() => { throw new Error(t("تعذر رفع الصورة")); });
           uploaded.current = { file: photo, path: photoPath };
         }
       }
@@ -133,7 +129,7 @@ function AdminThreadPage() {
           if (draft.trim() || photo) reply.mutate();
         }}
       >
-        <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" aria-label={t("إرفاق صورة")} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (!f) return; if (!["image/jpeg", "image/png", "image/webp"].includes(f.type) || f.size > 10 * 1024 * 1024) { toast.error(t("اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت")); e.target.value = ""; return; } setPhoto(f); }} />
+        <input ref={fileInput} type="file" accept="image/*" aria-label={t("إرفاق صورة")} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (!f) return; if (!f.type.startsWith("image/") && !/\.(heic|heif)$/i.test(f.name)) { toast.error(t("اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت")); e.target.value = ""; return; } setPhoto(f); }} />
         <Button type="button" size="icon" variant="outline" className="h-11 w-11 shrink-0 rounded-2xl" aria-label={t("إرفاق صورة")} disabled={reply.isPending} onClick={() => fileInput.current?.click()}><ImagePlus /></Button>
         <input
           value={draft}

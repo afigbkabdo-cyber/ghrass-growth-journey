@@ -136,6 +136,8 @@ function AdminClassesPage() {
             <option value="nursery">{tr(stageLabels.nursery)}</option>
             <option value="kg1">{tr(stageLabels.kg1)}</option>
             <option value="kg2">{tr(stageLabels.kg2)}</option>
+            <option value="prekg">{tr(stageLabels.prekg)}</option>
+            <option value="after_school">{tr(stageLabels.after_school)}</option>
           </select>
           <button
             type="button"

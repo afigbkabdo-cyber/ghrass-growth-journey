@@ -26,4 +26,5 @@ export const classes: Record<string, string> = {
   "روضة أولى": "KG1",
   "روضة ثانية": "KG2",
   "تمهيدي": "Pre-K",
+  "ما بعد المدرسة": "After School",
 };

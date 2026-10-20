@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import { preparePhoto, uploadMessagePhoto } from "@/lib/message-photo-upload";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MessagesSquare, ShieldCheck, ChevronLeft, Plus, X, Send } from "lucide-react";
+import { MessagesSquare, ShieldCheck, ChevronLeft, Plus, X, Send, ImagePlus } from "lucide-react";
 import { SectionHeader, ToneBadge, Avatar, EmptyState } from "@/components/ghiras";
-import { listThreads, adminCreateThread } from "@/lib/kg.functions";
+import { listThreads, adminCreateThread, sendMessage } from "@/lib/kg.functions";
 import { listParents } from "@/lib/directory.functions";
 import { useI18n } from "@/lib/i18n";
 
@@ -39,12 +41,30 @@ function AdminMessagesPage() {
   const [parentId, setParentId] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const send = useServerFn(sendMessage);
 
   const create = useMutation({
-    mutationFn: () =>
-      startThread({ data: { parentId, subject: subject.trim(), body: body.trim() } }),
+    mutationFn: async () => {
+      const blob = photo ? await preparePhoto(photo).catch(() => { throw new Error(t("اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت")); }) : null;
+      const result = await startThread({ data: { parentId, subject: subject.trim(), body: body.trim() } });
+      if (blob) {
+        try {
+          const photoPath = await uploadMessagePhoto(result.id, blob);
+          await send({ data: { threadId: result.id, body: "", photoPath } });
+        } catch {
+          qc.invalidateQueries({ queryKey: ["admin-threads"] });
+          navigate({ to: "/admin/messages/$id", params: { id: result.id } });
+          throw new Error(t("أُرسلت الرسالة لكن تعذر رفع الصورة. أعد إرفاقها داخل المحادثة."));
+        }
+      }
+      return result;
+    },
+    onError: (e: Error) => toast.error(e.message || t("تعذر إنشاء المحادثة. حاول مرة أخرى.")),
     onSuccess: (result) => {
       setOpen(false);
+      setPhoto(null);
       setParentId("");
       setSubject("");
       setBody("");
@@ -103,6 +123,15 @@ function AdminMessagesPage() {
             aria-label={t("نص الرسالة")}
             className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none focus:shadow-soft"
           />
+          <input ref={fileInput} type="file" accept="image/*" className="hidden" aria-label={t("إرفاق صورة")} onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => fileInput.current?.click()} className="flex items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 text-xs font-bold text-foreground">
+              <ImagePlus className="h-4 w-4" />
+              {t("إرفاق صورة")}
+            </button>
+            {photo && <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{photo.name}</span>}
+            {photo && <button type="button" aria-label={t("إزالة الصورة")} onClick={() => { setPhoto(null); if (fileInput.current) fileInput.current.value = ""; }}><X className="h-4 w-4" /></button>}
+          </div>
           {create.isError && (
             <p className="rounded-xl bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive">
               {t("تعذر إنشاء المحادثة. حاول مرة أخرى.")}

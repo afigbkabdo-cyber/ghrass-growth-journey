@@ -881,8 +881,8 @@ export const listThreadMessages = createServerFn({ method: "GET" })
       let photoUrl: string | null = null;
       if (m.photo_path) {
         const { data: signed, error: photoError } = await context.supabase.storage.from("message-photos").createSignedUrl(m.photo_path, 900);
-        if (photoError) throw new Error(photoError.message);
-        if (signed?.signedUrl) {
+        // صورة واحدة متعذرة لا تُخفي بقية المحادثة.
+        if (!photoError && signed?.signedUrl) {
           const url = new URL(signed.signedUrl);
           photoUrl = `${import.meta.env['VITE_SUPABASE_URL']}${url.pathname}${url.search}`;
         }

@@ -7,6 +7,7 @@ import {
   CloudOff,
   CircleAlert,
   CheckCircle2,
+  ChevronLeft,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -215,22 +216,34 @@ export function StatCard({
   value,
   label,
   tone = "orange",
+  to,
 }: {
   icon: LucideIcon;
   value: string | number;
   label: string;
   tone?: Tone;
+  to?: "/admin/children" | "/admin/attendance" | "/admin/staff" | "/admin/classes";
 }) {
   const t = toneClasses[tone];
-  return (
-    <div className="rounded-2xl border border-border bg-card p-3.5 shadow-soft">
-      <span className={cn("mb-2 grid h-9 w-9 place-items-center rounded-xl", t.soft)}>
-        <Icon className={cn("h-4.5 w-4.5", t.deep)} strokeWidth={2.2} />
+  const body = (
+    <>
+      <span className="mb-2 flex items-start justify-between">
+        <span className={cn("grid h-9 w-9 place-items-center rounded-xl", t.soft)}>
+          <Icon className={cn("h-4.5 w-4.5", t.deep)} strokeWidth={2.2} />
+        </span>
+        {to && <ChevronLeft className="h-4 w-4 text-muted-foreground" aria-hidden />}
       </span>
       <p className="font-display text-xl font-extrabold text-foreground">{value}</p>
       <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
-    </div>
+    </>
   );
+  if (to)
+    return (
+      <Link to={to} aria-label={label} className="block rounded-2xl border border-border bg-card p-3.5 shadow-soft transition-transform hover:border-primary/40 active:scale-95">
+        {body}
+      </Link>
+    );
+  return <div className="rounded-2xl border border-border bg-card p-3.5 shadow-soft">{body}</div>;
 }
 
 /* ---------- الحالات الفارغة وغيرها ---------- */

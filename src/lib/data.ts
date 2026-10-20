@@ -5,12 +5,14 @@
 
 export type Tone = "orange" | "blue" | "green" | "yellow" | "pink";
 
-export type Stage = "nursery" | "kg1" | "kg2";
+export type Stage = "nursery" | "kg1" | "kg2" | "prekg" | "after_school";
 
 export const stageLabels: Record<Stage, string> = {
   nursery: "الحضانة",
   kg1: "KG1",
   kg2: "KG2",
+  prekg: "Pre-KG",
+  after_school: "ما بعد المدرسة",
 };
 
 export interface Child {

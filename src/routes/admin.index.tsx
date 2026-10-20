@@ -83,10 +83,10 @@ function AdminHome() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard icon={Baby} value={adminStats.totalChildren} label={t("إجمالي الأطفال")} tone="orange" />
-        <StatCard icon={CalendarCheck} value={adminStats.presentToday} label={t("حاضرون اليوم")} tone="green" />
-        <StatCard icon={Users} value={adminStats.teachersCount} label={t("الكادر التعليمي")} tone="blue" />
-        <StatCard icon={School} value={adminStats.classesCount} label={t("الفصول")} tone="pink" />
+        <StatCard icon={Baby} value={adminStats.totalChildren} to="/admin/children" label={t("إجمالي الأطفال")} tone="orange" />
+        <StatCard icon={CalendarCheck} value={adminStats.presentToday} to="/admin/attendance" label={t("حاضرون اليوم")} tone="green" />
+        <StatCard icon={Users} value={adminStats.teachersCount} to="/admin/staff" label={t("الكادر التعليمي")} tone="blue" />
+        <StatCard icon={School} value={adminStats.classesCount} to="/admin/classes" label={t("الفصول")} tone="pink" />
       </div>
 
       <section>
