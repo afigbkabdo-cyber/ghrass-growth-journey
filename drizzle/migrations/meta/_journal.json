@@ -43,6 +43,13 @@
       "when": 1792528436953,
       "tag": "0005_parent_in_app_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792528720247,
+      "tag": "0006_notification_recipient_role_lookup",
+      "breakpoints": true
     }
   ]
 }
