@@ -561,6 +561,76 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_notifications: {
+        Row: {
+          body: string
+          body_en: string
+          child_id: string | null
+          created_at: string
+          event_date: string | null
+          event_type: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          source_id: string
+          thread_id: string | null
+          title: string
+          title_en: string
+        }
+        Insert: {
+          body: string
+          body_en: string
+          child_id?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_type: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          source_id: string
+          thread_id?: string | null
+          title: string
+          title_en: string
+        }
+        Update: {
+          body?: string
+          body_en?: string
+          child_id?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_type?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          source_id?: string
+          thread_id?: string | null
+          title?: string
+          title_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_notifications_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_notifications_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -851,6 +921,10 @@ export type Database = {
       is_guardian_of: {
         Args: { _child_id: string; _user_id: string }
         Returns: boolean
+      }
+      mark_parent_notification_read: {
+        Args: { _id: string }
+        Returns: undefined
       }
       record_child_attendance: { Args: { _entries: Json }; Returns: undefined }
       record_teacher_attendance: {

@@ -1,11 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bell, CircleHelp, Languages, LogOut, ShieldCheck } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, parentNav } from "@/components/shells";
 import { LanguageSwitcher } from "@/lib/i18n";
 import { Avatar, PageContainer, SectionHeader, ToneBadge } from "@/components/ghiras";
-import { Switch } from "@/components/ui/switch";
 import { RoleGuard } from "@/components/role-guard";
 import { ChangePasswordCard } from "@/components/change-password-card";
 import { sectionRoles, signOutCompletely, useAppSession } from "@/lib/session";
@@ -32,7 +30,6 @@ export const Route = createFileRoute("/more")({
 function MorePage() {
   const navigate = useNavigate();
   const { session } = useAppSession();
-  const [notifications, setNotifications] = useState(true);
   const { t, n } = useI18n();
 
   return (
@@ -57,18 +54,17 @@ function MorePage() {
 
         <SectionHeader title={t("إعدادات التطبيق")} icon={Bell} tone="blue" />
         <div className="mb-6 space-y-3">
-          <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft">
+          <Link to="/notifications" className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center gap-3">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-blue-soft">
                 <Bell className="h-4.5 w-4.5 text-brand-blue-deep" strokeWidth={2.2} />
               </span>
               <div>
-                <p className="text-sm font-bold text-foreground">{t("الإشعارات الفورية")}</p>
+                <p className="text-sm font-bold text-foreground">{t("الإشعارات داخل التطبيق")}</p>
                 <p className="text-[11px] text-muted-foreground">{t("أنشطة ورسائل وحضور طفلك")}</p>
               </div>
             </div>
-            <Switch checked={notifications} onCheckedChange={setNotifications} aria-label={t("الإشعارات")} />
-          </div>
+          </Link>
           <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center gap-3">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-green-soft">
