@@ -24,8 +24,10 @@ import { getDailyLog, listChildNotes, listSchedule, myChildren } from "@/lib/kg.
 import { useI18n } from "@/lib/i18n";
 import { attendanceDate } from "@/lib/attendance";
 import { DataStatus } from "@/components/data-status";
+import { z } from 'zod';
 
 export const Route = createFileRoute("/child")({
+  validateSearch: (input) => z.object({ childId: z.string().uuid().optional().catch(undefined), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().catch(undefined) }).parse(input),
   head: () => ({
     meta: [
       { title: "طفلي — غراس" },
@@ -86,8 +88,9 @@ function ChildPage() {
   const fetchLog = useServerFn(getDailyLog);
   const fetchNotes = useServerFn(listChildNotes);
   const fetchSchedule = useServerFn(listSchedule);
-  const [selected, setSelected] = useState<string | null>(null);
-  const date = attendanceDate();
+  const search = Route.useSearch();
+  const [selected, setSelected] = useState<string | null>(search.childId ?? null);
+  const date = search.date ?? attendanceDate();
 
   const children = useQuery({ queryKey: ["my-children"], queryFn: () => fetchChildren({}) });
   const list = children.data ?? [];
@@ -177,7 +180,7 @@ function ChildPage() {
               </p>
             )}
 
-            <SectionHeader title={t("متابعة اليوم")} subtitle={t("تسجيل المعلمة لهذا اليوم")} icon={ListChecks} tone="green" />
+            <SectionHeader title={t("متابعة اليوم")} subtitle={search.date ? d(date) : t("تسجيل المعلمة لهذا اليوم")} icon={ListChecks} tone="green" />
             <div className="mb-6 space-y-3">
               <DataStatus loading={log.isPending} error={log.isError} empty={log.data?.recorded === false} />
               <InfoRow

@@ -25,6 +25,7 @@ import { GhirasLogo, toneClasses } from "@/components/ghiras";
 import { clearSession, useAppSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import type { Tone } from "@/lib/data";
+import { ParentNotificationBell } from '@/components/parent-notification-bell';
 
 /** تسجيل خروج آمن للإدارة — مسح الجلسة والعودة لصفحة الدخول بدون رجوع للخلف. */
 function AdminLogoutButton() {
@@ -57,6 +58,7 @@ export interface NavItem {
 function TopBar({ roleLabel, tone }: { roleLabel: string; tone: Tone }) {
   const t = toneClasses[tone];
   const { t: tr } = useI18n();
+  const { session } = useAppSession();
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-2xl items-center justify-between px-4">
@@ -65,13 +67,13 @@ function TopBar({ roleLabel, tone }: { roleLabel: string; tone: Tone }) {
           <span className={cn("hidden rounded-full px-3 py-1 text-[11px] font-bold sm:inline", t.soft, t.deep)}>
             {tr(roleLabel)}
           </span>
-          <button
+          {session?.role === 'parent' ? <ParentNotificationBell /> : <button
             aria-label={tr("الإشعارات")}
             className="relative grid h-10 w-10 place-items-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
           >
             <Bell className="h-4.5 w-4.5 text-muted-foreground" />
             <span className="absolute top-2 end-2 h-2 w-2 rounded-full bg-brand-pink" />
-          </button>
+          </button>}
         </div>
       </div>
     </header>
