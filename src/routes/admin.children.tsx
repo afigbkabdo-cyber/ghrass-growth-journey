@@ -94,6 +94,8 @@ function AdminChildren() {
     { key: "nursery", label: tr(stageLabels.nursery) },
     { key: "kg1", label: tr(stageLabels.kg1) },
     { key: "kg2", label: tr(stageLabels.kg2) },
+    { key: "prekg", label: tr(stageLabels.prekg) },
+    { key: "after_school", label: tr(stageLabels.after_school) },
   ];
 
   const create = useMutation({
@@ -382,6 +384,8 @@ function AdminChildren() {
                       <option value="nursery">{tr(stageLabels.nursery)}</option>
                       <option value="kg1">{tr(stageLabels.kg1)}</option>
                       <option value="kg2">{tr(stageLabels.kg2)}</option>
+                      <option value="prekg">{tr(stageLabels.prekg)}</option>
+                      <option value="after_school">{tr(stageLabels.after_school)}</option>
                     </select>
                     <label className="block text-[11px] font-bold text-muted-foreground">
                       {tr("تاريخ الميلاد")}
@@ -581,6 +585,8 @@ function AdminChildren() {
             <option value="nursery">{tr(stageLabels.nursery)}</option>
             <option value="kg1">{tr(stageLabels.kg1)}</option>
             <option value="kg2">{tr(stageLabels.kg2)}</option>
+            <option value="prekg">{tr(stageLabels.prekg)}</option>
+            <option value="after_school">{tr(stageLabels.after_school)}</option>
           </select>
           <select
             value={form.classId}

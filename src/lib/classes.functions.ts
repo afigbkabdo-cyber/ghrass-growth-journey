@@ -58,7 +58,7 @@ export const createClass = createServerFn({ method: "POST" })
     z
       .object({
         name: z.string().trim().min(2),
-        stage: z.enum(["nursery", "kg1", "kg2"]),
+        stage: z.enum(["nursery", "kg1", "kg2", "prekg", "after_school"]),
         nameEn: z.string().trim().optional(),
       })
       .parse(d),

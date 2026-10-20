@@ -16,6 +16,8 @@ export const stageLabels: Record<string, string> = {
   kg1: "روضة أولى",
   kg2: "روضة ثانية",
   kg3: "تمهيدي",
+  prekg: "Pre-KG",
+  after_school: "ما بعد المدرسة",
 };
 
 /** حساب عمر الطفل بالسنوات والأشهر من تاريخ الميلاد. */

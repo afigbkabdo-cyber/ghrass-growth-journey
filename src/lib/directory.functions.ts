@@ -154,7 +154,7 @@ export const listParents = createServerFn({ method: "GET" })
 const childSchema = z.object({
   name: z.string().trim().min(2),
   nameEn: z.string().trim().optional(),
-  stage: z.enum(["nursery", "kg1", "kg2"]),
+  stage: z.enum(["nursery", "kg1", "kg2", "prekg", "after_school"]),
   classId: z.string().uuid().nullable().optional(),
   guardianId: z.string().uuid().nullable().optional(),
   birthDate: z.string().trim().nullable().optional(),
@@ -312,7 +312,7 @@ export const updateChild = createServerFn({ method: "POST" })
         id: z.string().uuid(),
         name: z.string().trim().min(2),
         nameEn: z.string().trim().nullable().optional(),
-        stage: z.enum(["nursery", "kg1", "kg2"]),
+        stage: z.enum(["nursery", "kg1", "kg2", "prekg", "after_school"]),
         birthDate: z.string().trim().nullable().optional(),
         gender: z.string().trim().nullable().optional(),
         allergies: z.string().trim().nullable().optional(),
