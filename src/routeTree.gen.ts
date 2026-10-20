@@ -18,6 +18,7 @@ import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MoreRouteImport } from './routes/more'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as ValueRouteImport } from './routes/value'
@@ -91,6 +92,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const MoreRoute = MoreRouteImport.update({
   id: '/more',
   path: '/more',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
+  '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/teacher': typeof TeacherRouteWithChildren
   '/value': typeof ValueRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
+  '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/value': typeof ValueRoute
   '/admin/activities': typeof AdminActivitiesRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
   '/more': typeof MoreRoute
+  '/notifications': typeof NotificationsRoute
   '/parent': typeof ParentRoute
   '/teacher': typeof TeacherRouteWithChildren
   '/value': typeof ValueRoute
@@ -370,6 +379,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/messages'
     | '/more'
+    | '/notifications'
     | '/parent'
     | '/teacher'
     | '/value'
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/messages'
     | '/more'
+    | '/notifications'
     | '/parent'
     | '/value'
     | '/admin/activities'
@@ -448,6 +459,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/messages'
     | '/more'
+    | '/notifications'
     | '/parent'
     | '/teacher'
     | '/value'
@@ -489,6 +501,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
   MoreRoute: typeof MoreRoute
+  NotificationsRoute: typeof NotificationsRoute
   ParentRoute: typeof ParentRoute
   TeacherRoute: typeof TeacherRouteWithChildren
   ValueRoute: typeof ValueRoute
@@ -558,6 +571,13 @@ declare module '@tanstack/react-router' {
       path: '/more'
       fullPath: '/more'
       preLoaderRoute: typeof MoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -843,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
   MoreRoute: MoreRoute,
+  NotificationsRoute: NotificationsRoute,
   ParentRoute: ParentRoute,
   TeacherRoute: TeacherRouteWithChildren,
   ValueRoute: ValueRoute,
