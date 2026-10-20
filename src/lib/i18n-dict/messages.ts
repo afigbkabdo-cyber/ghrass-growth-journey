@@ -8,6 +8,7 @@ export const messages: Record<string, string> = {
   "حضور المعلمات": "Teacher attendance",
   "لا توجد سجلات": "No records",
   "إرفاق صورة": "Attach photo",
+  "أُرسلت الرسالة لكن تعذر رفع الصورة. أعد إرفاقها داخل المحادثة.": "Message sent, but the photo failed to upload. Attach it again inside the conversation.",
   "إزالة الصورة": "Remove photo",
   "صورة مرفقة": "Attached photo",
   "تعذر رفع الصورة": "Couldn't upload the photo",
