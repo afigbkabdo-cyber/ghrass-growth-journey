@@ -78,11 +78,12 @@ export const renameClass = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
-      .object({ id: z.string().uuid(), name: z.string().trim().min(2), nameEn: z.string().trim().optional() })
+      .object({ id: z.string().uuid(), name: z.string().trim().min(2), nameEn: z.string().trim().optional(), stage: z.enum(["nursery", "kg1", "kg2", "prekg", "after_school"]).optional() })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    const patch: { name: string; name_en?: string } = { name: data.name };
+    const patch: { name: string; name_en?: string; stage?: string } = { name: data.name };
+    if (data.stage) patch.stage = data.stage;
     if (data.nameEn !== undefined) patch.name_en = data.nameEn;
     const { error } = await context.supabase
       .from("classes")

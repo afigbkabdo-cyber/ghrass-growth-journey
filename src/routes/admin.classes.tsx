@@ -55,6 +55,7 @@ function AdminClassesPage() {
   const [stage, setStage] = useState<Stage>("kg1");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editStage, setEditStage] = useState<Stage>("kg1");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const invalidate = () => {
@@ -76,7 +77,7 @@ function AdminClassesPage() {
   });
 
   const renameMut = useMutation({
-    mutationFn: (v: { id: string; name: string }) => rename({ data: v }),
+    mutationFn: (v: { id: string; name: string; stage: Stage }) => rename({ data: v }),
     onSuccess: () => {
       toast.success(tr("تم تحديث اسم الفصل"));
       setEditingId(null);
@@ -167,11 +168,18 @@ function AdminClassesPage() {
                       aria-label={tr("اسم الفصل")}
                       className={inputCls}
                     />
+                    <select value={editStage} onChange={(e) => setEditStage(e.target.value as Stage)} aria-label={tr("المرحلة")} className={inputCls}>
+                      <option value="nursery">{tr(stageLabels.nursery)}</option>
+                      <option value="kg1">{tr(stageLabels.kg1)}</option>
+                      <option value="kg2">{tr(stageLabels.kg2)}</option>
+                      <option value="prekg">{tr(stageLabels.prekg)}</option>
+                      <option value="after_school">{tr(stageLabels.after_school)}</option>
+                    </select>
                     <button
                       type="button"
                       aria-label={tr("حفظ")}
                       disabled={editName.trim().length < 2}
-                      onClick={() => renameMut.mutate({ id: c.id, name: editName.trim() })}
+                      onClick={() => renameMut.mutate({ id: c.id, name: editName.trim(), stage: editStage })}
                       className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground disabled:opacity-50"
                     >
                       <Check className="h-4 w-4" />
@@ -202,6 +210,7 @@ function AdminClassesPage() {
                     onClick={() => {
                       setEditingId(c.id);
                       setEditName(c.name);
+                      setEditStage(c.stage as Stage);
                     }}
                     className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground hover:bg-muted"
                   >
