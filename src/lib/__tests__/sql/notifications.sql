@@ -30,6 +30,12 @@ BEGIN
  source:=gen_random_uuid();
  INSERT INTO public.messages(id,thread_id,sender_id,sender_role,body) VALUES(source,c.id,c.parent_id,'parent','transaction-only verification');
  IF EXISTS(SELECT 1 FROM public.parent_notifications WHERE source_id=source) THEN RAISE EXCEPTION 'Parent outgoing message must not notify parent'; END IF;
- RAISE NOTICE 'Five real event paths, class/child recipient matching, draft and outgoing-message suppression passed';
+ SELECT count(*) INTO notice_count FROM public.parent_notifications;
+ BEGIN
+  INSERT INTO public.child_notes(child_id,author_id,body) VALUES((SELECT id FROM public.children LIMIT 1),a,NULL);
+ EXCEPTION WHEN not_null_violation THEN NULL;
+ END;
+ IF (SELECT count(*) FROM public.parent_notifications)<>notice_count THEN RAISE EXCEPTION 'Failed source generated a notification'; END IF;
+ RAISE NOTICE 'Five event paths, recipient matching, draft and outgoing-message suppression, failed source passed';
 END $$;
 ROLLBACK;
