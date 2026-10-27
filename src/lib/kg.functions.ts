@@ -130,6 +130,7 @@ export interface ThreadRow {
 
 export interface MessageRow {
   photoUrl: string | null;
+  media: { url: string; downloadUrl: string | null; kind: "image" | "video" }[];
   id: string;
   body: string;
   senderRole: string;
@@ -873,11 +874,24 @@ export const listThreadMessages = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<MessageRow[]> => {
     const { data: rows, error } = await context.supabase
       .from("messages")
-      .select("id, body, sender_role, sender_id, created_at, photo_path")
+      .select("id, body, sender_role, sender_id, created_at, photo_path, attachments")
       .eq("thread_id", data.threadId)
       .order("created_at");
     if (error) throw new Error(error.message);
+    const browserUrl = (signed: string) => { const u = new URL(signed); return `${import.meta.env['VITE_SUPABASE_URL']}${u.pathname}${u.search}`; };
     return Promise.all((rows ?? []).map(async (m) => {
+      const list = Array.isArray(m.attachments) ? (m.attachments as { path?: string; kind?: string }[]) : [];
+      const media: MessageRow["media"] = [];
+      for (const a of list) {
+        if (!a?.path) continue;
+        const kind = a.kind === "video" ? "video" : "image";
+        const [view, dl] = await Promise.all([
+          context.supabase.storage.from("message-photos").createSignedUrl(a.path, 3600),
+          context.supabase.storage.from("message-photos").createSignedUrl(a.path, 3600, { download: true }),
+        ]);
+        // ملف متعذر لا يُخفي بقية المحادثة.
+        if (view.data?.signedUrl) media.push({ kind, url: browserUrl(view.data.signedUrl), downloadUrl: dl.data?.signedUrl ? browserUrl(dl.data.signedUrl) : null });
+      }
       let photoUrl: string | null = null;
       if (m.photo_path) {
         const { data: signed, error: photoError } = await context.supabase.storage.from("message-photos").createSignedUrl(m.photo_path, 900);
@@ -887,7 +901,7 @@ export const listThreadMessages = createServerFn({ method: "GET" })
           photoUrl = `${import.meta.env['VITE_SUPABASE_URL']}${url.pathname}${url.search}`;
         }
       }
-      return { photoUrl,
+      return { photoUrl, media,
       id: m.id,
       body: m.body,
       senderRole: m.sender_role,
@@ -938,19 +952,21 @@ export const sendMessage = createServerFn({ method: "POST" })
         threadId: z.string().uuid(),
         body: z.string().trim().max(10000),
         photoPath: z.string().max(500).optional(),
-      }).refine(d => Boolean(d.body || d.photoPath), "Message required")
+        attachments: z.array(z.object({ path: z.string().max(500), kind: z.enum(["image", "video"]) })).max(10).optional(),
+      }).refine(d => Boolean(d.body || d.photoPath || d.attachments?.length), "Message required")
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     // الدور يُستنتج من الخادم ولا يُقبل من العميل.
     const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
-    if (data.photoPath && !isAdmin) throw new Error("Forbidden image");
+    if ((data.photoPath || data.attachments?.length) && !isAdmin) throw new Error("Forbidden image");
     const { error } = await context.supabase.from("messages").insert({
       thread_id: data.threadId,
       sender_id: context.userId,
       sender_role: isAdmin ? "admin" : "parent",
       body: data.body,
       photo_path: data.photoPath ?? null,
+      attachments: data.attachments ?? [],
     });
     if (error) throw new Error(error.message);
     // تحديث وقت آخر رسالة — مسموح لصاحب المحادثة أو الإدارة عبر RLS.

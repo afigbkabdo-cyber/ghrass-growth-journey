@@ -31,3 +31,30 @@ export async function uploadMessagePhoto(threadId: string, blob: Blob): Promise<
   if (error) throw new Error("upload");
   return path;
 }
+
+export type MediaKind = "image" | "video";
+export const MAX_FILES = 10;
+const VIDEO_TYPES: Record<string, string> = { "video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm" };
+export const VIDEO_MAX = 50 * 1024 * 1024;
+
+export function isVideoFile(f: File) {
+  return f.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(f.name);
+}
+
+/** يجهّز ويرفع صورة أو فيديو؛ يعيد المسار والنوع. يرمي "video-size" أو "video-type" أو "unsupported". */
+export async function uploadMessageMedia(threadId: string, file: File): Promise<{ path: string; kind: MediaKind }> {
+  if (!isVideoFile(file)) {
+    const blob = await preparePhoto(file);
+    return { path: await uploadMessagePhoto(threadId, blob), kind: "image" };
+  }
+  const type = file.type || (/\.webm$/i.test(file.name) ? "video/webm" : /\.mov$/i.test(file.name) ? "video/quicktime" : "video/mp4");
+  const ext = VIDEO_TYPES[type === "video/x-m4v" ? "video/mp4" : type];
+  if (!ext) throw new Error("video-type");
+  if (file.size > VIDEO_MAX) throw new Error("video-size");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("auth");
+  const path = `${threadId}/${user.id}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("message-photos").upload(path, file, { contentType: type === "video/x-m4v" ? "video/mp4" : type });
+  if (error) throw new Error("upload");
+  return { path, kind: "video" };
+}
