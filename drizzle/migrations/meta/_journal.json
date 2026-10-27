@@ -50,6 +50,13 @@
       "when": 1792528720247,
       "tag": "0006_notification_recipient_role_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793134120541,
+      "tag": "0007_message_multi_media_attachments",
+      "breakpoints": true
     }
   ]
 }
