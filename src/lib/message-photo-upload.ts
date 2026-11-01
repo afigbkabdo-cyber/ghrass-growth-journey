@@ -1,5 +1,7 @@
 /* رفع صور المحادثات إلى المخزن الخاص الحالي (message-photos). */
 import { supabase } from "@/integrations/supabase/client";
+import { mediaType, MAX_FILES, VIDEO_MAX } from './message-media';
+export { MAX_FILES, VIDEO_MAX };
 
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX = 10 * 1024 * 1024;
@@ -33,9 +35,7 @@ export async function uploadMessagePhoto(threadId: string, blob: Blob): Promise<
 }
 
 export type MediaKind = "image" | "video";
-export const MAX_FILES = 10;
 const VIDEO_TYPES: Record<string, string> = { "video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm" };
-export const VIDEO_MAX = 50 * 1024 * 1024;
 
 export function isVideoFile(f: File) {
   return f.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(f.name);
@@ -43,7 +43,7 @@ export function isVideoFile(f: File) {
 
 /** يجهّز ويرفع صورة أو فيديو؛ يعيد المسار والنوع. يرمي "video-size" أو "video-type" أو "unsupported". */
 export async function uploadMessageMedia(threadId: string, file: File): Promise<{ path: string; kind: MediaKind }> {
-  if (!isVideoFile(file)) {
+  if (mediaType(file) === 'image') {
     const blob = await preparePhoto(file);
     return { path: await uploadMessagePhoto(threadId, blob), kind: "image" };
   }
