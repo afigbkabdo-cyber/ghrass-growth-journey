@@ -130,6 +130,7 @@ export interface ThreadRow {
 
 export interface MessageRow {
   photoUrl: string | null;
+  unavailableMedia: number;
   media: { url: string; downloadUrl: string | null; kind: "image" | "video" }[];
   id: string;
   body: string;
@@ -880,8 +881,10 @@ export const listThreadMessages = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const browserUrl = (signed: string) => { const u = new URL(signed); return `${import.meta.env['VITE_SUPABASE_URL']}${u.pathname}${u.search}`; };
     return Promise.all((rows ?? []).map(async (m) => {
-      const list = Array.isArray(m.attachments) ? (m.attachments as { path?: string; kind?: string }[]) : [];
+      const list = Array.isArray(m.attachments) ? [...(m.attachments as { path?: string; kind?: string }[])] : [];
+      if (m.photo_path && !list.some(a => a.path === m.photo_path)) list.unshift({ path: m.photo_path, kind: 'image' });
       const media: MessageRow["media"] = [];
+      let unavailableMedia = 0;
       for (const a of list) {
         if (!a?.path) continue;
         const kind = a.kind === "video" ? "video" : "image";
@@ -891,17 +894,10 @@ export const listThreadMessages = createServerFn({ method: "GET" })
         ]);
         // ملف متعذر لا يُخفي بقية المحادثة.
         if (view.data?.signedUrl) media.push({ kind, url: browserUrl(view.data.signedUrl), downloadUrl: dl.data?.signedUrl ? browserUrl(dl.data.signedUrl) : null });
+        else unavailableMedia++;
       }
-      let photoUrl: string | null = null;
-      if (m.photo_path) {
-        const { data: signed, error: photoError } = await context.supabase.storage.from("message-photos").createSignedUrl(m.photo_path, 900);
-        // صورة واحدة متعذرة لا تُخفي بقية المحادثة.
-        if (!photoError && signed?.signedUrl) {
-          const url = new URL(signed.signedUrl);
-          photoUrl = `${import.meta.env['VITE_SUPABASE_URL']}${url.pathname}${url.search}`;
-        }
-      }
-      return { photoUrl, media,
+      const photoUrl = m.photo_path ? media.find(item => item.kind === 'image')?.url ?? null : null;
+      return { photoUrl, media, unavailableMedia,
       id: m.id,
       body: m.body,
       senderRole: m.sender_role,
@@ -958,7 +954,8 @@ export const sendMessage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     // الدور يُستنتج من الخادم ولا يُقبل من العميل.
-    const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+    if (roleError) throw new Error('Unable to verify permissions');
     if ((data.photoPath || data.attachments?.length) && !isAdmin) throw new Error("Forbidden image");
     const { error } = await context.supabase.from("messages").insert({
       thread_id: data.threadId,
