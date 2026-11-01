@@ -80,7 +80,7 @@ function ThreadPage() {
 
   return (
     <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
-      <PageContainer className="pb-36">
+      <PageContainer className="pb-36 md:pb-36">
         <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-soft">
           <Link to="/messages" aria-label={t("عودة للرسائل")} className="grid h-9 w-9 place-items-center rounded-xl hover:bg-muted">
             <ChevronRight className="h-5 w-5 text-muted-foreground" />

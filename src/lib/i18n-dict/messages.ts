@@ -1,5 +1,6 @@
 /* قاموس الترجمة — messages */
 export const messages: Record<string, string> = {
+  "تعذر تشغيل الفيديو في هذا المتصفح. يمكنك تنزيله.": "This browser couldn't play the video. You can download it.",
   "إرفاق صور أو فيديو": "Attach photos or video",
   "إزالة المرفق": "Remove attachment",
   "فتح الصورة": "Open photo",
