@@ -1,5 +1,15 @@
 /* قاموس الترجمة — messages */
 export const messages: Record<string, string> = {
+  "إرفاق صور أو فيديو": "Attach photos or video",
+  "إزالة المرفق": "Remove attachment",
+  "فتح الصورة": "Open photo",
+  "تنزيل": "Download",
+  "فيديو مرفق": "Attached video",
+  "اختر حتى 10 مرفقات": "Choose up to 10 attachments",
+  "اختر فيديو MP4 أو MOV أو WebM بحجم لا يتجاوز 50 ميجابايت": "Choose an MP4, MOV or WebM video up to 50 MB",
+  "تعذر رفع المرفق. لم تُرسل الرسالة؛ حاول مجددًا.": "Couldn't upload the attachment. The message was not sent; try again.",
+  "تعذر إرسال الرسالة. احتُفظ بالنص والمرفقات لإعادة المحاولة.": "Couldn't send the message. Your text and attachments were kept for retry.",
+  "تعذر تحميل بعض المرفقات. حاول تحديث المحادثة.": "Some attachments couldn't load. Try refreshing the conversation.",
   "الحضور والانصراف": "Check-in and check-out",
   "لم يُسجل": "Not recorded",
   "تعذر حفظ السجل": "Couldn't save the record",

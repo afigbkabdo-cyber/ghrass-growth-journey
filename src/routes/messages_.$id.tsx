@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronRight, SendHorizonal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MessagePhoto } from "@/components/message-photo";
+import { MessageMediaList } from "@/components/message-photo";
 import { toast } from "sonner";
 import { AppShell, parentNav } from "@/components/shells";
 import { PageContainer, EmptyState } from "@/components/ghiras";
@@ -107,7 +107,7 @@ function ThreadPage() {
                       : "max-w-[80%] rounded-2xl rounded-tr-sm border border-border bg-card px-4 py-2.5 shadow-soft"
                   }
                 >
-                  <MessagePhoto url={m.photoUrl} />
+                  <MessageMediaList items={m.media} unavailable={m.unavailableMedia} />
                   <p
                     className={`whitespace-pre-line text-sm leading-relaxed ${mine ? "text-primary-foreground" : "text-foreground"}`}
                   >
