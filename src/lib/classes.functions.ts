@@ -22,7 +22,7 @@ export const listClassDetails = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<ClassDetailRow[]> => {
     const [{ data: classes, error }, { data: kids }, { data: links }] = await Promise.all([
       context.supabase.from("classes").select("id, name, name_en, stage").order("name"),
-      context.supabase.from("children").select("id, name, class_id").order("name"),
+      context.supabase.from("children").select("id, name, class_id").is("archived_at", null).order("name"),
       context.supabase.from("teacher_classes").select("teacher_id, class_id, profiles(full_name)"),
     ]);
     if (error) throw new Error(error.message);
@@ -99,7 +99,7 @@ export const deleteClass = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const [{ count: childCount }, { count: activityCount }, { count: scheduleCount }] = await Promise.all([
-      context.supabase.from("children").select("id", { count: "exact", head: true }).eq("class_id", data.id),
+      context.supabase.from("children").select("id", { count: "exact", head: true }).eq("class_id", data.id).is("archived_at", null),
       context.supabase.from("activities").select("id", { count: "exact", head: true }).eq("class_id", data.id),
       context.supabase
         .from("schedule_items")

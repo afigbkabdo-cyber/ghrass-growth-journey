@@ -60,6 +60,7 @@ export const listChildren = createServerFn({ method: "GET" })
       .select(
         "id, name, name_en, stage, class_id, birth_date, allergies, allergies_en, classes(name, name_en), child_guardians(profiles(full_name, full_name_en))",
       )
+      .is("archived_at", null)
       .order("name");
     if (error) throw new Error(error.message);
     return (data ?? []).map((row) => {
@@ -186,20 +187,26 @@ export const createChild = createServerFn({ method: "POST" })
       .single();
     if (error || !inserted) throw new Error(error?.message ?? "تعذر تسجيل الطفل.");
     if (data.guardianId) {
-      await context.supabase
+      const { error: linkError } = await context.supabase
         .from("child_guardians")
         .insert({ child_id: inserted.id, guardian_id: data.guardianId });
+      if (linkError) throw new Error(`تم تسجيل الطفل لكن تعذر ربطه بولي الأمر: ${linkError.message}`);
     }
     return { id: inserted.id };
   });
 
-/** حذف طفل من السجل. */
+/** أرشفة آمنة للطفل: يُخفى من القوائم مع الإبقاء على الحضور والمتابعة والملاحظات وروابط ولي الأمر. */
 export const deleteChild = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    await context.supabase.from("child_guardians").delete().eq("child_id", data.id);
-    const { error } = await context.supabase.from("children").delete().eq("id", data.id);
+    const { data: row, error } = await context.supabase
+      .from("children")
+      .update({ archived_at: new Date().toISOString() })
+      .eq("id", data.id)
+      .select("id")
+      .maybeSingle();
+    if (!error && !row) throw new Error("لم يُعثر على الطفل أو لا تملك صلاحية أرشفته.");
     if (error) throw new Error(error.message);
     return { ok: true };
   });
