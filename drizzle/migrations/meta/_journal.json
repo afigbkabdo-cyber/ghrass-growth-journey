@@ -57,6 +57,13 @@
       "when": 1793134120541,
       "tag": "0007_message_multi_media_attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793682486996,
+      "tag": "0008_archive_children_multiclass_activities_meal3_checkout",
+      "breakpoints": true
     }
   ]
 }

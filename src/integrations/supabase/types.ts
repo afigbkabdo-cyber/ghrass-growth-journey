@@ -80,6 +80,36 @@ export type Database = {
           },
         ]
       }
+      activity_classes: {
+        Row: {
+          activity_id: string
+          class_id: string
+        }
+        Insert: {
+          activity_id: string
+          class_id: string
+        }
+        Update: {
+          activity_id?: string
+          class_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_classes_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_classes_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_photos: {
         Row: {
           activity_id: string
@@ -265,6 +295,7 @@ export type Database = {
         Row: {
           allergies: string | null
           allergies_en: string | null
+          archived_at: string | null
           birth_date: string | null
           class_id: string | null
           created_at: string
@@ -280,6 +311,7 @@ export type Database = {
         Insert: {
           allergies?: string | null
           allergies_en?: string | null
+          archived_at?: string | null
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
@@ -295,6 +327,7 @@ export type Database = {
         Update: {
           allergies?: string | null
           allergies_en?: string | null
+          archived_at?: string | null
           birth_date?: string | null
           class_id?: string | null
           created_at?: string
@@ -357,6 +390,10 @@ export type Database = {
           meal2_notes: string | null
           meal2_status: string | null
           meal2_time: string | null
+          meal3_enabled: boolean
+          meal3_notes: string | null
+          meal3_status: string | null
+          meal3_time: string | null
           prayer_done: boolean
           recorded_by: string | null
           sleep_end: string | null
@@ -380,6 +417,10 @@ export type Database = {
           meal2_notes?: string | null
           meal2_status?: string | null
           meal2_time?: string | null
+          meal3_enabled?: boolean
+          meal3_notes?: string | null
+          meal3_status?: string | null
+          meal3_time?: string | null
           prayer_done?: boolean
           recorded_by?: string | null
           sleep_end?: string | null
@@ -403,6 +444,10 @@ export type Database = {
           meal2_notes?: string | null
           meal2_status?: string | null
           meal2_time?: string | null
+          meal3_enabled?: boolean
+          meal3_notes?: string | null
+          meal3_status?: string | null
+          meal3_time?: string | null
           prayer_done?: boolean
           recorded_by?: string | null
           sleep_end?: string | null
@@ -909,6 +954,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activity_for_parent: {
+        Args: { _activity_id: string; _user_id: string }
+        Returns: boolean
+      }
+      activity_for_teacher: {
+        Args: { _activity_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_child_in_class: {
         Args: { _class_id: string; _user_id: string }
         Returns: boolean

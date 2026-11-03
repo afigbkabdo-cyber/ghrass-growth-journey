@@ -43,6 +43,9 @@ export interface ActivityRow {
   classId: string | null;
   className: string | null;
   classNameEn: string | null;
+  /** جميع الفصول المستهدفة (يشمل الفصل الأساسي). */
+  classIds: string[];
+  classNames: { name: string; nameEn: string | null }[];
   valueId: string | null;
   valueName: string | null;
   valueNameEn: string | null;
@@ -83,6 +86,10 @@ export interface DailyLogRow {
   meal2Status: string | null;
   meal2Time: string | null;
   meal2Notes: string | null;
+  meal3Enabled: boolean;
+  meal3Status: string | null;
+  meal3Time: string | null;
+  meal3Notes: string | null;
   bathroomCount: number;
   diaperCount: number;
   bathroomNotes: string | null;
@@ -150,6 +157,10 @@ const emptyLog = (childId: string, logDate: string): DailyLogRow => ({
   meal2Status: null,
   meal2Time: null,
   meal2Notes: null,
+  meal3Enabled: false,
+  meal3Status: null,
+  meal3Time: null,
+  meal3Notes: null,
   bathroomCount: 0,
   diaperCount: 0,
   bathroomNotes: null,
@@ -381,7 +392,7 @@ const childSelect = "id, name, name_en, stage, birth_date, gender, allergies, al
 export const myClassChildren = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ClassChildRow[]> => {
-    const { data, error } = await context.supabase.from("children").select(childSelect).order("name");
+    const { data, error } = await context.supabase.from("children").select(childSelect).is("archived_at", null).order("name");
     if (error) throw new Error(error.message);
     return ((data ?? []) as unknown as Parameters<typeof mapChild>[0][]).map(mapChild);
   });
@@ -401,6 +412,7 @@ export const myChildren = createServerFn({ method: "GET" })
       .from("children")
       .select(childSelect)
       .in("id", ids)
+      .is("archived_at", null)
       .order("name");
     if (error) throw new Error(error.message);
     return ((data ?? []) as unknown as Parameters<typeof mapChild>[0][]).map(mapChild);
@@ -430,6 +442,10 @@ function mapLog(r: Record<string, unknown>): DailyLogRow {
     meal2Status: (r["meal2_status"] as string) ?? null,
     meal2Time: (r["meal2_time"] as string) ?? null,
     meal2Notes: (r["meal2_notes"] as string) ?? null,
+    meal3Enabled: Boolean(r["meal3_enabled"]),
+    meal3Status: (r["meal3_status"] as string) ?? null,
+    meal3Time: (r["meal3_time"] as string) ?? null,
+    meal3Notes: (r["meal3_notes"] as string) ?? null,
     bathroomCount: (r["bathroom_count"] as number) ?? 0,
     diaperCount: (r["diaper_count"] as number) ?? 0,
     bathroomNotes: (r["bathroom_notes"] as string) ?? null,
@@ -468,6 +484,10 @@ const logInput = z.object({
   meal2Status: z.string().nullable().optional(),
   meal2Time: z.string().nullable().optional(),
   meal2Notes: z.string().nullable().optional(),
+  meal3Enabled: z.boolean().optional(),
+  meal3Status: z.string().nullable().optional(),
+  meal3Time: z.string().nullable().optional(),
+  meal3Notes: z.string().nullable().optional(),
   bathroomCount: z.number().int().min(0).max(50).optional(),
   diaperCount: z.number().int().min(0).max(50).optional(),
   bathroomNotes: z.string().nullable().optional(),
@@ -498,6 +518,10 @@ export const saveDailyLog = createServerFn({ method: "POST" })
       meal2_status: data.meal2Status ?? null,
       meal2_time: data.meal2Time || null,
       meal2_notes: data.meal2Notes ?? null,
+      meal3_enabled: data.meal3Enabled ?? false,
+      meal3_status: data.meal3Status ?? null,
+      meal3_time: data.meal3Time || null,
+      meal3_notes: data.meal3Notes ?? null,
       bathroom_count: data.bathroomCount ?? 0,
       diaper_count: data.diaperCount ?? 0,
       bathroom_notes: data.bathroomNotes ?? null,
@@ -679,7 +703,7 @@ export const markScheduleDone = createServerFn({ method: "POST" })
 /* ================= الأنشطة ================= */
 
 const activitySelect =
-  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name, name_en), activity_photos(path)";
+  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name, name_en), activity_photos(path), activity_classes(class_id, classes(name, name_en))";
 
 type ActivityQueryRow = {
   id: string;
@@ -696,10 +720,18 @@ type ActivityQueryRow = {
   classes: { name: string; name_en: string | null } | null;
   values_week: { name: string; name_en: string | null } | null;
   activity_photos: { path: string }[] | null;
+  activity_classes: { class_id: string; classes: { name: string; name_en: string | null } | null }[] | null;
 };
 
 function mapActivity(r: ActivityQueryRow): ActivityRow {
+  const extra = r.activity_classes ?? [];
+  const classIds = [...new Set([...(r.class_id ? [r.class_id] : []), ...extra.map((x) => x.class_id)])];
+  const nameMap = new Map<string, { name: string; nameEn: string | null }>();
+  if (r.class_id && r.classes) nameMap.set(r.class_id, { name: r.classes.name, nameEn: r.classes.name_en ?? null });
+  for (const x of extra) if (x.classes && !nameMap.has(x.class_id)) nameMap.set(x.class_id, { name: x.classes.name, nameEn: x.classes.name_en ?? null });
   return {
+    classIds,
+    classNames: classIds.map((id) => nameMap.get(id)).filter((v): v is { name: string; nameEn: string | null } => Boolean(v)),
     id: r.id,
     title: r.title,
     titleEn: r.title_en ?? null,
@@ -756,6 +788,8 @@ export const saveActivity = createServerFn({ method: "POST" })
         activityDate: z.string(),
         activityTime: z.string().nullable().optional(),
         classId: z.string().uuid(),
+        /** فصول إضافية مستهدفة (اختياري) — النشاط يُحفظ مرة واحدة. */
+        classIds: z.array(z.string().uuid()).max(30).optional(),
         linkedToValue: z.boolean(),
         valueId: z.string().uuid().nullable().optional(),
         published: z.boolean().optional(),
@@ -789,6 +823,24 @@ export const saveActivity = createServerFn({ method: "POST" })
         .single();
       if (error) throw new Error(error.message);
       activityId = row.id;
+    }
+    const targets = [...new Set([data.classId, ...(data.classIds ?? [])])];
+    if (data.id) {
+      const { error } = await context.supabase
+        .from("activity_classes")
+        .delete()
+        .eq("activity_id", activityId!)
+        .not("class_id", "in", `(${targets.join(",")})`);
+      if (error) throw new Error(error.message);
+    }
+    {
+      const { error } = await context.supabase
+        .from("activity_classes")
+        .upsert(targets.map((class_id) => ({ activity_id: activityId!, class_id })), {
+          onConflict: "activity_id,class_id",
+          ignoreDuplicates: true,
+        });
+      if (error) throw new Error(error.message);
     }
     if (data.photoPaths && data.photoPaths.length > 0) {
       const { error } = await context.supabase

@@ -1,4 +1,4 @@
-export type NotificationKind = 'attendance' | 'daily_log' | 'note' | 'activity' | 'message';
+export type NotificationKind = 'attendance' | 'daily_log' | 'note' | 'activity' | 'message' | 'checkout';
 export interface NotificationTarget { event_type: string; child_id: string | null; thread_id: string | null; event_date: string | null }
 export function notificationTarget(item: NotificationTarget) {
   if (item.event_type === 'message' && item.thread_id) return { to: '/messages/$id' as const, params: { id: item.thread_id } };
