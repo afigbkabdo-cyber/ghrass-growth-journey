@@ -133,7 +133,7 @@ function AdminChildren() {
   const remove = useMutation({
     mutationFn: (id: string) => removeChild({ data: { id } }),
     onSuccess: () => {
-      setMessage(tr("تم حذف الطفل من السجل."));
+      setMessage(tr("تمت أرشفة الطفل مع الاحتفاظ بسجلاته."));
       setConfirmDeleteId(null);
       setDetailId(null);
       qc.invalidateQueries({ queryKey: ["admin-children"] });
@@ -522,7 +522,7 @@ function AdminChildren() {
                   {confirmDeleteId === detail.id ? (
                     <div className="space-y-2 rounded-2xl border border-destructive/30 bg-destructive/5 p-3">
                       <p className="text-xs font-bold text-destructive">
-                        {tr("هل تريد حذف الطفل نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.")}
+                        {tr("سيُؤرشف الطفل ويختفي من القوائم، مع الاحتفاظ بسجلات الحضور والمتابعة والملاحظات. هل تريد المتابعة؟")}
                       </p>
                       <div className="flex gap-2">
                         <button
@@ -531,7 +531,7 @@ function AdminChildren() {
                           onClick={() => remove.mutate(detail.id)}
                           className="flex-1 rounded-2xl bg-destructive py-2.5 text-xs font-extrabold text-destructive-foreground disabled:opacity-60"
                         >
-                          {tr("تأكيد الحذف")}
+                          {tr("تأكيد الأرشفة")}
                         </button>
                         <button
                           type="button"
@@ -549,7 +549,7 @@ function AdminChildren() {
                       className="flex w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30 py-3 text-sm font-bold text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
-                      {tr("حذف الطفل")}
+                      {tr("أرشفة الطفل")}
                     </button>
                   )}
                 </div>
