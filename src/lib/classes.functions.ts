@@ -99,7 +99,7 @@ export const deleteClass = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const [{ count: childCount }, { count: activityCount }, { count: scheduleCount }] = await Promise.all([
-      context.supabase.from("children").select("id", { count: "exact", head: true }).eq("class_id", data.id).is("archived_at", null),
+      context.supabase.from("children").select("id", { count: "exact", head: true }).eq("class_id", data.id),
       context.supabase.from("activities").select("id", { count: "exact", head: true }).eq("class_id", data.id),
       context.supabase
         .from("schedule_items")
