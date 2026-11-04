@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { PageContainer, ToneBadge, EmptyState } from "@/components/ghiras";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from '@/components/ui/checkbox';
+import { selectedActivityClasses } from '@/lib/child-activity';
 import {
   deleteActivity,
   getCurrentValue,
@@ -51,12 +53,13 @@ function TeacherActivitiesPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
-  const [classId, setClassId] = useState("");
+  const [classIds, setClassIds] = useState<string[]>([]);
   const [linked, setLinked] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const activeClass = classId || (classes.data ?? [])[0]?.id || "";
+  const targets = selectedActivityClasses(classIds, (classes.data ?? []).map((c) => c.id));
+  const activeClass = targets[0] ?? "";
 
   const create = useMutation({
     mutationFn: async () => {
@@ -77,6 +80,7 @@ function TeacherActivitiesPage() {
             activityDate: new Date().toISOString().slice(0, 10),
             activityTime: time || null,
             classId: activeClass,
+            classIds: targets,
             linkedToValue: linked && Boolean(value.data),
             valueId: linked ? (value.data?.id ?? null) : null,
             published: false,
@@ -93,6 +97,7 @@ function TeacherActivitiesPage() {
       setDescription("");
       setTime("");
       setFiles([]);
+      setClassIds([]);
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["activities"] });
     },
@@ -151,15 +156,15 @@ function TeacherActivitiesPage() {
             className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none"
           />
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label={t("وقت النشاط")} className={field} />
-          {(classes.data ?? []).length > 1 && (
-            <select value={activeClass} onChange={(e) => setClassId(e.target.value)} aria-label={t("الفصل")} className={field}>
-              {(classes.data ?? []).map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          )}
+          <fieldset className="space-y-2 rounded-2xl border border-border p-3">
+            <legend className="px-1 text-xs font-bold">{t('الفصول المستهدفة')}</legend>
+            {(classes.data ?? []).map((c) => (
+              <label key={c.id} className="flex items-center gap-2 text-sm">
+                <Checkbox checked={targets.includes(c.id)} onCheckedChange={(checked) => setClassIds((prev) => checked === true ? [...prev, c.id] : prev.filter((id) => id !== c.id))} />
+                {n(c.name, c.nameEn)}
+              </label>
+            ))}
+          </fieldset>
 
           <label className="flex items-center justify-between rounded-2xl border border-border bg-background p-3.5">
             <span className="flex items-center gap-2 text-xs font-bold text-foreground">
@@ -196,7 +201,7 @@ function TeacherActivitiesPage() {
                 return;
               }
               if (!activeClass) {
-                toast.error(t("لا يوجد فصل مرتبط بحسابك"));
+                toast.error(t((classes.data ?? []).length ? 'اختاري فصلًا واحدًا على الأقل' : 'لا يوجد فصل مرتبط بحسابك'));
                 return;
               }
               create.mutate();
@@ -234,7 +239,7 @@ function TeacherActivitiesPage() {
                 </div>
                 {a.description && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{n(a.description, a.descriptionEn)}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  {a.className && <ToneBadge tone="blue">{n(a.className, a.classNameEn)}</ToneBadge>}
+                  {a.classNames.map((c, index) => <ToneBadge key={index} tone="blue">{n(c.name, c.nameEn)}</ToneBadge>)}
                   {a.linkedToValue && a.valueName && <ToneBadge tone="green">{t("مرتبط بقيمة {value}", { value: n(a.valueName, a.valueNameEn) })}</ToneBadge>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
