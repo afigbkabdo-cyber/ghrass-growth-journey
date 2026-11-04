@@ -17,6 +17,8 @@ import {
 import { toast } from "sonner";
 import { PageContainer, Avatar, SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
 import { Switch } from "@/components/ui/switch";
+import { Button } from '@/components/ui/button';
+import { optionalThirdMeal } from '@/lib/child-activity';
 import { childAge, mealStatusOptions, stageLabels, sleepMinutes, sleepDurationLabel } from "@/lib/kg-labels";
 import {
   addChildNote,
@@ -73,6 +75,10 @@ function TeacherChildPage() {
   const [meal2Status, setMeal2Status] = useState("");
   const [meal2Time, setMeal2Time] = useState("");
   const [meal2Notes, setMeal2Notes] = useState("");
+  const [meal3Enabled, setMeal3Enabled] = useState(false);
+  const [meal3Status, setMeal3Status] = useState('');
+  const [meal3Time, setMeal3Time] = useState('');
+  const [meal3Notes, setMeal3Notes] = useState('');
   const [bathroomCount, setBathroomCount] = useState(0);
   const [diaperCount, setDiaperCount] = useState(0);
   const [bathroomNotes, setBathroomNotes] = useState("");
@@ -90,6 +96,10 @@ function TeacherChildPage() {
     setMeal2Status(d.meal2Status ?? "");
     setMeal2Time(d.meal2Time ? d.meal2Time.slice(0, 5) : "");
     setMeal2Notes(d.meal2Notes ?? "");
+    setMeal3Enabled(d.meal3Enabled);
+    setMeal3Status(d.meal3Status ?? '');
+    setMeal3Time(d.meal3Time?.slice(0, 5) ?? '');
+    setMeal3Notes(d.meal3Notes ?? '');
     setBathroomCount(d.bathroomCount);
     setDiaperCount(d.diaperCount);
     setBathroomNotes(d.bathroomNotes ?? "");
@@ -117,6 +127,7 @@ function TeacherChildPage() {
           meal2Status: meal2Enabled ? meal2Status || null : null,
           meal2Time: meal2Enabled ? meal2Time || null : null,
           meal2Notes: meal2Enabled ? meal2Notes || null : null,
+          ...optionalThirdMeal(meal3Enabled, meal3Status, meal3Time, meal3Notes),
           bathroomCount,
           diaperCount,
           bathroomNotes: bathroomNotes || null,
@@ -243,6 +254,20 @@ function TeacherChildPage() {
               {t("إضافة وجبة ثانية")}
             </button>
           )}
+          {meal3Enabled ? (
+            <div className="space-y-2.5 rounded-2xl border border-border bg-background/40 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-extrabold">{t('الوجبة الثالثة')}</p>
+                <Button type="button" variant="outline" size="icon" aria-label={t('حذف الوجبة الثالثة')} onClick={() => { setMeal3Enabled(false); setMeal3Status(''); setMeal3Time(''); setMeal3Notes(''); }}><Trash2 className="text-destructive" /></Button>
+              </div>
+              <select value={meal3Status} onChange={(e) => setMeal3Status(e.target.value)} aria-label={t('حالة الوجبة الثالثة')} className={field}>
+                <option value="">{t('لم تُسجّل')}</option>
+                {mealStatusOptions.map((o) => <option key={o.value} value={o.value}>{t(o.label)}</option>)}
+              </select>
+              <input type="time" value={meal3Time} onChange={(e) => setMeal3Time(e.target.value)} aria-label={t('وقت الوجبة الثالثة')} className={field} />
+              <input value={meal3Notes} onChange={(e) => setMeal3Notes(e.target.value)} placeholder={t('ملاحظة عن الوجبة (اختياري)')} aria-label={t('ملاحظة الوجبة الثالثة')} className={field} />
+            </div>
+          ) : <Button type="button" variant="outline" onClick={() => setMeal3Enabled(true)}><Plus />{t('إضافة وجبة ثالثة')}</Button>}
         </div>
 
         <div className="space-y-2.5 border-t border-border pt-4">

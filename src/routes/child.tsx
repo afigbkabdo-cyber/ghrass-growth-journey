@@ -211,6 +211,11 @@ function ChildPage() {
                   note={log.data.meal2Notes ?? null}
                 />
               )}
+              {log.data?.meal3Enabled && (
+                <InfoRow icon={Utensils} tone="orange" title={t('الوجبة الثالثة')}
+                  value={log.data.meal3Status ? `${t(mealStatusLabels[log.data.meal3Status] ?? log.data.meal3Status)}${log.data.meal3Time ? ` • ${time(log.data.meal3Time.slice(0, 5))}` : ''}` : t('لم تُسجّل بعد')}
+                  note={log.data.meal3Notes} />
+              )}
               <InfoRow
                 icon={Droplets}
                 tone="blue"
