@@ -7,7 +7,9 @@ import { useI18n } from "@/lib/i18n";
 import { PageContainer, ToneBadge, EmptyState } from "@/components/ghiras";
 import { RoleGuard } from "@/components/role-guard";
 import { sectionRoles } from "@/lib/session";
-import { listActivities } from "@/lib/kg.functions";
+import { listActivities, type ActivityRow } from "@/lib/kg.functions";
+import { ActivityDetails } from "@/components/activity-details";
+import { useState } from "react";
 
 export const Route = createFileRoute("/activities")({
   head: () => ({
@@ -40,6 +42,7 @@ export function ActivityCard({
   valueName,
   valueNameEn,
   photos,
+  onOpen,
 }: {
   title: string;
   titleEn?: string | null;
@@ -53,10 +56,11 @@ export function ActivityCard({
   valueName: string | null;
   valueNameEn?: string | null;
   photos: string[];
+  onOpen?: () => void;
 }) {
   const { t, d, n } = useI18n();
   return (
-    <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
+    <article onClick={onOpen} onKeyDown={(e) => { if (onOpen && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(); } }} role={onOpen ? "button" : undefined} tabIndex={onOpen ? 0 : undefined} aria-label={onOpen ? t("عرض تفاصيل النشاط") : undefined} className="cursor-pointer overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
       {photos.length > 0 && (
         <div className={photos.length === 1 ? "" : "grid grid-cols-2 gap-0.5"}>
           {photos.slice(0, 4).map((src) => (
@@ -98,6 +102,7 @@ function ActivitiesPage() {
   const fetchActivities = useServerFn(listActivities);
   const activities = useQuery({ queryKey: ["activities"], queryFn: () => fetchActivities({}) });
   const list = (activities.data ?? []).filter((a) => a.published);
+  const [selected, setSelected] = useState<ActivityRow | null>(null);
 
   return (
     <AppShell navItems={parentNav} roleLabel={t("ولي أمر")} tone="orange">
@@ -119,10 +124,11 @@ function ActivitiesPage() {
         ) : (
           <div className="space-y-4">
             {list.map((a) => (
-              <ActivityCard key={a.id} {...a} />
+              <ActivityCard key={a.id} {...a} onOpen={() => setSelected(a)} />
             ))}
           </div>
         )}
+        <ActivityDetails activity={selected} onClose={() => setSelected(null)} />
       </PageContainer>
     </AppShell>
   );

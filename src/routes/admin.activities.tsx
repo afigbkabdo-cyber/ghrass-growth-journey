@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Blocks, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Blocks, Info, Eye, EyeOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SectionHeader, ToneBadge, EmptyState } from "@/components/ghiras";
-import { deleteActivity, listActivities, setActivityPublished } from "@/lib/kg.functions";
+import { deleteActivity, listActivities, setActivityPublished, type ActivityRow } from "@/lib/kg.functions";
+import { ActivityDetails } from "@/components/activity-details";
+import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin/activities")({
@@ -46,6 +48,7 @@ function AdminActivitiesPage() {
   });
 
   const list = activities.data ?? [];
+  const [selected, setSelected] = useState<ActivityRow | null>(null);
 
   return (
     <div className="space-y-5">
@@ -103,6 +106,13 @@ function AdminActivitiesPage() {
                   </button>
                   <button
                     type="button"
+                    onClick={() => setSelected(a)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted"
+                  >
+                    <Info className="h-3.5 w-3.5" /> {t("عرض التفاصيل")}
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => del.mutate(a.id)}
                     aria-label={t("حذف النشاط")}
                     className="grid h-9 w-9 place-items-center rounded-xl border border-destructive/25 text-destructive hover:bg-destructive/10"
@@ -115,6 +125,7 @@ function AdminActivitiesPage() {
           ))}
         </div>
       )}
+      <ActivityDetails activity={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
