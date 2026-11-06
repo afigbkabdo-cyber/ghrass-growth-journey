@@ -703,7 +703,7 @@ export const markScheduleDone = createServerFn({ method: "POST" })
 /* ================= الأنشطة ================= */
 
 const activitySelect =
-  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes(name, name_en), values_week(name, name_en), activity_photos(path), activity_classes(class_id, classes(name, name_en))";
+  "id, title, title_en, description, description_en, activity_date, activity_time, class_id, value_id, linked_to_value, published, classes!activities_class_id_fkey(name, name_en), values_week(name, name_en), activity_photos(path), activity_classes(class_id, classes(name, name_en))";
 
 type ActivityQueryRow = {
   id: string;
