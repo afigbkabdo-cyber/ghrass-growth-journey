@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Blocks, Plus, X, Eye, EyeOff, ImagePlus, Sparkles, Trash2 } from "lucide-react";
+import { Blocks, Plus, X, Eye, EyeOff, ImagePlus, Sparkles, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer, ToneBadge, EmptyState } from "@/components/ghiras";
 import { useI18n } from "@/lib/i18n";
@@ -50,6 +50,7 @@ function TeacherActivitiesPage() {
   const value = useQuery({ queryKey: ["current-value"], queryFn: () => fetchValue({}) });
 
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
@@ -75,6 +76,7 @@ function TeacherActivitiesPage() {
         }
         return save({
           data: {
+            ...(editingId ? { id: editingId } : {}),
             title: title.trim(),
             description: description.trim() || null,
             activityDate: new Date().toISOString().slice(0, 10),
@@ -98,6 +100,7 @@ function TeacherActivitiesPage() {
       setTime("");
       setFiles([]);
       setClassIds([]);
+      setEditingId(null);
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["activities"] });
     },
@@ -135,7 +138,7 @@ function TeacherActivitiesPage() {
         </div>
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => { if (open) setEditingId(null); setOpen((o) => !o); }}
           className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft"
           aria-label={t("إضافة نشاط")}
         >
@@ -145,7 +148,7 @@ function TeacherActivitiesPage() {
 
       {open && (
         <section className="mb-5 space-y-2.5 rounded-3xl border border-brand-orange-soft bg-card p-4 shadow-soft">
-          <h2 className="text-sm font-extrabold text-foreground">{t("نشاط جديد")}</h2>
+          <h2 className="text-sm font-extrabold text-foreground">{editingId ? t("تعديل المسودة") : t("نشاط جديد")}</h2>
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("عنوان النشاط")} aria-label={t("عنوان النشاط")} className={field} />
           <textarea
             value={description}
@@ -258,6 +261,19 @@ function TeacherActivitiesPage() {
                       </>
                     )}
                   </button>
+                  {!a.published && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(a.id); setTitle(a.title); setDescription(a.description ?? ""); setTime(a.activityTime?.slice(0, 5) ?? "");
+                        setClassIds(a.classIds); setLinked(a.linkedToValue); setFiles([]); setOpen(true);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="ms-auto inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[11px] font-bold text-foreground hover:bg-muted"
+                    >
+                      <Pencil className="h-3.5 w-3.5" strokeWidth={2.2} /> {t("تعديل")}
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => del.mutate(a.id)}
