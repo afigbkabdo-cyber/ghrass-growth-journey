@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { preparePhoto, uploadMessagePhoto } from "@/lib/message-photo-upload";
+import { uploadMessageMedia } from "@/lib/message-photo-upload";
+import { MAX_FILES, mediaType } from "@/lib/message-media";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -41,22 +42,36 @@ function AdminMessagesPage() {
   const [parentId, setParentId] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
+  useEffect(() => {
+    const next = files.map(file => ({ file, url: URL.createObjectURL(file) }));
+    setPreviews(next);
+    return () => next.forEach(item => URL.revokeObjectURL(item.url));
+  }, [files]);
+  const uploadError = (error: unknown) => {
+    const code = error instanceof Error ? error.message : '';
+    if (code === 'video-type' || code === 'video-size') return t('اختر فيديو MP4 أو MOV أو WebM بحجم لا يتجاوز 50 ميجابايت');
+    if (code === 'unsupported') return t('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت');
+    return t('تعذر رفع المرفق. لم تُرسل الرسالة؛ حاول مجددًا.');
+  };
   const fileInput = useRef<HTMLInputElement>(null);
   const send = useServerFn(sendMessage);
 
   const create = useMutation({
     mutationFn: async () => {
-      const blob = photo ? await preparePhoto(photo).catch(() => { throw new Error(t("اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت")); }) : null;
       const result = await startThread({ data: { parentId, subject: subject.trim(), body: body.trim() } });
-      if (blob) {
+      if (files.length) {
         try {
-          const photoPath = await uploadMessagePhoto(result.id, blob);
-          await send({ data: { threadId: result.id, body: "", photoPath } });
+          const attachments: { path: string; kind: 'image' | 'video' }[] = [];
+          for (const file of files) attachments.push(await uploadMessageMedia(result.id, file));
+          await send({ data: { threadId: result.id, body: "", attachments } });
         } catch {
+          setFiles([]);
+          setOpen(false);
           qc.invalidateQueries({ queryKey: ["admin-threads"] });
           navigate({ to: "/admin/messages/$id", params: { id: result.id } });
-          throw new Error(t("أُرسلت الرسالة لكن تعذر رفع الصورة. أعد إرفاقها داخل المحادثة."));
+          throw new Error(t("أُرسلت الرسالة لكن تعذر رفع المرفقات. أعد إرفاقها داخل المحادثة."));
         }
       }
       return result;
@@ -64,7 +79,7 @@ function AdminMessagesPage() {
     onError: (e: Error) => toast.error(e.message || t("تعذر إنشاء المحادثة. حاول مرة أخرى.")),
     onSuccess: (result) => {
       setOpen(false);
-      setPhoto(null);
+      setFiles([]);
       setParentId("");
       setSubject("");
       setBody("");
@@ -123,15 +138,20 @@ function AdminMessagesPage() {
             aria-label={t("نص الرسالة")}
             className="w-full resize-none rounded-2xl border border-border bg-background p-3 text-sm outline-none focus:shadow-soft"
           />
-          <input ref={fileInput} type="file" accept="image/*" className="hidden" aria-label={t("إرفاق صورة")} onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => fileInput.current?.click()} className="flex items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 text-xs font-bold text-foreground">
-              <ImagePlus className="h-4 w-4" />
-              {t("إرفاق صورة")}
-            </button>
-            {photo && <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{photo.name}</span>}
-            {photo && <button type="button" aria-label={t("إزالة الصورة")} onClick={() => { setPhoto(null); if (fileInput.current) fileInput.current.value = ""; }}><X className="h-4 w-4" /></button>}
-          </div>
+          <input ref={fileInput} type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/webm,.heic,.heif,.mov,.m4v" className="hidden" aria-label={t('إرفاق صور أو فيديو')} disabled={create.isPending} onChange={(e) => {
+            const selected = Array.from(e.target.files ?? []);
+            e.target.value = '';
+            if (files.length + selected.length > MAX_FILES) { toast.error(t('اختر حتى 10 مرفقات')); return; }
+            try { selected.forEach(file => mediaType(file)); setFiles(current => [...current, ...selected]); } catch (error) { toast.error(uploadError(error)); }
+          }} />
+          <button type="button" disabled={create.isPending} onClick={() => fileInput.current?.click()} className="flex items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 text-xs font-bold text-foreground">
+            <ImagePlus className="h-4 w-4" />
+            {t('إرفاق صور أو فيديو')}
+          </button>
+          {previews.length > 0 && <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{previews.map(({ file, url }, index) => <div key={url} className="min-w-0">
+            {mediaType(file) === 'video' ? <video src={url} controls playsInline className="h-32 w-full rounded-xl bg-muted object-contain" /> : <img src={url} alt={file.name} className="h-32 w-full rounded-xl bg-muted object-contain" />}
+            <div className="flex items-center gap-1"><span className="min-w-0 flex-1 truncate text-xs">{file.name}</span><button type="button" aria-label={t('إزالة المرفق')} disabled={create.isPending} onClick={() => setFiles(current => current.filter((_, i) => i !== index))}><X className="h-4 w-4" /></button></div>
+          </div>)}</div>}
           {create.isError && (
             <p className="rounded-xl bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive">
               {t("تعذر إنشاء المحادثة. حاول مرة أخرى.")}

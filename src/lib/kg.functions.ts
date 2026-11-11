@@ -138,7 +138,7 @@ export interface ThreadRow {
 export interface MessageRow {
   photoUrl: string | null;
   unavailableMedia: number;
-  media: { url: string; downloadUrl: string | null; kind: "image" | "video" }[];
+  media: { path: string; url: string; downloadUrl: string | null; kind: "image" | "video" }[];
   id: string;
   body: string;
   senderRole: string;
@@ -937,17 +937,18 @@ export const listThreadMessages = createServerFn({ method: "GET" })
       if (m.photo_path && !list.some(a => a.path === m.photo_path)) list.unshift({ path: m.photo_path, kind: 'image' });
       const media: MessageRow["media"] = [];
       let unavailableMedia = 0;
-      for (const a of list) {
-        if (!a?.path) continue;
-        const kind = a.kind === "video" ? "video" : "image";
+      // روابط كل المرفقات تُنشأ معًا بدل واحد تلو الآخر.
+      const results = await Promise.all(list.filter(a => a?.path).map(async (a) => {
+        const path = a.path as string;
+        const kind: "image" | "video" = a.kind === "video" ? "video" : "image";
         const [view, dl] = await Promise.all([
-          context.supabase.storage.from("message-photos").createSignedUrl(a.path, 3600),
-          context.supabase.storage.from("message-photos").createSignedUrl(a.path, 3600, { download: true }),
+          context.supabase.storage.from("message-photos").createSignedUrl(path, 3600),
+          context.supabase.storage.from("message-photos").createSignedUrl(path, 3600, { download: true }),
         ]);
-        // ملف متعذر لا يُخفي بقية المحادثة.
-        if (view.data?.signedUrl) media.push({ kind, url: browserUrl(view.data.signedUrl), downloadUrl: dl.data?.signedUrl ? browserUrl(dl.data.signedUrl) : null });
-        else unavailableMedia++;
-      }
+        return view.data?.signedUrl ? { path, kind, url: browserUrl(view.data.signedUrl), downloadUrl: dl.data?.signedUrl ? browserUrl(dl.data.signedUrl) : null } : null;
+      }));
+      // ملف متعذر لا يُخفي بقية المحادثة.
+      for (const r of results) { if (r) media.push(r); else unavailableMedia++; }
       const photoUrl = m.photo_path ? media.find(item => item.kind === 'image')?.url ?? null : null;
       return { photoUrl, media, unavailableMedia,
       id: m.id,
