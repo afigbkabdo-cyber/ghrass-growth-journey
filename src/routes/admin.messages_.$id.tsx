@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ChevronRight, SendHorizonal, ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageMediaList } from "@/components/message-photo";
-import { uploadMessageMedia } from "@/lib/message-photo-upload";
+import { uploadMessageMedia, messageAttachmentErrorText, MessageAttachmentError } from "@/lib/message-photo-upload";
 import { MAX_FILES, mediaType } from "@/lib/message-media";
 import { toast } from "sonner";
 import { EmptyState, ToneBadge } from "@/components/ghiras";
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/admin/messages_/$id")({
 });
 
 function AdminThreadPage() {
-  const { t, dt } = useI18n();
+  const { t, dt, lang } = useI18n();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const fetchMessages = useServerFn(listThreadMessages);
@@ -55,12 +55,7 @@ function AdminThreadPage() {
     setPreviews(next);
     return () => next.forEach(item => URL.revokeObjectURL(item.url));
   }, [files]);
-  const uploadError = (error: unknown) => {
-    const code = error instanceof Error ? error.message : '';
-    if (code === 'video-type' || code === 'video-size') return t('اختر فيديو MP4 أو MOV أو WebM بحجم لا يتجاوز 50 ميجابايت');
-    if (code === 'unsupported') return t('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت');
-    return t('تعذر رفع المرفق. لم تُرسل الرسالة؛ حاول مجددًا.');
-  };
+  const uploadError = (error: unknown) => messageAttachmentErrorText(error, lang);
 
   const messages = useQuery({
     queryKey: ["thread-messages", id],
@@ -76,7 +71,7 @@ function AdminThreadPage() {
       for (const file of files) {
         let attachment = uploaded.current.get(file);
         if (!attachment) {
-          attachment = await uploadMessageMedia(id, file).catch(error => { throw new Error(uploadError(error)); });
+          attachment = await uploadMessageMedia(id, file);
           uploaded.current.set(file, attachment);
         }
         attachments.push(attachment);
@@ -92,7 +87,7 @@ function AdminThreadPage() {
       qc.invalidateQueries({ queryKey: ["admin-threads"] });
       toast.success(t("تم إرسال الرد لولي الأمر"));
     },
-    onError: (e: Error) => toast.error(e.message || t("تعذر الإرسال")),
+    onError: (e: Error) => toast.error(e instanceof MessageAttachmentError ? uploadError(e) : e.message || t("تعذر الإرسال")),
   });
 
   return (

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { uploadMessageMedia } from "@/lib/message-photo-upload";
+import { uploadMessageMedia, messageAttachmentErrorText, diagnoseMessageAttachmentError } from "@/lib/message-photo-upload";
 import { MAX_FILES, mediaType } from "@/lib/message-media";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/admin/messages")({
 });
 
 function AdminMessagesPage() {
-  const { t, dt, n } = useI18n();
+  const { t, dt, n, lang } = useI18n();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const fetchThreads = useServerFn(listThreads);
@@ -49,12 +49,7 @@ function AdminMessagesPage() {
     setPreviews(next);
     return () => next.forEach(item => URL.revokeObjectURL(item.url));
   }, [files]);
-  const uploadError = (error: unknown) => {
-    const code = error instanceof Error ? error.message : '';
-    if (code === 'video-type' || code === 'video-size') return t('اختر فيديو MP4 أو MOV أو WebM بحجم لا يتجاوز 50 ميجابايت');
-    if (code === 'unsupported') return t('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 10 ميجابايت');
-    return t('تعذر رفع المرفق. لم تُرسل الرسالة؛ حاول مجددًا.');
-  };
+  const uploadError = (error: unknown) => messageAttachmentErrorText(error, lang);
   const fileInput = useRef<HTMLInputElement>(null);
   const send = useServerFn(sendMessage);
 
@@ -65,13 +60,15 @@ function AdminMessagesPage() {
         try {
           const attachments: { path: string; kind: 'image' | 'video' }[] = [];
           for (const file of files) attachments.push(await uploadMessageMedia(result.id, file));
-          await send({ data: { threadId: result.id, body: "", attachments } });
-        } catch {
+          await send({ data: { threadId: result.id, body: "", attachments } }).catch(error => {
+            throw diagnoseMessageAttachmentError(error, "save");
+          });
+        } catch (error) {
           setFiles([]);
           setOpen(false);
           qc.invalidateQueries({ queryKey: ["admin-threads"] });
           navigate({ to: "/admin/messages/$id", params: { id: result.id } });
-          throw new Error(t("أُرسلت الرسالة لكن تعذر رفع المرفقات. أعد إرفاقها داخل المحادثة."));
+          throw new Error(`${t("أُرسلت الرسالة لكن تعذر رفع المرفقات. أعد إرفاقها داخل المحادثة.")} ${uploadError(error)}`, { cause: error });
         }
       }
       return result;
