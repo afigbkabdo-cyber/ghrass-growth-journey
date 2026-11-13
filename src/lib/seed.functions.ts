@@ -15,7 +15,7 @@ export const seedDemoData = createServerFn({ method: "POST" })
     _role: "super_admin",
   });
   if (roleError || isSuperAdmin !== true) {
-    throw new Response("Forbidden", { status: 403 });
+    throw new Error("Forbidden: super_admin role required");
   }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
