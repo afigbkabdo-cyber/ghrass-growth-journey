@@ -2,16 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { normalizePhone, phoneToEmail } from "./phone";
+import { generateTempPassword } from "./temp-password";
 
-/** توليد كلمة مرور مؤقتة قوية وسهلة القراءة. */
-function tempPassword() {
-  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const small = "abcdefghijkmnpqrstuvwxyz";
-  const digits = "23456789";
-  const pick = (s: string, n: number) =>
-    Array.from({ length: n }, () => s[Math.floor(Math.random() * s.length)]).join("");
-  return `Ghiras${pick(letters, 1)}${pick(small, 3)}${pick(digits, 3)}`;
-}
+const tempPassword = () => generateTempPassword();
 
 async function assertAdmin(supabase: {
   from: (t: "user_roles") => {
