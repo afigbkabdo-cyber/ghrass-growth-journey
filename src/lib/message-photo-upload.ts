@@ -1,6 +1,6 @@
 /* رفع صور المحادثات إلى المخزن الخاص الحالي (message-photos). */
 import { supabase } from "@/integrations/supabase/client";
-import { mediaType, MAX_FILES, VIDEO_MAX } from './message-media';
+import { mediaType, videoFileInfo, MAX_FILES, VIDEO_MAX } from './message-media';
 export { MAX_FILES, VIDEO_MAX };
 
 const OK_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -151,7 +151,6 @@ export async function uploadMessagePhoto(threadId: string, blob: Blob): Promise<
 }
 
 export type MediaKind = "image" | "video";
-const VIDEO_TYPES: Record<string, string> = { "video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm" };
 
 export function isVideoFile(f: File) {
   return f.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(f.name);
@@ -168,14 +167,13 @@ export async function uploadMessageMedia(threadId: string, file: File): Promise<
     catch (error) { throw diagnoseMessageAttachmentError(error, "read"); }
     return { path: await uploadMessagePhoto(threadId, blob), kind: "image" };
   }
-  const type = file.type || (/\.webm$/i.test(file.name) ? "video/webm" : /\.mov$/i.test(file.name) ? "video/quicktime" : "video/mp4");
-  const ext = VIDEO_TYPES[type === "video/x-m4v" ? "video/mp4" : type];
-  if (!ext) throw diagnoseMessageAttachmentError(new Error("video-type"), "validation");
-  if (file.size > VIDEO_MAX) throw diagnoseMessageAttachmentError(new Error("video-size"), "validation");
+  const video = videoFileInfo(file);
+  if (!video) throw diagnoseMessageAttachmentError(new Error("video-type"), "validation");
+  if (!file.size || file.size > VIDEO_MAX) throw diagnoseMessageAttachmentError(new Error("video-size"), "validation");
   const user = await attachmentUser();
   let path: string;
-  try { path = `${threadId}/${user.id}/${crypto.randomUUID()}.${ext}`; }
+  try { path = `${threadId}/${user.id}/${crypto.randomUUID()}.${video.extension}`; }
   catch (error) { throw diagnoseMessageAttachmentError(error, "start"); }
-  await uploadAttachment(path, file, type === "video/x-m4v" ? "video/mp4" : type);
+  await uploadAttachment(path, file, video.contentType);
   return { path, kind: "video" };
 }

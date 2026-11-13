@@ -1,9 +1,22 @@
 export const MAX_FILES = 10;
 export const IMAGE_MAX = 10 * 1024 * 1024;
 export const VIDEO_MAX = 50 * 1024 * 1024;
+
+type VideoInfo = { contentType: 'video/mp4' | 'video/quicktime' | 'video/webm'; extension: 'mp4' | 'mov' | 'webm' };
+export function videoFileInfo(file: { type: string; name: string }): VideoInfo | null {
+  if (/\.(mp4|m4v)$/i.test(file.name)) return { contentType: 'video/mp4', extension: 'mp4' };
+  if (/\.mov$/i.test(file.name)) return { contentType: 'video/quicktime', extension: 'mov' };
+  if (/\.webm$/i.test(file.name)) return { contentType: 'video/webm', extension: 'webm' };
+  const mime = file.type.toLowerCase().split(';', 1)[0]?.trim() ?? '';
+  if (mime === 'video/mp4' || mime === 'video/x-m4v' || mime === 'application/mp4') return { contentType: 'video/mp4', extension: 'mp4' };
+  if (mime === 'video/quicktime' || mime === 'video/mov' || mime === 'video/x-quicktime') return { contentType: 'video/quicktime', extension: 'mov' };
+  if (mime === 'video/webm' || mime === 'video/x-webm') return { contentType: 'video/webm', extension: 'webm' };
+  return null;
+}
+
 export function mediaType(file: { type: string; name: string; size: number }) {
-  const type = file.type || (/\.webm$/i.test(file.name) ? 'video/webm' : /\.mov$/i.test(file.name) ? 'video/quicktime' : /\.(mp4|m4v)$/i.test(file.name) ? 'video/mp4' : '');
-  if (['video/mp4', 'video/x-m4v', 'video/quicktime', 'video/webm'].includes(type)) {
+  const type = file.type.toLowerCase().split(';', 1)[0]?.trim() ?? '';
+  if (videoFileInfo(file)) {
     if (!file.size || file.size > VIDEO_MAX) throw new Error('video-size');
     return 'video' as const;
   }
