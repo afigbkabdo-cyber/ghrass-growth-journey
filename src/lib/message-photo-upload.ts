@@ -174,6 +174,7 @@ export async function uploadMessageMedia(threadId: string, file: File): Promise<
   let path: string;
   try { path = `${threadId}/${user.id}/${crypto.randomUUID()}.${video.extension}`; }
   catch (error) { throw diagnoseMessageAttachmentError(error, "start"); }
-  await uploadAttachment(path, file, video.contentType);
+  const body = file.type === video.contentType ? file : new Blob([file], { type: video.contentType });
+  await uploadAttachment(path, body, video.contentType);
   return { path, kind: "video" };
 }
