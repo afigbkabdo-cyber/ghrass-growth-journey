@@ -1,11 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { phoneToEmail } from "./phone";
 
 /**
  * تهيئة بيانات العرض التجريبية مرة واحدة (فصول، أطفال، حسابات العرض).
  * آمنة للتكرار: لا تنشئ شيئًا موجودًا مسبقًا.
  */
-export const seedDemoData = createServerFn({ method: "POST" }).handler(async () => {
+export const seedDemoData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+  // التحقق داخل الخادم: مسؤول النظام (super_admin) فقط.
+  const { data: isSuperAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "super_admin",
+  });
+  if (roleError || isSuperAdmin !== true) {
+    throw new Response("Forbidden", { status: 403 });
+  }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const accounts = [
