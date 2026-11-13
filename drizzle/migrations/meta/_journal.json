@@ -64,6 +64,13 @@
       "when": 1793682486996,
       "tag": "0008_archive_children_multiclass_activities_meal3_checkout",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794583177201,
+      "tag": "0009_scope_classes_values_settings_reads",
+      "breakpoints": true
     }
   ]
 }
