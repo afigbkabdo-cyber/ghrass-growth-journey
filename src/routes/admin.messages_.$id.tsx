@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useAttachmentPreviews } from "@/hooks/use-attachment-previews";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -47,14 +48,9 @@ function AdminThreadPage() {
   const send = useServerFn(sendMessage);
   const [draft, setDraft] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
+  const previews = useAttachmentPreviews(files);
   const fileInput = useRef<HTMLInputElement>(null);
   const uploaded = useRef(new Map<File, { path: string; kind: 'image' | 'video' }>());
-  useEffect(() => {
-    const next = files.map(file => ({ file, url: URL.createObjectURL(file) }));
-    setPreviews(next);
-    return () => next.forEach(item => URL.revokeObjectURL(item.url));
-  }, [files]);
   const uploadError = (error: unknown) => messageAttachmentErrorText(error, lang);
 
   const messages = useQuery({
@@ -142,11 +138,14 @@ function AdminThreadPage() {
       >
         <input ref={fileInput} type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/webm,.heic,.heif,.mov,.m4v" aria-label={t('إرفاق صور أو فيديو')} className="hidden" disabled={reply.isPending} onChange={e => {
           const selected = Array.from(e.target.files ?? []);
-          e.target.value = '';
           if (files.length + selected.length > MAX_FILES) { toast.error(t('اختر حتى 10 مرفقات')); return; }
           try { selected.forEach(file => mediaType(file)); setFiles(current => [...current, ...selected]); } catch (error) { toast.error(uploadError(error)); }
         }} />
-        <Button type="button" size="icon" variant="outline" className="h-11 w-11 shrink-0 rounded-2xl" aria-label={t('إرفاق صور أو فيديو')} disabled={reply.isPending} onClick={() => fileInput.current?.click()}><ImagePlus /></Button>
+        <Button type="button" size="icon" variant="outline" className="h-11 w-11 shrink-0 rounded-2xl" aria-label={t('إرفاق صور أو فيديو')} disabled={reply.isPending} onClick={() => {
+          if (!fileInput.current) return;
+          fileInput.current.value = "";
+          fileInput.current.click();
+        }}><ImagePlus /></Button>
         <input
           value={draft}
           disabled={reply.isPending}

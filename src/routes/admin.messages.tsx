@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useAttachmentPreviews } from "@/hooks/use-attachment-previews";
 import { toast } from "sonner";
 import { uploadMessageMedia, messageAttachmentErrorText, diagnoseMessageAttachmentError } from "@/lib/message-photo-upload";
 import { MAX_FILES, mediaType } from "@/lib/message-media";
@@ -43,12 +44,7 @@ function AdminMessagesPage() {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
-  useEffect(() => {
-    const next = files.map(file => ({ file, url: URL.createObjectURL(file) }));
-    setPreviews(next);
-    return () => next.forEach(item => URL.revokeObjectURL(item.url));
-  }, [files]);
+  const previews = useAttachmentPreviews(files);
   const uploadError = (error: unknown) => messageAttachmentErrorText(error, lang);
   const fileInput = useRef<HTMLInputElement>(null);
   const send = useServerFn(sendMessage);
@@ -137,11 +133,14 @@ function AdminMessagesPage() {
           />
           <input ref={fileInput} type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/webm,.heic,.heif,.mov,.m4v" className="hidden" aria-label={t('إرفاق صور أو فيديو')} disabled={create.isPending} onChange={(e) => {
             const selected = Array.from(e.target.files ?? []);
-            e.target.value = '';
             if (files.length + selected.length > MAX_FILES) { toast.error(t('اختر حتى 10 مرفقات')); return; }
             try { selected.forEach(file => mediaType(file)); setFiles(current => [...current, ...selected]); } catch (error) { toast.error(uploadError(error)); }
           }} />
-          <button type="button" disabled={create.isPending} onClick={() => fileInput.current?.click()} className="flex items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 text-xs font-bold text-foreground">
+          <button type="button" disabled={create.isPending} onClick={() => {
+            if (!fileInput.current) return;
+            fileInput.current.value = "";
+            fileInput.current.click();
+          }} className="flex items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 text-xs font-bold text-foreground">
             <ImagePlus className="h-4 w-4" />
             {t('إرفاق صور أو فيديو')}
           </button>
